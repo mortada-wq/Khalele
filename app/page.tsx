@@ -139,9 +139,8 @@ export default function HomePage() {
       dir="rtl"
       style={{ background: "#ebebec" }}
     >
-      {/* Sidebar – RIGHT side in RTL. ChatGPT-style: sticky top/bottom, seamless scroll */}
       <aside
-        className="relative shrink-0 flex flex-col overflow-hidden"
+        className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
           width: sidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
           background: sidebarExpanded ? "#ffffff" : "#ebebec",
@@ -204,10 +203,8 @@ export default function HomePage() {
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
-      {/* Main content – LEFT side in RTL */}
-      <main className="flex-1 flex flex-col items-center justify-center px-8">
-        {/* Logo — original black, not affected by accent */}
-        <div className="mb-4" style={{ width: "min(40vw, 320px)" }}>
+      <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-8">
+        <div className="mb-4 md:mb-6" style={{ width: "min(40vw, 320px)" }}>
           <img
             src="/logo/logo_black.svg"
             alt="خليلي"
@@ -216,29 +213,29 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Tagline – all gold */}
         <p
-          className="font-ui font-semibold text-center mb-8"
-          style={{ color: "var(--color-accent)", lineHeight: 1.8, fontSize: "0.95rem" }}
+          className="font-ui font-semibold text-center mb-6 md:mb-8 text-sm md:text-base"
+          style={{ color: "var(--color-accent)", lineHeight: 1.8 }}
         >
           {tagline}
         </p>
 
-        {/* Input pill */}
-        <HomePillInput
-          value={input}
-          onChange={setInput}
-          onSend={handleSend}
-          onVoiceMode={() => setVoiceOverlayOpen(true)}
-          onMicTranscript={handleTranscript}
-          onFiles={(files) => {
-            const names = Array.from(files).map((f) => f.name).join(", ");
-            setInput((prev) => (prev ? `${prev} ${names}` : names));
-          }}
-          incognitoMode={incognitoMode}
-          onIncognitoChange={setIncognitoMode}
-          placeholder="سلام عليكم.."
-        />
+        <div className="w-full max-w-md md:max-w-lg">
+          <HomePillInput
+            value={input}
+            onChange={setInput}
+            onSend={handleSend}
+            onVoiceMode={() => setVoiceOverlayOpen(true)}
+            onMicTranscript={handleTranscript}
+            onFiles={(files) => {
+              const names = Array.from(files).map((f) => f.name).join(", ");
+              setInput((prev) => (prev ? `${prev} ${names}` : names));
+            }}
+            incognitoMode={incognitoMode}
+            onIncognitoChange={setIncognitoMode}
+            placeholder="سلام عليكم.."
+          />
+        </div>
       </main>
 
       <VoiceOverlay

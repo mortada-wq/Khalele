@@ -2,11 +2,10 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { HomePillInput } from "@/components/HomePillInput";
-import { ChatMessage } from "@/components/Chat/ChatMessage";
-import { FeedbackButtons } from "@/components/Chat/FeedbackButtons";
-import { LanguageStyleSelector } from "@/components/Chat/LanguageStyleSelector";
+import { MessageList } from "@/components/Chat/MessageList";
+import { ControlsBar } from "@/components/Chat/ControlsBar";
+import { ConversationList } from "@/components/Chat/ConversationList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BirdToggle } from "@/components/BirdToggle";
 import { SettingsModal } from "@/components/Settings";
@@ -16,6 +15,8 @@ import type { Character, LanguageStyle } from "@/lib/characters";
 import { detectIntegrationIntent, INTEGRATION_PROMPTS, type IntegrationSuggestion } from "@/lib/connectors";
 import { ToolsModal } from "@/components/Tools";
 import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
+import { groupConversationsByDate, getOrCreateUserId, USER_ID_KEY } from "@/lib/chat";
+import type { Message, Conversation, DateGroup } from "@/lib/chat";
 
 function UserAvatarIcon({ expanded }: { expanded: boolean }) {
   const fillColor = expanded ? "var(--color-accent-avatar-expanded)" : "var(--color-accent-avatar-collapsed)";
@@ -59,7 +60,6 @@ function SectionIcon({ section, color }: { section: string; color: string }) {
     </svg>
   );
 
-  // خليخانة (last of 3 sections)
   return (
     <svg width={s} height={s} viewBox="0 0 28.704 28.704" fill="currentColor" style={st}>
       <path d="M21.172,17.525c0.208-0.175,0.402-0.367,0.605-0.547C21.008,17.733,20.6,18.053,21.172,17.525z M27.162,19.768c0.047,0.734-0.102,1.527-0.499,2.16c-0.408,0.662-1.032,1.116-1.702,1.397c-0.672,0.282-1.383,0.408-2.087,0.455c-1.167,0.076-2.319-0.067-3.445-0.297c-1.219,3.187-3.06,5.221-5.119,5.221c-2.002,0-3.796-1.935-5.014-4.976c-1.029,0.232-2.082,0.38-3.151,0.348c-0.703-0.023-1.422-0.124-2.101-0.382c-0.679-0.257-1.319-0.689-1.751-1.336c-0.421-0.618-0.595-1.406-0.573-2.141c0.017-0.744,0.195-1.461,0.445-2.138c0.484-1.294,1.215-2.461,2.046-3.532c-0.109-0.126-0.222-0.25-0.328-0.379c-0.205,0.114-0.438,0.185-0.69,0.185c-0.79,0-1.431-0.641-1.431-1.431c0-0.456,0.218-0.858,0.55-1.12c-0.048-0.095-0.104-0.184-0.149-0.281c-0.297-0.642-0.529-1.326-0.605-2.051C1.48,8.752,1.584,7.975,1.961,7.312C2.331,6.645,2.95,6.143,3.62,5.829C4.291,5.51,5.013,5.347,5.73,5.265c1.145-0.125,2.287-0.056,3.406,0.12C10.354,2.107,12.219,0,14.31,0c2.046,0,3.878,2.013,5.096,5.168c1.055-0.192,2.134-0.281,3.221-0.203c0.72,0.058,1.446,0.194,2.13,0.49c0.681,0.293,1.311,0.764,1.714,1.43c0.391,0.637,0.527,1.419,0.474,2.138c-0.049,0.727-0.259,1.418-0.532,2.069c-0.484,1.137-1.178,2.15-1.941,3.097c0.867,1.043,1.637,2.182,2.168,3.459C26.913,18.315,27.119,19.026,27.162,19.768z M19.705,6.019c0.458,1.383,0.804,2.948,1.012,4.636c1.314,1.008,2.549,2.119,3.635,3.385c0.003,0.004,0.006,0.008,0.009,0.012c0.709-0.957,1.324-1.983,1.735-3.084c0.232-0.637,0.396-1.302,0.407-1.964c0.014-0.661-0.133-1.305-0.497-1.839c-0.346-0.512-0.892-0.893-1.492-1.115c-0.605-0.228-1.267-0.323-1.928-0.342C21.626,5.681,20.658,5.812,19.705,6.019z M15.365,21.399c-0.28,0.148-0.56,0.296-0.845,0.434c1.367,0.577,2.777,1.047,4.228,1.351c0.077,0.016,0.155,0.026,0.232,0.041c0.743-2.001,1.238-4.485,1.383-7.211c-0.637-0.144-1.113-0.711-1.113-1.392c0-0.689,0.488-1.264,1.137-1.399c-0.019-0.539-0.049-1.072-0.095-1.592c-0.962-0.733-1.967-1.416-3.007-2.024c-0.988-0.586-2.011-1.11-3.053-1.585c-1.027,0.512-2.032,1.071-2.999,1.692c-1.011,0.642-1.985,1.356-2.915,2.117c-0.067,0.819-0.107,1.659-0.107,2.521c0,1.37,0.091,2.69,0.256,3.94c0.119,0.132,0.109,0.154,0.011,0.097c0.256,1.891,0.689,3.603,1.252,5.055c0.174-0.037,0.348-0.069,0.52-0.11c1.44-0.354,2.832-0.874,4.178-1.499c-1.153-0.512-2.278-1.089-3.361-1.731c1.097,0.641,2.237,1.212,3.407,1.709c0.294-0.137,0.583-0.287,0.873-0.435c-0.183-0.24-0.295-0.537-0.295-0.862c0-0.791,0.641-1.432,1.432-1.432c0.604,0,1.118,0.375,1.329,0.904c0.002-0.001,0.004-0.002,0.005-0.003c-0.002,0.001-0.004,0.002-0.005,0.003c0.065,0.164,0.103,0.341,0.103,0.528c0,0.791-0.641,1.432-1.432,1.432C16.028,21.948,15.627,21.731,15.365,21.399z M7.673,14.352c0-0.698,0.031-1.379,0.076-2.051c-0.967,0.828-1.89,1.712-2.71,2.68c-0.031,0.037-0.06,0.076-0.091,0.113c1.441,1.264,2.368,2.097,2.915,2.606C7.743,16.624,7.673,15.507,7.673,14.352z M10.657,8.805c0.748-0.474,1.524-0.907,2.313-1.318c-1.039-0.414-2.096-0.778-3.179-1.046C9.644,6.406,9.496,6.379,9.349,6.347C8.966,7.56,8.666,8.913,8.472,10.373C9.18,9.823,9.905,9.293,10.657,8.805z M20.132,10.217c-0.206-1.486-0.526-2.855-0.927-4.078c-0.198,0.049-0.398,0.095-0.594,0.149c-1.072,0.306-2.115,0.707-3.139,1.156c0.802,0.382,1.592,0.788,2.356,1.234C18.62,9.153,19.384,9.674,20.132,10.217z M9.644,5.475C9.76,5.497,9.878,5.513,9.993,5.537c1.45,0.304,2.856,0.765,4.216,1.332c1.339-0.615,2.728-1.126,4.167-1.481c0.173-0.042,0.349-0.074,0.523-0.112C17.78,2.379,16.14,0.538,14.31,0.538C12.439,0.538,10.763,2.461,9.644,5.475z M4.316,14.406c0.003-0.004,0.006-0.008,0.009-0.012c1.052-1.318,2.262-2.483,3.556-3.546c0.195-1.671,0.52-3.229,0.96-4.61c-1.01-0.192-2.032-0.301-3.044-0.236c-0.662,0.044-1.32,0.162-1.915,0.411C3.287,6.659,2.761,7.05,2.425,7.586C2.087,8.12,1.96,8.778,1.997,9.436c0.036,0.66,0.221,1.32,0.478,1.948c0.034,0.083,0.079,0.161,0.115,0.243c0.184-0.086,0.387-0.137,0.603-0.137c0.79,0,1.431,0.641,1.431,1.431c0,0.47-0.23,0.884-0.58,1.144C4.132,14.182,4.226,14.292,4.316,14.406z M9.222,23.551c-0.62-1.6-1.075-3.5-1.327-5.578c-0.088-0.067-0.177-0.136-0.267-0.208c-0.989-0.775-1.924-1.62-2.789-2.536c-0.791,0.962-1.508,1.992-1.989,3.121c-0.514,1.202-0.772,2.615-0.096,3.732c0.315,0.53,0.852,0.95,1.454,1.208c0.607,0.265,1.28,0.396,1.957,0.45C7.179,23.815,8.207,23.733,9.222,23.551z M18.921,23.374c-0.069-0.016-0.138-0.028-0.206-0.044c-1.458-0.36-2.87-0.868-4.24-1.473c-1.348,0.653-2.742,1.21-4.187,1.622c-0.163,0.045-0.33,0.083-0.495,0.124c1.117,2.794,2.725,4.563,4.516,4.563C16.151,28.166,17.801,26.303,18.921,23.374z M25.968,17.941c-0.521-1.112-1.273-2.116-2.099-3.049c-0.652,0.742-1.356,1.431-2.092,2.086c0.558-0.548,1.305-1.326,2.01-2.181c-0.043-0.048-0.083-0.098-0.127-0.146c-0.854-0.94-1.809-1.791-2.803-2.585c0.028,0.38,0.052,0.762,0.066,1.151c0.674,0.116,1.188,0.699,1.188,1.406c0,0.715-0.526,1.302-1.21,1.408c-0.148,2.737-0.653,5.238-1.412,7.284c1.115,0.181,2.247,0.253,3.358,0.131c0.675-0.078,1.342-0.232,1.938-0.519c0.594-0.279,1.116-0.718,1.414-1.26C26.833,20.527,26.523,19.125,25.968,17.941z"/>
@@ -69,65 +69,6 @@ function SectionIcon({ section, color }: { section: string; color: string }) {
 
 const SIDEBAR_W_EXPANDED = 280;
 const SIDEBAR_W_COLLAPSED = 72;
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-interface Conversation {
-  id: string;
-  title: string;
-  messages: Message[];
-  updatedAt: string;
-}
-
-type DateGroup = "today" | "yesterday" | "last7" | "older";
-
-const USER_ID_KEY = "khalele_user_id";
-
-function getOrCreateUserId(): string {
-  if (typeof window === "undefined") return "anon_anonymous";
-  let id = localStorage.getItem(USER_ID_KEY);
-  if (!id) {
-    id = `anon_${crypto.randomUUID()}`;
-    localStorage.setItem(USER_ID_KEY, id);
-  }
-  return id;
-}
-
-function groupConversationsByDate(conversations: Conversation[]): Record<DateGroup, Conversation[]> {
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().slice(0, 10);
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  const sevenDaysStr = sevenDaysAgo.toISOString().slice(0, 10);
-
-  const groups: Record<DateGroup, Conversation[]> = {
-    today: [],
-    yesterday: [],
-    last7: [],
-    older: [],
-  };
-
-  const sorted = [...conversations].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
-
-  for (const c of sorted) {
-    const d = c.updatedAt.slice(0, 10);
-    if (d === todayStr) groups.today.push(c);
-    else if (d === yesterdayStr) groups.yesterday.push(c);
-    else if (d >= sevenDaysStr) groups.last7.push(c);
-    else groups.older.push(c);
-  }
-
-  return groups;
-}
 
 function ChatPageContent() {
   const router = useRouter();
@@ -164,7 +105,6 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [userToolIds, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const userIdRef = useRef<string>("");
   const incognitoIdRef = useRef<string>("");
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
@@ -176,21 +116,10 @@ function ChatPageContent() {
       : userIdRef.current || getOrCreateUserId(),
   });
 
-  const SUGGESTION_CHIPS = [
-    "اشرح لي بالعربي البسيط",
-    "كيف أقول مرحبا بالإنجليزي؟",
-    "اكتب لي قصيدة حب",
-    "ما الفرق بين الفصحى والعامية؟",
-  ];
-
   const SECTIONS = ["فهرس", "أدوات", "خليخانة"] as const;
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages ?? [];
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
 
   useEffect(() => {
     if (!currentConversationId && conversations.length > 0) {
@@ -426,9 +355,8 @@ function ChatPageContent() {
 
   return (
     <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "#ebebec" }}>
-      {/* ── Sidebar – RIGHT in RTL. ChatGPT-style: sticky top/bottom, seamless scroll middle ── */}
       <aside
-        className="relative shrink-0 flex flex-col overflow-hidden"
+        className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
           width: sidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
           background: sidebarExpanded ? "#ffffff" : "#ebebec",
@@ -437,7 +365,6 @@ function ChatPageContent() {
           zIndex: 10,
         }}
       >
-        {/* Bird toggle – sticky top, never moves */}
         <div className="shrink-0" style={{ height: 72 }}>
           <button
             onClick={() => setSidebarExpanded((p) => !p)}
@@ -449,7 +376,6 @@ function ChatPageContent() {
           </button>
         </div>
 
-        {/* Scrollable middle – section nav + فهرس archive or empty states */}
         <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
           {sidebarExpanded ? (
             <div className="sidebar-scroll flex-1 min-h-0 px-3 py-2 overflow-y-auto">
@@ -474,102 +400,13 @@ function ChatPageContent() {
               </div>
 
               {currentSection === "فهرس" && (
-                <div className="mt-4 space-y-4">
-                  <button
-                    onClick={startNewChat}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                    style={{ color: "#231f20" }}
-                  >
-                    <Plus size={18} style={{ color: "#999" }} />
-                    <span>محادثة جديدة</span>
-                  </button>
-
-                  {hasAnyConversations ? (
-                    <div className="space-y-4">
-                      {grouped.today.length > 0 && (
-                        <div>
-                          {grouped.today.map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => setCurrentConversationId(c.id)}
-                              className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                              style={{
-                                color: currentConversationId === c.id ? "var(--color-accent)" : "#231f20",
-                                background: currentConversationId === c.id ? "var(--color-accent-tint-10)" : "transparent",
-                              }}
-                            >
-                              {c.title || "محادثة جديدة"}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {grouped.yesterday.length > 0 && (
-                        <div>
-                          <p className="px-4 py-1 font-ui text-xs" style={{ color: "#8c8c8c" }}>
-                            أمس
-                          </p>
-                          {grouped.yesterday.map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => setCurrentConversationId(c.id)}
-                              className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                              style={{
-                                color: currentConversationId === c.id ? "var(--color-accent)" : "#231f20",
-                                background: currentConversationId === c.id ? "var(--color-accent-tint-10)" : "transparent",
-                              }}
-                            >
-                              {c.title || "محادثة جديدة"}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {grouped.last7.length > 0 && (
-                        <div>
-                          <p className="px-4 py-1 font-ui text-xs" style={{ color: "#8c8c8c" }}>
-                            آخر 7 أيام
-                          </p>
-                          {grouped.last7.map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => setCurrentConversationId(c.id)}
-                              className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                              style={{
-                                color: currentConversationId === c.id ? "var(--color-accent)" : "#231f20",
-                                background: currentConversationId === c.id ? "var(--color-accent-tint-10)" : "transparent",
-                              }}
-                            >
-                              {c.title || "محادثة جديدة"}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {grouped.older.length > 0 && (
-                        <div>
-                          <p className="px-4 py-1 font-ui text-xs" style={{ color: "#8c8c8c" }}>
-                            سابق
-                          </p>
-                          {grouped.older.map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => setCurrentConversationId(c.id)}
-                              className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                              style={{
-                                color: currentConversationId === c.id ? "var(--color-accent)" : "#231f20",
-                                background: currentConversationId === c.id ? "var(--color-accent-tint-10)" : "transparent",
-                              }}
-                            >
-                              {c.title || "محادثة جديدة"}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="px-4 py-2 font-ui text-sm" style={{ color: "#8c8c8c" }}>
-                      لا توجد محادثات بعد — ابدأ محادثة جديدة!
-                    </p>
-                  )}
-                </div>
+                <ConversationList
+                  conversations={conversations}
+                  currentConversationId={currentConversationId}
+                  onSelectConversation={setCurrentConversationId}
+                  onNewChat={startNewChat}
+                  groupedConversations={grouped}
+                />
               )}
 
               {currentSection === "أدوات" && (
@@ -579,7 +416,7 @@ function ChatPageContent() {
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
                     style={{ color: "#231f20" }}
                   >
-                    <Plus size={18} style={{ color: "#999" }} />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     <span>أضف أدوات</span>
                   </button>
                   {userToolIds.length > 0 ? (
@@ -617,7 +454,6 @@ function ChatPageContent() {
           )}
         </div>
 
-        {/* Bottom bar – sticky, same location in/out. Profile opens settings (ChatGPT-style). */}
         <div
           className="shrink-0 flex flex-col items-center gap-2 pb-4 pt-2"
           style={{ width: SIDEBAR_W_COLLAPSED, marginInlineEnd: "auto" }}
@@ -633,98 +469,30 @@ function ChatPageContent() {
         </div>
       </aside>
 
-      {/* ── Main – LEFT in RTL ── */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Messages */}
-        <div ref={scrollRef} className="sidebar-scroll flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-6 py-8 space-y-4">
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-6" style={{ minHeight: "50vh" }}>
-                <p className="font-ui text-center" style={{ color: "#8c8c8c", fontSize: "1rem" }}>
-                  ابدأ المحادثة...
-                </p>
-                <div className="flex flex-wrap justify-center gap-2 max-w-xl">
-                  {SUGGESTION_CHIPS.map((chip) => (
-                    <button
-                      key={chip}
-                      onClick={() => void sendMessage(chip)}
-                      className="px-4 py-2 rounded-full font-ui text-sm transition-colors"
-                      style={{
-                        background: "var(--color-accent-tint-12)",
-                        color: "var(--color-accent)",
-                        border: "1px solid var(--color-accent-tint-25)",
-                      }}
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+        <MessageList
+          messages={messages}
+          isLoading={isLoading}
+          speechSpeed={speechSpeed}
+          voiceId={voiceId}
+          onSendMessage={sendMessage}
+        />
 
-            {messages.map((msg) => (
-              <div key={msg.id}>
-                <ChatMessage role={msg.role} content={msg.content} showSpeak={msg.role === "assistant"} speechSpeed={speechSpeed} voiceId={voiceId} />
-                {msg.role === "assistant" && !msg.content.startsWith("عذراً") && (
-                  <FeedbackButtons messageId={msg.id} originalResponse={msg.content} />
-                )}
-              </div>
-            ))}
+        <ControlsBar
+          languageStyle={languageStyle}
+          onLanguageStyleChange={setLanguageStyle}
+          useSearch={useSearch}
+          onUseSearchChange={setUseSearch}
+          empathyMode={empathyMode}
+          onEmpathyModeChange={setEmpathyMode}
+          ramadanMode={ramadanMode}
+          onRamadanModeChange={setRamadanMode}
+        />
 
-            {isLoading && (
-              <div className="flex justify-end">
-                <div
-                  style={{
-                    background: "#ffffff",
-                    borderRadius: 16,
-                    padding: "12px 20px",
-                    border: "1px solid rgba(0,0,0,0.07)",
-                  }}
-                >
-                  <span
-                    className="font-ui font-semibold"
-                    style={{ color: "var(--color-accent)", fontSize: "1rem" }}
-                  >
-                    خال خليل خلّله مع المخللات
-                    <span className="khalele-dots" aria-hidden>
-                      <span>.</span><span>.</span><span>.</span>
-                    </span>
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Controls bar — language style + mode toggles */}
-        <div className="shrink-0 px-6 pt-2">
-          <div className="max-w-2xl mx-auto flex items-center gap-4 flex-wrap pb-2">
-            <LanguageStyleSelector value={languageStyle} onChange={setLanguageStyle} />
-            {(
-              [
-                { label: "بحث", key: "useSearch", val: useSearch, set: setUseSearch },
-                { label: "تعاطف", key: "empathy", val: empathyMode, set: setEmpathyMode },
-                { label: "رمضان", key: "ramadan", val: ramadanMode, set: setRamadanMode },
-              ] as const
-            ).map(({ label, key, val, set }) => (
-              <label key={key} className="flex items-center gap-1.5 cursor-pointer font-ui text-sm select-none" style={{ color: "#5a5a5a" }}>
-                <input
-                  type="checkbox"
-                  checked={val}
-                  onChange={(e) => (set as (v: boolean) => void)(e.target.checked)}
-                  className="rounded accent-accent"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Contextual integration prompt — when user tries Drive/Gmail/Calendar feature */}
         {suggestionBanner && (
-          <div className="shrink-0 px-6 pb-2">
+          <div className="shrink-0 px-4 md:px-6 pb-2">
             <div
-              className="max-w-2xl mx-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-ui text-sm"
+              className="max-w-2xl mx-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-ui text-xs md:text-sm"
               style={{ background: "var(--color-accent-tint-10)", border: "1px solid var(--color-accent-tint-25)" }}
             >
               <span style={{ color: "#231f20" }}>{INTEGRATION_PROMPTS[suggestionBanner]}</span>
@@ -735,7 +503,7 @@ function ChatPageContent() {
                     setSettingsInitialSection("apps");
                     setSettingsOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-lg font-medium"
+                  className="px-3 py-1.5 rounded-lg font-medium text-xs md:text-sm"
                   style={{ background: "var(--color-accent)", color: "#fff" }}
                 >
                   ربط
@@ -754,8 +522,7 @@ function ChatPageContent() {
           </div>
         )}
 
-        {/* Input pill — same style as home page */}
-        <div className="shrink-0 px-6 pb-6 pt-1">
+        <div className="shrink-0 px-4 md:px-6 pb-4 md:pb-6 pt-1">
           <div className="max-w-2xl mx-auto">
             <HomePillInput
               value={input}
