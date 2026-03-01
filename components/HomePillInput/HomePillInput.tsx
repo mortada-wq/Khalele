@@ -16,6 +16,8 @@ interface HomePillInputProps {
   onChange: (v: string) => void;
   onSend: () => void;
   onMicTranscript?: (text: string) => void;
+  /** Called when the voice icon inside the pill is clicked - should open voice calling mode */
+  onVoiceMode?: () => void;
   /** Custom attach handler; if provided, clicking attachment calls this instead of the file picker */
   onAttach?: () => void;
   /** Called when files are selected via the default file picker (when onAttach is not passed) */
@@ -39,6 +41,7 @@ export function HomePillInput({
   onChange,
   onSend,
   onMicTranscript,
+  onVoiceMode,
   onAttach,
   onFiles,
   incognitoMode = false,
@@ -75,13 +78,18 @@ export function HomePillInput({
           borderRadius: PILL_RADIUS,
         }}
       >
-        {/* Right (RTL first child): Waveform (voice indicator) */}
-        <div
-          className="shrink-0 flex items-center justify-center text-[#4a4a4a] self-center"
+        {/* Right (RTL first child): Waveform (voice indicator) - NOW CLICKABLE */}
+        <button
+          type="button"
+          onClick={onVoiceMode}
+          disabled={disabled || !onVoiceMode}
+          className="shrink-0 flex items-center justify-center text-[#4a4a4a] self-center hover:text-[var(--color-accent)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+          aria-label="وضع المكالمة الصوتية"
+          title="ابدأ محادثة صوتية مع خليل"
         >
           <WaveformIcon size={ICON_SIZE} />
-        </div>
+        </button>
 
         {/* Center: Text input — Enter to send, Shift+Enter for new line */}
         <textarea

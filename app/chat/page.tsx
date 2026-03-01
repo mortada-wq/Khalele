@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Mic, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { ChatMessage } from "@/components/Chat/ChatMessage";
 import { FeedbackButtons } from "@/components/Chat/FeedbackButtons";
@@ -696,18 +696,9 @@ function ChatPageContent() {
           </div>
         </div>
 
-        {/* Controls bar — voice overlay + language style + mode toggles */}
+        {/* Controls bar — language style + mode toggles */}
         <div className="shrink-0 px-6 pt-2">
           <div className="max-w-2xl mx-auto flex items-center gap-4 flex-wrap pb-2">
-            <button
-              onClick={() => setVoiceOverlayOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-ui text-sm transition-colors"
-              style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)", border: "1px solid var(--color-accent-tint-25)" }}
-              aria-label="وضع الصوت"
-            >
-              <Mic size={18} />
-              صوت
-            </button>
             <LanguageStyleSelector value={languageStyle} onChange={setLanguageStyle} />
             {(
               [
@@ -770,6 +761,7 @@ function ChatPageContent() {
               value={input}
               onChange={setInput}
               onSend={handleSend}
+              onVoiceMode={() => setVoiceOverlayOpen(true)}
               onMicTranscript={(text) => {
                 if (text.trim()) { setInput(""); void sendMessage(text); }
               }}

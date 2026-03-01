@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { HomePillInput } from "@/components/HomePillInput";
 import { SettingsModal } from "@/components/Settings";
 import { BirdToggle } from "@/components/BirdToggle";
+import { VoiceOverlay } from "@/components/Voice/VoiceOverlay";
 
 
 /* ─── Sidebar section with definition and empty-state CTA ─── */
@@ -94,6 +95,7 @@ export default function HomePage() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [incognitoMode, setIncognitoMode] = useState(false);
+  const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -227,6 +229,7 @@ export default function HomePage() {
           value={input}
           onChange={setInput}
           onSend={handleSend}
+          onVoiceMode={() => setVoiceOverlayOpen(true)}
           onMicTranscript={handleTranscript}
           onFiles={(files) => {
             const names = Array.from(files).map((f) => f.name).join(", ");
@@ -237,6 +240,17 @@ export default function HomePage() {
           placeholder="سلام عليكم.."
         />
       </main>
+
+      <VoiceOverlay
+        open={voiceOverlayOpen}
+        onClose={() => setVoiceOverlayOpen(false)}
+        onTranscript={(text) => {
+          if (text.trim()) {
+            setInput(text);
+            setVoiceOverlayOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }

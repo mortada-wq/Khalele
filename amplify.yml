@@ -12,11 +12,11 @@ applications:
       artifacts:
         baseDirectory: .next
         files:
-          - "**/*"
+          - '**/*'
       cache:
         paths:
-          - node_modules/**/*
-          - .next/cache/**/*
+          - 'node_modules/**/*'
+          - '.next/cache/**/*'
     backend:
       phases:
         build:
