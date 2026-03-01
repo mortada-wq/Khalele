@@ -99,3 +99,40 @@ aws dynamodb create-table \
 ```
 
 **IAM:** Add `dynamodb:PutItem` to the policy (already included in the minimal policy above).
+
+#### khalele-training-sessions (Phase 3: training data collection)
+
+Volunteer-contributed training sessions for dialect improvement.
+
+**Table name:** `khalele-training-sessions`  
+**Environment variable:** `DYNAMODB_TRAINING_TABLE` (default: `khalele-training-sessions`)
+
+**Key schema:**
+| Attribute  | Type   | Key |
+|------------|--------|-----|
+| sessionId  | String | PK  |
+
+**Attributes:**
+| Attribute   | Type   | Description                          |
+|-------------|--------|--------------------------------------|
+| sessionId   | String | Primary key (e.g. `ts-<timestamp>-<id>`) |
+| userId      | String | User ID (anon_ or incognito)          |
+| nativeSpeaker | Boolean | Whether participant is native speaker |
+| dialect     | String | Optional dialect (e.g. بغدادي)       |
+| region      | String | Optional region                       |
+| gender      | String | Optional (male/female)                |
+| audioFiles  | List   | S3 URIs of recorded audio            |
+| transcripts | List   | User-provided or auto transcripts    |
+| status      | String | pending | approved | rejected          |
+| metadata    | Map    | Optional (e.g. prompts)               |
+| createdAt   | String | ISO 8601                              |
+| updatedAt   | String | ISO 8601                              |
+
+**AWS CLI creation example:**
+```bash
+aws dynamodb create-table \
+  --table-name khalele-training-sessions \
+  --attribute-definitions AttributeName=sessionId,AttributeType=S \
+  --key-schema AttributeName=sessionId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```

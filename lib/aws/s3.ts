@@ -5,6 +5,7 @@ const client = new S3Client({
 });
 
 const BUCKET = process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+export const S3_BUCKET = BUCKET;
 
 export async function uploadTrainingData(key: string, content: string): Promise<string> {
   await client.send(
@@ -26,6 +27,22 @@ export async function getTrainingData(key: string): Promise<string> {
     })
   );
   return (await result.Body?.transformToString()) ?? "";
+}
+
+export async function getObjectAsBuffer(bucket: string, key: string): Promise<{ body: Buffer; contentType?: string }> {
+  const result = await client.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key })
+  );
+  const chunks: Uint8Array[] = [];
+  if (result.Body) {
+    for await (const chunk of result.Body as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk);
+    }
+  }
+  return {
+    body: Buffer.concat(chunks),
+    contentType: result.ContentType ?? undefined,
+  };
 }
 
 export async function uploadFile(

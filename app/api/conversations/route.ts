@@ -21,8 +21,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ conversations });
   } catch (error) {
     console.error("Conversations list error:", error);
+    const msg = error instanceof Error ? error.message : "Unknown";
+    if (msg.includes("ResourceNotFoundException") || msg.includes("Cannot do operations on a non-existent table")) {
+      return NextResponse.json({ conversations: [] });
+    }
     return NextResponse.json(
-      { error: "Failed to list conversations", details: error instanceof Error ? error.message : "Unknown" },
+      { error: "Failed to list conversations", details: msg },
       { status: 500 }
     );
   }
@@ -46,7 +50,15 @@ export async function POST(req: NextRequest) {
       createdAt: now,
     };
 
-    await saveConversation(conversation);
+    try {
+      await saveConversation(conversation);
+    } catch (saveErr) {
+      const saveMsg = saveErr instanceof Error ? saveErr.message : "Unknown";
+      if (saveMsg.includes("ResourceNotFoundException") || saveMsg.includes("Cannot do operations on a non-existent table")) {
+        return NextResponse.json({ conversation });
+      }
+      throw saveErr;
+    }
     return NextResponse.json({ conversation });
   } catch (error) {
     console.error("Conversations create error:", error);

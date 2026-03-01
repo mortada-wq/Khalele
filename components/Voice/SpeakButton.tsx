@@ -6,6 +6,8 @@ import { Volume2, Loader2 } from "lucide-react";
 interface SpeakButtonProps {
   text: string;
   disabled?: boolean;
+  speechSpeed?: number;
+  voiceId?: string;
 }
 
 function VoiceWaveIcon({ size = 18 }: { size?: number }) {
@@ -19,7 +21,7 @@ function VoiceWaveIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-export function SpeakButton({ text, disabled = false }: SpeakButtonProps) {
+export function SpeakButton({ text, disabled = false, speechSpeed = 1, voiceId }: SpeakButtonProps) {
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
@@ -31,7 +33,7 @@ export function SpeakButton({ text, disabled = false }: SpeakButtonProps) {
       const res = await fetch("/api/voice/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, speechSpeed, voiceId }),
       });
       if (!res.ok) throw new Error("Failed");
       const blob = await res.blob();

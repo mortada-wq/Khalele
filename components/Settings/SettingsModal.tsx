@@ -12,6 +12,7 @@ export interface KhaleleSettings {
   compactMode: boolean;
   // الصوت
   speechSpeed: number;
+  voiceId: string;
   autoResponse: boolean;
   // اللغة والأسلوب
   languageStyle: LanguageStyle;
@@ -34,6 +35,7 @@ const DEFAULT_SETTINGS: KhaleleSettings = {
   fontSize: "medium",
   compactMode: false,
   speechSpeed: 1,
+  voiceId: "Zeina",
   autoResponse: false,
   languageStyle: "easy_arabic",
   tone: "friendly",
@@ -342,6 +344,19 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                     className="w-full accent-accent"
                   />
                   <span className="text-sm" style={{ color: "#6b6b6b" }}>{settings.speechSpeed}x</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">الصوت</label>
+                  <select
+                    value={settings.voiceId}
+                    onChange={(e) => update("voiceId", e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border text-sm"
+                    style={{ borderColor: "#e0e0e0" }}
+                  >
+                    <option value="Zeina">زينة (Zeina)</option>
+                    <option value="Hala">هالة (Hala)</option>
+                    <option value="Tarik">طارق (Tarik)</option>
+                  </select>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input

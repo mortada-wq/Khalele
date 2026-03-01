@@ -143,8 +143,7 @@ export function HomePillInput({
           <button
             type="button"
             onClick={() => onIncognitoChange(!incognitoMode)}
-            className="p-2 rounded-lg transition-colors disabled:opacity-50"
-            className="hover:opacity-80"
+            className="p-2 rounded-lg transition-colors disabled:opacity-50 hover:opacity-80"
             style={{
               color: incognitoMode ? "var(--color-accent)" : "var(--text-subtle)",
             }}

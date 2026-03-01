@@ -3,12 +3,16 @@ import { synthesizeSpeech } from "@/lib/aws/polly";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
+    const body = await req.json();
+    const { text, voiceId, speed } = body ?? {};
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Text required" }, { status: 400 });
     }
 
-    const audioBuffer = await synthesizeSpeech(text);
+    const audioBuffer = await synthesizeSpeech(text, {
+      voiceId: typeof voiceId === "string" ? voiceId : undefined,
+      speed: typeof speed === "number" ? speed : undefined,
+    });
     return new NextResponse(new Uint8Array(audioBuffer), {
       headers: {
         "Content-Type": "audio/mpeg",

@@ -142,6 +142,16 @@ function ChatPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [character, setCharacter] = useState<Character>(DEFAULT_CHARACTERS[0]);
   const [languageStyle, setLanguageStyle] = useState<LanguageStyle>("easy_arabic");
+  const [speechSpeed, setSpeechSpeed] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const v = localStorage.getItem("khalele_speech_speed");
+    const n = v ? parseFloat(v) : 1;
+    return Number.isFinite(n) && n >= 0.5 && n <= 2 ? n : 1;
+  });
+  const [voiceId, setVoiceId] = useState(() => {
+    if (typeof window === "undefined") return "Zeina";
+    return localStorage.getItem("khalele_voice_id") || "Zeina";
+  });
   const [useSearch, setUseSearch] = useState(false);
   const [empathyMode, setEmpathyMode] = useState(false);
   const [ramadanMode, setRamadanMode] = useState(false);
@@ -654,7 +664,7 @@ function ChatPageContent() {
 
             {messages.map((msg) => (
               <div key={msg.id}>
-                <ChatMessage role={msg.role} content={msg.content} showSpeak={msg.role === "assistant"} />
+                <ChatMessage role={msg.role} content={msg.content} showSpeak={msg.role === "assistant"} speechSpeed={speechSpeed} voiceId={voiceId} />
                 {msg.role === "assistant" && !msg.content.startsWith("عذراً") && (
                   <FeedbackButtons messageId={msg.id} originalResponse={msg.content} />
                 )}
@@ -788,9 +798,17 @@ function ChatPageContent() {
           setSettingsOpen(false);
           setSettingsInitialSection(undefined);
         }}
-        initialSettings={{ languageStyle }}
+        initialSettings={{ languageStyle, speechSpeed, voiceId }}
         initialSection={settingsInitialSection === "apps" ? "apps" : undefined}
-        onSave={(s) => setLanguageStyle(s.languageStyle)}
+        onSave={(s) => {
+          setLanguageStyle(s.languageStyle);
+          setSpeechSpeed(s.speechSpeed);
+          setVoiceId(s.voiceId);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("khalele_speech_speed", String(s.speechSpeed));
+            localStorage.setItem("khalele_voice_id", s.voiceId);
+          }
+        }}
       />
 
       <VoiceOverlay

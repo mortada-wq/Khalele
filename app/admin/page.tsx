@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { BarChart3, MessageSquare, Users, Settings, Type } from "lucide-react";
+import { BarChart3, MessageSquare, Users, Settings, Type, Mic } from "lucide-react";
 
 interface Correction {
   id: string;
@@ -77,6 +77,13 @@ export default function AdminDashboard() {
           <h3 className="text-lg font-bold mb-2">استخراج البيانات</h3>
           <p className="text-white/60 text-sm">
             رفع التدريب، الميديا، التراث
+          </p>
+        </Link>
+        <Link href="/admin/training" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
+          <Mic className="w-10 h-10 text-khalele-gold mb-4" />
+          <h3 className="text-lg font-bold mb-2">جلسات التدريب</h3>
+          <p className="text-white/60 text-sm">
+            مراجعة مساهمات المتطوعين
           </p>
         </Link>
       </div>

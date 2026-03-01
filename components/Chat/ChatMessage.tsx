@@ -6,9 +6,11 @@ interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   showSpeak?: boolean;
+  speechSpeed?: number;
+  voiceId?: string;
 }
 
-export function ChatMessage({ role, content, showSpeak = false }: ChatMessageProps) {
+export function ChatMessage({ role, content, showSpeak = false, speechSpeed = 1, voiceId }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -29,7 +31,7 @@ export function ChatMessage({ role, content, showSpeak = false }: ChatMessagePro
           <p className="flex-1 font-ui text-base leading-relaxed whitespace-pre-wrap" style={{ color: "#231f20" }}>
             {content}
           </p>
-          {!isUser && showSpeak && <SpeakButton text={content} />}
+          {!isUser && showSpeak && <SpeakButton text={content} speechSpeed={speechSpeed} voiceId={voiceId} />}
         </div>
       </div>
     </div>
