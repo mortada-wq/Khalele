@@ -11,9 +11,9 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        gold: "#C68E17",
-        earth: "#8B7355",
-        "khalele-gold": "#C68E17",
+        gold: "var(--color-accent)",
+        earth: "var(--color-earth)",
+        "khalele-gold": "var(--color-accent)",
       },
       fontFamily: {
         title: ["var(--font-title)", "serif"],

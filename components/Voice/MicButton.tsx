@@ -54,12 +54,12 @@ export function MicButton({ onTranscript, disabled = false, variant = "default" 
   };
 
   const minimalClass = variant === "minimal"
-    ? "p-2 rounded-lg text-[var(--text-subtle)] hover:text-[var(--foreground)] bg-transparent border-0"
+    ? `p-2 rounded-lg text-[var(--text-subtle)] hover:text-[var(--foreground)] bg-transparent border-0 ${isListening ? "mic-recording-pulse !text-red-500 !bg-red-500/15" : ""}`
     : "";
   const defaultClass = variant === "default"
     ? `p-3 rounded-xl transition-colors ${
         isListening
-          ? "bg-red-500/20 text-red-400 border border-red-500/40"
+          ? "bg-red-500/20 text-red-400 border border-red-500/40 mic-recording-pulse"
           : "bg-white/5 text-white/80 hover:bg-khalele-gold/20 hover:text-khalele-gold border border-white/10"
       }`
     : "";

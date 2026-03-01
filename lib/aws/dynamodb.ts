@@ -43,6 +43,51 @@ export interface ConversationSummary {
   lastMessageAt: string;
 }
 
+export interface ConversationRecord {
+  conversationId: string;
+  userId: string;
+  title: string;
+  messages: { id: string; role: "user" | "assistant"; content: string }[];
+  updatedAt: string;
+  createdAt: string;
+}
+
+export async function saveConversation(conversation: ConversationRecord): Promise<void> {
+  await docClient.send(
+    new PutCommand({
+      TableName: TABLE_CONVERSATIONS,
+      Item: conversation,
+    })
+  );
+}
+
+export async function getConversation(conversationId: string): Promise<ConversationRecord | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: TABLE_CONVERSATIONS,
+      Key: { conversationId },
+    })
+  );
+  return (result.Item as ConversationRecord) ?? null;
+}
+
+export async function listConversationsByUser(
+  userId: string,
+  limit = 50
+): Promise<ConversationRecord[]> {
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: TABLE_CONVERSATIONS,
+      IndexName: "userId-updatedAt-index",
+      KeyConditionExpression: "userId = :uid",
+      ExpressionAttributeValues: { ":uid": userId },
+      Limit: limit,
+      ScanIndexForward: false,
+    })
+  );
+  return (result.Items as ConversationRecord[]) ?? [];
+}
+
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const result = await docClient.send(
     new GetCommand({

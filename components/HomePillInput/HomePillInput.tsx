@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { SendIcon, MicIcon, AttachmentIcon, WaveformIcon } from "./Icons";
+import { SendIcon, MicIcon, AttachmentIcon, WaveformIcon, IncognitoIcon } from "./Icons";
 import { MicButton } from "@/components/Voice/MicButton";
 
 /**
@@ -16,7 +16,13 @@ interface HomePillInputProps {
   onChange: (v: string) => void;
   onSend: () => void;
   onMicTranscript?: (text: string) => void;
+  /** Custom attach handler; if provided, clicking attachment calls this instead of the file picker */
   onAttach?: () => void;
+  /** Called when files are selected via the default file picker (when onAttach is not passed) */
+  onFiles?: (files: FileList) => void;
+  /** Incognito mode: chat without user identity. Toggle shows beside mic/attachment. */
+  incognitoMode?: boolean;
+  onIncognitoChange?: (enabled: boolean) => void;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -34,17 +40,21 @@ export function HomePillInput({
   onSend,
   onMicTranscript,
   onAttach,
+  onFiles,
+  incognitoMode = false,
+  onIncognitoChange,
   placeholder = "سلام عليكم..",
   disabled = false,
 }: HomePillInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSend();
     }
+    // Shift+Enter = new line (default textarea behavior)
   };
 
   const handleAttach = () => {
@@ -61,47 +71,48 @@ export function HomePillInput({
       <div
         className="home-pill-bar relative flex items-center rounded-full transition-all duration-200 focus-within:ring-1 focus-within:ring-[rgba(0,0,0,0.08)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--background)]"
         style={{
-          height: PILL_HEIGHT,
+          minHeight: PILL_HEIGHT,
           borderRadius: PILL_RADIUS,
         }}
       >
-        {/* Left: Send (paper plane) — inside pill */}
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={disabled || !value.trim()}
-          className="shrink-0 flex items-center justify-center text-[#4a4a4a] hover:text-[#231f20] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        {/* Right (RTL first child): Waveform (voice indicator) */}
+        <div
+          className="shrink-0 flex items-center justify-center text-[#4a4a4a] self-center"
           style={{ width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
-          aria-label="إرسال"
         >
-          <SendIcon size={ICON_SIZE} />
-        </button>
+          <WaveformIcon size={ICON_SIZE} />
+        </div>
 
-        {/* Center: Text input — transparent, no border */}
-        <input
+        {/* Center: Text input — Enter to send, Shift+Enter for new line */}
+        <textarea
           ref={inputRef}
-          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          className="font-ui flex-1 bg-transparent border-0 focus:outline-none text-[#231f20] placeholder:text-[#8c8c8c] min-w-0"
+          rows={1}
+          className="font-ui flex-1 bg-transparent border-0 focus:outline-none text-[#231f20] placeholder:text-[#8c8c8c] min-w-0 resize-none py-3 leading-normal"
           style={{
             paddingLeft: 10,
             paddingRight: 10,
-            height: PILL_HEIGHT,
+            minHeight: 24,
+            maxHeight: 120,
             fontSize: "1rem",
           }}
         />
 
-        {/* Right: Waveform (voice indicator) — inside pill, dark gray outline */}
-        <div
-          className="shrink-0 flex items-center justify-center text-[#4a4a4a]"
-          style={{ width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+        {/* Left (RTL last child): Send (paper plane) */}
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={disabled || !value.trim()}
+          className="shrink-0 flex items-center justify-center self-center hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          style={{ color: "var(--color-accent)", width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+          aria-label="إرسال"
         >
-          <WaveformIcon size={ICON_SIZE} />
-        </div>
+          <SendIcon size={ICON_SIZE} />
+        </button>
       </div>
 
       {/* Second row: Mic + Attachment — below pill, dark gray outline, ~18–24px gap */}
@@ -128,6 +139,21 @@ export function HomePillInput({
         >
           <AttachmentIcon size={ROW_ICON_SIZE} />
         </button>
+        {onIncognitoChange && (
+          <button
+            type="button"
+            onClick={() => onIncognitoChange(!incognitoMode)}
+            className="p-2 rounded-lg transition-colors disabled:opacity-50"
+            className="hover:opacity-80"
+            style={{
+              color: incognitoMode ? "var(--color-accent)" : "var(--text-subtle)",
+            }}
+            aria-label={incognitoMode ? "وضع خاص مفعّل" : "وضع خاص"}
+            title={incognitoMode ? "المحادثة بدون معرفة المستخدم — مفعّل" : "المحادثة بدون معرفة المستخدم"}
+          >
+            <IncognitoIcon size={ROW_ICON_SIZE} />
+          </button>
+        )}
       </div>
 
       <input
@@ -135,6 +161,13 @@ export function HomePillInput({
         type="file"
         className="hidden"
         accept="*/*"
+        onChange={(e) => {
+          const files = e.target.files;
+          if (files?.length && onFiles) {
+            onFiles(files);
+          }
+          e.target.value = "";
+        }}
       />
     </div>
   );

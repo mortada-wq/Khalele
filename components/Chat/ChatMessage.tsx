@@ -17,14 +17,18 @@ export function ChatMessage({ role, content, showSpeak = false }: ChatMessagePro
       dir="rtl"
     >
       <div
-        className={`max-w-[85%] p-4 rounded-2xl ${
-          isUser
-            ? "chat-message-user bg-khalele-gold/20 border border-khalele-gold/40"
-            : "chat-message-ai bg-white/5 border border-white/10"
-        }`}
+        className="max-w-[85%]"
+        style={{
+          background: isUser ? "var(--color-accent-tint-10)" : "#ffffff",
+          border: `1px solid ${isUser ? "var(--color-accent-tint-25)" : "rgba(0,0,0,0.07)"}`,
+          borderRadius: 16,
+          padding: "12px 16px",
+        }}
       >
         <div className="flex items-start gap-2">
-          <p className="flex-1 text-base leading-relaxed whitespace-pre-wrap">{content}</p>
+          <p className="flex-1 font-ui text-base leading-relaxed whitespace-pre-wrap" style={{ color: "#231f20" }}>
+            {content}
+          </p>
           {!isUser && showSpeak && <SpeakButton text={content} />}
         </div>
       </div>

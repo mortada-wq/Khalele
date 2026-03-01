@@ -15,9 +15,21 @@
 }
 
 /* Design Bible Rule 3: Palette (fonts set by layout) */
+/* Accent palette — overridden by user choice via JS. One color drives the whole UI. */
 :root {
-  --color-gold: #C68E17;
+  --color-accent: #C68E17;
+  --color-accent-hover: #a87212;
+  --color-accent-avatar-expanded: #936928;
+  --color-accent-avatar-collapsed: #7a5a20;
   --color-earth: #8B7355;
+  --color-accent-tint-12: rgba(198, 142, 23, 0.12);
+  --color-accent-tint-08: rgba(198, 142, 23, 0.08);
+  --color-accent-tint-20: rgba(198, 142, 23, 0.2);
+  --color-accent-tint-25: rgba(198, 142, 23, 0.25);
+  --color-accent-tint-10: rgba(198, 142, 23, 0.1);
+  --color-accent-tint-06: rgba(198, 142, 23, 0.06);
+  --color-accent-tint-40: rgba(198, 142, 23, 0.4);
+  --color-gold: var(--color-accent);
   --color-black: #000000;
   --tile-radius: 28px;
   --text-muted: rgba(248, 250, 255, 0.7);
@@ -93,10 +105,10 @@ body {
 
 /* DeepSeek-style glass message bubbles */
 .chat-message-user {
-  background: rgba(201, 162, 39, 0.12) !important;
+  background: var(--color-accent-tint-12) !important;
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(201, 162, 39, 0.25);
+  border: 1px solid var(--color-accent-tint-25);
   border-radius: 16px;
   padding: 1rem 1.25rem;
   margin: 0.5rem 0;
@@ -116,6 +128,127 @@ body {
 .home-pill-bar {
   background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0%, #ebebec 100%);
   border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* ── Bird wing-flap animation ─────────────────────────────── */
+.bird-wing-l {
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: flap-left 2s ease-in-out infinite;
+}
+.bird-wing-r {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: flap-right 2s ease-in-out infinite;
+}
+@keyframes flap-left {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(-28deg); }
+}
+@keyframes flap-right {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(28deg); }
+}
+
+/* Bird open wing fade-in */
+@keyframes bird-open-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bird-open-fade-in {
+  animation: bird-open-fade-in 0.25s ease-out forwards;
+}
+
+/* ── Khalele loading dots ── */
+@keyframes khalele-dot {
+  0%, 60%, 100% { opacity: 0; }
+  30%           { opacity: 1; }
+}
+.khalele-dots span { animation: khalele-dot 1.4s ease-in-out infinite; }
+.khalele-dots span:nth-child(2) { animation-delay: 0.2s; }
+.khalele-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Mic button red pulse when recording */
+.mic-recording-pulse {
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+}
+
+/* Voice wave bars when AI is speaking */
+.voice-wave-bars rect {
+  animation: voice-bar 0.6s ease-in-out infinite alternate;
+}
+.voice-wave-bars rect:nth-child(1) { animation-delay: 0s; }
+.voice-wave-bars rect:nth-child(2) { animation-delay: 0.1s; }
+.voice-wave-bars rect:nth-child(3) { animation-delay: 0.2s; }
+.voice-wave-bars rect:nth-child(4) { animation-delay: 0.3s; }
+@keyframes voice-bar {
+  from { transform: scaleY(0.4); transform-origin: center; }
+  to { transform: scaleY(1); transform-origin: center; }
+}
+
+/* Voice overlay orb animations */
+@keyframes voice-orb-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+@keyframes voice-orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Sidebar scrollbar: invisible until mouse hovers near it (over track/thumb) */
+.sidebar-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scroll-behavior: smooth;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+.sidebar-scroll::-webkit-scrollbar-track:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.15s ease;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.35);
+}
+/* Firefox: show on hover via scrollbar-color (limited – no per-element hover) */
+.sidebar-scroll:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+[data-theme="dark"] .sidebar-scroll::-webkit-scrollbar-track:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+[data-theme="dark"] .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+[data-theme="dark"] .sidebar-scroll::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+[data-theme="dark"] .sidebar-scroll:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Accent color for checkboxes/radios — uses user palette */
+.accent-accent {
+  accent-color: var(--color-accent);
 }
 
 /* Glass input area - keep colors, shapes, stroke */
