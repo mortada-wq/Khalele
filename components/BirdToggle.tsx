@@ -2,11 +2,11 @@
 
 import { useId } from "react";
 
-const svgProps = { viewBox: "0 0 112.41 112.41", width: 44, height: 44 } as const;
+const defaultSize = 44;
 
-function BirdClosed({ id }: { id: string }) {
+function BirdClosed({ id, size = defaultSize }: { id: string; size?: number }) {
   return (
-    <svg {...svgProps} aria-hidden>
+    <svg className="icon icon-closed" viewBox="0 0 112.41 112.41" width={size} height={size} aria-hidden>
       <defs>
         <linearGradient id={`${id}-closed-fill`} x1="-284.27" y1="114.52" x2="-257.6" y2="114.52" gradientTransform="translate(-234.19 49.93) rotate(160) scale(1 -1)" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#565656" /><stop offset=".74" stopColor="#231f20" />
@@ -22,9 +22,9 @@ function BirdClosed({ id }: { id: string }) {
   );
 }
 
-function BirdOpen({ id }: { id: string }) {
+function BirdOpen({ id, size = defaultSize }: { id: string; size?: number }) {
   return (
-    <svg {...svgProps} aria-hidden className="bird-open-fade-in">
+    <svg className="icon icon-open" viewBox="0 0 112.41 112.41" width={size} height={size} aria-hidden>
       <defs>
         <linearGradient id={`${id}-open-fill`} x1="-348.64" y1="170.26" x2="-269.26" y2="170.26" gradientTransform="translate(272.49 -218.05) rotate(-21.82)" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#565656" /><stop offset=".74" stopColor="#231f20" />
@@ -40,7 +40,16 @@ function BirdOpen({ id }: { id: string }) {
   );
 }
 
-export function BirdToggle({ expanded }: { expanded: boolean }) {
+export function BirdToggle({ expanded, size }: { expanded: boolean; size?: number }) {
   const id = useId();
-  return expanded ? <BirdOpen id={id} /> : <BirdClosed id={id} />;
+  const s = size || defaultSize;
+  return (
+    <span
+      className={`toggle-wrapper${expanded ? " is-open" : ""}`}
+      style={{ width: s, height: s }}
+    >
+      <BirdOpen id={id} size={size} />
+      <BirdClosed id={id} size={size} />
+    </span>
+  );
 }

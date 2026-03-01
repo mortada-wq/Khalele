@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
@@ -9,7 +10,7 @@ import { ConversationList } from "@/components/Chat/ConversationList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BirdToggle } from "@/components/BirdToggle";
 import { SettingsModal } from "@/components/Settings";
-import { VoiceOverlay } from "@/components/Voice/VoiceOverlay";
+import { CallModeOverlay } from "@/components/Voice/CallModeOverlay";
 import { DEFAULT_CHARACTERS } from "@/lib/characters";
 import type { Character, LanguageStyle } from "@/lib/characters";
 import { detectIntegrationIntent, INTEGRATION_PROMPTS, type IntegrationSuggestion } from "@/lib/connectors";
@@ -67,14 +68,15 @@ function SectionIcon({ section, color }: { section: string; color: string }) {
   );
 }
 
-const SIDEBAR_W_EXPANDED = 280;
-const SIDEBAR_W_COLLAPSED = 72;
+const SIDEBAR_W_EXPANDED = 240;
+const SIDEBAR_W_COLLAPSED = 64;
 
 function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [input, setInput] = useState("");
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const id = crypto.randomUUID();
     return [{ id, title: "محادثة جديدة", messages: [], updatedAt: new Date().toISOString() }];
@@ -141,6 +143,15 @@ function ChatPageContent() {
     if (v === "1") {
       sessionStorage.removeItem("khalele_incognito");
       setIncognitoMode(true);
+    }
+  }, []);
+
+  // Open Call Mode when coming from home page (wave icon)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("khalele_open_call_mode") === "1") {
+      sessionStorage.removeItem("khalele_open_call_mode");
+      setVoiceOverlayOpen(true);
     }
   }, []);
 
@@ -232,7 +243,11 @@ function ChatPageContent() {
     }
   };
 
-  const sendMessageInternal = async (content: string, convId: string, existingMessages: Message[] = []) => {
+  const sendMessageInternal = async (
+    content: string,
+    convId: string,
+    existingMessages: Message[] = []
+  ): Promise<string | null> => {
     setIsLoading(true);
     const allMessages = [...existingMessages, { role: "user" as const, content }];
     try {
@@ -251,7 +266,8 @@ function ChatPageContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
 
-      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: data.content };
+      const aiContent = data.content as string;
+      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: aiContent };
       setConversations((prev) => {
         const updated = prev.map((c) =>
           c.id === convId ? { ...c, messages: [...c.messages, aiMsg], updatedAt: new Date().toISOString() } : c
@@ -260,6 +276,7 @@ function ChatPageContent() {
         if (conv) void persistConversation(conv);
         return updated;
       });
+      return aiContent;
     } catch (error) {
       const errMsg: Message = {
         id: crypto.randomUUID(),
@@ -271,12 +288,13 @@ function ChatPageContent() {
           c.id === convId ? { ...c, messages: [...c.messages, errMsg], updatedAt: new Date().toISOString() } : c
         )
       );
+      return errMsg.content;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string): Promise<string | null> => {
     const convId = currentConversationId || crypto.randomUUID();
     if (!currentConversationId) {
       setConversations((prev) => [
@@ -308,7 +326,7 @@ function ChatPageContent() {
       return updated;
     });
     const conv = conversations.find((c) => c.id === convId) || { messages: [] };
-    await sendMessageInternal(content, convId, conv.messages);
+    return sendMessageInternal(content, convId, conv.messages);
   };
 
   const handleSend = () => {
@@ -361,7 +379,7 @@ function ChatPageContent() {
           width: sidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
           background: sidebarExpanded ? "#ffffff" : "#ebebec",
           borderTopLeftRadius: sidebarExpanded ? 20 : 0,
-          transition: "width 0.3s ease-in-out, background 0.3s ease-in-out",
+          transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10,
         }}
       >
@@ -389,7 +407,7 @@ function ChatPageContent() {
                       fontSize: "1rem",
                       fontWeight: currentSection === section ? 600 : 400,
                       background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
-                      color: currentSection === section ? "var(--color-accent)" : "#231f20",
+                      color: currentSection === section ? "var(--color-accent)" : "#000000",
                       border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
                     }}
                   >
@@ -414,7 +432,7 @@ function ChatPageContent() {
                   <button
                     onClick={() => setToolsModalOpen(true)}
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                    style={{ color: "#231f20" }}
+                    style={{ color: "#000000" }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     <span>أضف أدوات</span>
@@ -428,7 +446,7 @@ function ChatPageContent() {
                           <button
                             key={tool.id}
                             className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                            style={{ color: "#231f20" }}
+                            style={{ color: "#000000" }}
                           >
                             {tool.label}
                           </button>
@@ -469,7 +487,125 @@ function ChatPageContent() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0">
+      {/* Mobile menu - BirdToggle (same icon as desktop sidebar) */}
+      <button
+        type="button"
+        onClick={() => setMobileSidebarOpen(true)}
+        className="md:hidden fixed top-4 z-50 flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation"
+        style={{ right: 12 }}
+        aria-label="فتح القائمة"
+      >
+        <BirdToggle expanded={false} size={40} />
+      </button>
+
+      {/* Mobile sidebar overlay */}
+      <AnimatePresence>
+      {mobileSidebarOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="md:hidden fixed inset-0 z-40 bg-black/40"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden
+          />
+            <motion.aside
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "tween", duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[min(320px,85vw)] flex flex-col overflow-hidden"
+            style={{ background: "#ffffff", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
+          >
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[#e5e5e5]">
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="p-2 -m-2 rounded-lg hover:bg-black/5"
+                aria-label="إغلاق"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              </button>
+              <span className="font-ui font-semibold" style={{ color: "#000000" }}>القائمة</span>
+              <div className="w-10" />
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
+              {SECTIONS.map((section) => (
+                <button
+                  key={section}
+                  onClick={() => {
+                    setCurrentSection(section);
+                    setMobileSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui transition-colors"
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: currentSection === section ? 600 : 400,
+                    background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
+                    color: currentSection === section ? "var(--color-accent)" : "#000000",
+                    border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
+                  }}
+                >
+                  <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "#999"} />
+                  <span>{section}</span>
+                </button>
+              ))}
+              {currentSection === "فهرس" && (
+                <ConversationList
+                  conversations={conversations}
+                  currentConversationId={currentConversationId}
+                  onSelectConversation={(id) => {
+                    setCurrentConversationId(id);
+                    setMobileSidebarOpen(false);
+                  }}
+                  onNewChat={() => {
+                    startNewChat();
+                    setMobileSidebarOpen(false);
+                  }}
+                  groupedConversations={grouped}
+                />
+              )}
+              {currentSection === "أدوات" && (
+                <div className="mt-4 space-y-4">
+                  <button
+                    onClick={() => {
+                      setToolsModalOpen(true);
+                      setMobileSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
+                    style={{ color: "#000000" }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                    <span>أضف أدوات</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="shrink-0 flex flex-col items-center gap-2 p-4 border-t border-[#e5e5e5]">
+              <ThemeToggle />
+              <button
+                onClick={() => {
+                  setSettingsOpen(true);
+                  setMobileSidebarOpen(false);
+                }}
+                className="flex items-center justify-center p-2 rounded-lg hover:bg-black/5"
+                aria-label="الإعدادات"
+              >
+                <UserAvatarIcon expanded={true} />
+              </button>
+            </div>
+          </motion.aside>
+        </>
+      )}
+      </AnimatePresence>
+
+      <main className="flex-1 flex flex-col min-w-0 relative">
+        <motion.div
+          className="flex-1 flex flex-col min-w-0"
+          animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
+          transition={{ duration: 0.2 }}
+        >
         <MessageList
           messages={messages}
           isLoading={isLoading}
@@ -495,7 +631,7 @@ function ChatPageContent() {
               className="max-w-2xl mx-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-ui text-xs md:text-sm"
               style={{ background: "var(--color-accent-tint-10)", border: "1px solid var(--color-accent-tint-25)" }}
             >
-              <span style={{ color: "#231f20" }}>{INTEGRATION_PROMPTS[suggestionBanner]}</span>
+              <span style={{ color: "#000000" }}>{INTEGRATION_PROMPTS[suggestionBanner]}</span>
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
@@ -543,6 +679,7 @@ function ChatPageContent() {
             />
           </div>
         </div>
+        </motion.div>
       </main>
 
       <ToolsModal
@@ -570,16 +707,12 @@ function ChatPageContent() {
         }}
       />
 
-      <VoiceOverlay
+      <CallModeOverlay
         open={voiceOverlayOpen}
         onClose={() => setVoiceOverlayOpen(false)}
-        onTranscript={(text) => {
-          if (text.trim()) {
-            setInput("");
-            void sendMessage(text);
-            setVoiceOverlayOpen(false);
-          }
-        }}
+        onSendAndGetResponse={sendMessage}
+        speechSpeed={speechSpeed}
+        voiceId={voiceId}
       />
     </div>
   );

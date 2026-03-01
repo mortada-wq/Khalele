@@ -124,10 +124,13 @@ body {
   margin: 0.5rem 0;
 }
 
-/* Home pill input — exact from SVG: soft milky white → #ebebec, subtle glow edge */
+/* Home pill input */
 .home-pill-bar {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0%, #ebebec 100%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  border: none;
+  border-image: none;
+  color: var(--color-accent);
+  box-shadow: 1.1px 4px 9.3px 0px rgba(0, 0, 0, 0.15);
 }
 
 /* ── Bird wing-flap animation ─────────────────────────────── */
@@ -150,13 +153,38 @@ body {
   50%       { transform: rotate(28deg); }
 }
 
-/* Bird open wing fade-in */
-@keyframes bird-open-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ── Bird Toggle — Plug & Play icon morph ─────────────────── */
+.toggle-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
-.bird-open-fade-in {
-  animation: bird-open-fade-in 0.25s ease-out forwards;
+
+.toggle-wrapper .icon {
+  position: absolute;
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Default (sidebar collapsed): expanded wing visible */
+.toggle-wrapper .icon-open {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+.toggle-wrapper .icon-closed {
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.5);
+}
+
+/* Sidebar expanded (.is-open): compact wing visible */
+.toggle-wrapper.is-open .icon-open {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.5);
+}
+.toggle-wrapper.is-open .icon-closed {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* ── Khalele loading dots ── */

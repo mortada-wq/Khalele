@@ -17,6 +17,7 @@
     "@aws-sdk/client-transcribe": "^3.700.0",
     "@aws-sdk/lib-dynamodb": "^3.700.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.34.3",
     "lucide-react": "^0.460.0",
     "next": "14.2.18",
     "react": "^18.3.1",

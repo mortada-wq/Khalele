@@ -29,7 +29,7 @@ export function ConversationList({
       <button
         onClick={onNewChat}
         className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-        style={{ color: "#231f20" }}
+        style={{ color: "#000000" }}
       >
         <Plus size={18} style={{ color: "#999" }} />
         <span>محادثة جديدة</span>
@@ -54,7 +54,7 @@ export function ConversationList({
                     onClick={() => onSelectConversation(c.id)}
                     className="conversation-item w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate block"
                     style={{
-                      color: currentConversationId === c.id ? "var(--color-accent)" : "#231f20",
+                      color: currentConversationId === c.id ? "var(--color-accent)" : "#000000",
                       background: currentConversationId === c.id ? "var(--color-accent-tint-10)" : "transparent",
                     }}
                   >
