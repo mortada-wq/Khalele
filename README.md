@@ -1,4 +1,4 @@
-# Khalele — خليلي
+# Kheleel — خليلي
 
 Arabic AI — understands every dialect, responds in Fusha or Easy Arabic.
 

@@ -96,7 +96,7 @@ export function FeedbackButtons({
             />
             <button
               onClick={submitCorrection}
-              className="px-3 py-2 bg-khalele-gold/80 text-black rounded-lg text-sm font-medium hover:bg-khalele-gold"
+              className="px-3 py-2 bg-kheleel-gold/80 text-black rounded-lg text-sm font-medium hover:bg-kheleel-gold"
             >
               إرسال
             </button>

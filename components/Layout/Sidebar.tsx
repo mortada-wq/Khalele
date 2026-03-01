@@ -30,7 +30,7 @@ export function Sidebar({
       <aside className="w-16 flex flex-col items-center py-4 border-r border-[var(--border-subtle)] bg-[var(--glass-bg)] backdrop-blur-xl shrink-0">
         <button
           onClick={onNewChat}
-          className="p-3 rounded-xl text-white/70 hover:bg-white/10 hover:text-khalele-gold transition-colors"
+          className="p-3 rounded-xl text-white/70 hover:bg-white/10 hover:text-kheleel-gold transition-colors"
           title="محادثة جديدة"
         >
           <Plus size={22} />
@@ -41,7 +41,7 @@ export function Sidebar({
               key={c.id}
               onClick={() => onSelectConversation(c.id)}
               className={`p-3 rounded-xl transition-colors ${
-                currentId === c.id ? "bg-khalele-gold/20 text-khalele-gold" : "text-white/50 hover:bg-white/5 hover:text-white/70"
+                currentId === c.id ? "bg-kheleel-gold/20 text-kheleel-gold" : "text-white/50 hover:bg-white/5 hover:text-white/70"
               }`}
             >
               <MessageSquare size={18} />
@@ -84,7 +84,7 @@ export function Sidebar({
                 onClick={() => onSelectConversation(c.id)}
                 className={`w-full text-right px-4 py-3 rounded-xl transition-colors truncate ${
                   currentId === c.id
-                    ? "bg-khalele-gold/15 text-khalele-gold border border-khalele-gold/20"
+                    ? "bg-kheleel-gold/15 text-kheleel-gold border border-kheleel-gold/20"
                     : "text-white/70 hover:bg-white/5 hover:text-white/90 border border-transparent"
                 }`}
               >

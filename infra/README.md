@@ -1,4 +1,4 @@
-# Khalele AWS Infrastructure
+# Kheleel AWS Infrastructure
 
 ## Manual Setup (Phase 1)
 

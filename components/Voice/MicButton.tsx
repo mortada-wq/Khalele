@@ -60,7 +60,7 @@ export function MicButton({ onTranscript, disabled = false, variant = "default" 
     ? `p-3 rounded-xl transition-colors ${
         isListening
           ? "bg-red-500/20 text-red-400 border border-red-500/40 mic-recording-pulse"
-          : "bg-white/5 text-white/80 hover:bg-khalele-gold/20 hover:text-khalele-gold border border-white/10"
+          : "bg-white/5 text-white/80 hover:bg-kheleel-gold/20 hover:text-kheleel-gold border border-white/10"
       }`
     : "";
 

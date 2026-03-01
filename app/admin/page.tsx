@@ -1,116 +1,155 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { BarChart3, MessageSquare, Users, Settings, Type, Mic } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-interface Correction {
-  id: string;
-  originalResponse: string;
-  correctedResponse: string;
-  correctionType: string;
-  status: string;
-  createdAt: string;
+interface DashboardStats {
+  totalSessions: number;
+  pendingSessions: number;
+  approvedSessions: number;
+  rejectedSessions: number;
 }
 
-export default function AdminDashboard() {
-  const [corrections, setCorrections] = useState<Correction[]>([]);
+function StatCard({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+  return (
+    <div
+      className="rounded-2xl p-5 font-ui"
+      style={{
+        background: accent ? "var(--color-accent-tint-12)" : "#ffffff",
+        border: accent ? "1px solid var(--color-accent-tint-25)" : "1px solid #e5e5e5",
+      }}
+    >
+      <p className="text-xs mb-1" style={{ color: "#8c8c8c" }}>{label}</p>
+      <p className="text-2xl font-bold" style={{ color: accent ? "var(--color-accent)" : "#000000" }}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+export default function AdminPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/corrections")
-      .then((r) => r.json())
-      .then((d) => setCorrections(d.corrections || []))
-      .catch(() => {});
-  }, []);
+    if (status === "loading") return;
+    if (!session || session.user?.role !== "admin") {
+      router.replace("/");
+      return;
+    }
+
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/training-sessions", {
+          headers: { "x-admin-secret": "admin" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const sessions = data.sessions || [];
+          setStats({
+            totalSessions: sessions.length,
+            pendingSessions: sessions.filter((s: { status: string }) => s.status === "pending").length,
+            approvedSessions: sessions.filter((s: { status: string }) => s.status === "approved").length,
+            rejectedSessions: sessions.filter((s: { status: string }) => s.status === "rejected").length,
+          });
+        }
+      } catch {
+        // Fallback to zeros
+        setStats({ totalSessions: 0, pendingSessions: 0, approvedSessions: 0, rejectedSessions: 0 });
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [session, status, router]);
+
+  if (status === "loading" || (session?.user?.role !== "admin")) {
+    return (
+      <div className="h-screen flex items-center justify-center" style={{ background: "#ebebec" }}>
+        <span className="font-ui" style={{ color: "#8c8c8c" }}>جاري التحميل...</span>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen p-8">
-      <header className="flex items-center justify-between mb-12">
-        <Link href="/" className="text-khalele-gold font-bold text-2xl">
-          خليلي — لوحة التحكم
-        </Link>
-        <Link
-          href="/chat"
-          className="text-white/80 hover:text-khalele-gold transition-colors"
+    <div className="min-h-screen" dir="rtl" style={{ background: "#ebebec" }}>
+      <header
+        className="flex items-center justify-between px-6 py-4"
+        style={{ background: "#ffffff", borderBottom: "1px solid #e5e5e5" }}
+      >
+        <div className="flex items-center gap-3">
+          <div style={{ width: 100 }}>
+            <img src="/logo/logo_black.svg" alt="خليلي" className="w-full h-auto" />
+          </div>
+          <span
+            className="font-ui text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{ background: "linear-gradient(135deg, #D4A017, #FFD700)", color: "#fff" }}
+          >
+            مدير
+          </span>
+        </div>
+        <button
+          onClick={() => router.push("/")}
+          className="font-ui text-sm px-4 py-2 rounded-xl transition-colors hover:bg-black/5"
+          style={{ color: "var(--color-accent)" }}
         >
-          العودة للمحادثة
-        </Link>
+          الرجوع للرئيسية
+        </button>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-          <BarChart3 className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">أداء النموذج</h3>
-          <p className="text-white/60 text-sm">
-            مراقبة دقة اللهجة وجودة الردود
-          </p>
-        </div>
-        <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-          <MessageSquare className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">التصحيحات</h3>
-          <p className="text-white/60 text-sm">
-            معالجة تصحيحات المستخدمين
-          </p>
-        </div>
-        <Link href="/admin/characters" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
-          <Users className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">الشخصيات</h3>
-          <p className="text-white/60 text-sm">
-            إدارة الشخصيات واللهجات
-          </p>
-        </Link>
-        <Link href="/admin/taglines" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
-          <Type className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">بنك الشعارات</h3>
-          <p className="text-white/60 text-sm">
-            تعديل، حفظ، تبديل الشعار
-          </p>
-        </Link>
-        <Link href="/admin/lexicons" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
-          <BarChart3 className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">معاجم النطق</h3>
-          <p className="text-white/60 text-sm">
-            Polly Lexicons، لهجات
-          </p>
-        </Link>
-        <Link href="/admin/data" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
-          <Settings className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">استخراج البيانات</h3>
-          <p className="text-white/60 text-sm">
-            رفع التدريب، الميديا، التراث
-          </p>
-        </Link>
-        <Link href="/admin/training" className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors block">
-          <Mic className="w-10 h-10 text-khalele-gold mb-4" />
-          <h3 className="text-lg font-bold mb-2">جلسات التدريب</h3>
-          <p className="text-white/60 text-sm">
-            مراجعة مساهمات المتطوعين
-          </p>
-        </Link>
-      </div>
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="font-ui text-xl font-bold mb-6" style={{ color: "#000000" }}>
+          لوحة التحكم
+        </h1>
 
-      <div className="space-y-6">
-        <section className="p-6 rounded-2xl bg-white/5 border border-white/10">
-          <h2 className="text-xl font-bold mb-4">قائمة انتظار التدريب</h2>
-          <p className="text-white/60">لا توجد مهام تدريب نشطة حالياً.</p>
-        </section>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <span className="font-ui" style={{ color: "#8c8c8c" }}>جاري تحميل البيانات...</span>
+          </div>
+        ) : stats ? (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <StatCard label="إجمالي الجلسات" value={stats.totalSessions} />
+              <StatCard label="في الانتظار" value={stats.pendingSessions} accent />
+              <StatCard label="مقبولة" value={stats.approvedSessions} />
+              <StatCard label="مرفوضة" value={stats.rejectedSessions} />
+            </div>
 
-        <section className="p-6 rounded-2xl bg-white/5 border border-white/10">
-          <h2 className="text-xl font-bold mb-4">آخر التصحيحات</h2>
-          {corrections.length === 0 ? (
-            <p className="text-white/60">لم يتم استلام تصحيحات بعد.</p>
-          ) : (
-            <ul className="space-y-4">
-              {corrections.slice(0, 10).map((c) => (
-                <li key={c.id} className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-white/60 line-through text-sm">{c.originalResponse}</p>
-                  <p className="text-khalele-gold mt-1">{c.correctedResponse}</p>
-                  <p className="text-white/40 text-xs mt-2">{c.createdAt}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-    </main>
+            <div className="rounded-2xl p-5" style={{ background: "#ffffff", border: "1px solid #e5e5e5" }}>
+              <h2 className="font-ui text-sm font-semibold mb-4" style={{ color: "#000000" }}>
+                إجراءات سريعة
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => router.push("/chat")}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:opacity-90"
+                  style={{ background: "var(--color-accent)", color: "#fff" }}
+                >
+                  فتح المحادثة
+                </button>
+                <button
+                  onClick={() => {
+                    setLoading(true);
+                    window.location.reload();
+                  }}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                  style={{ background: "#f5f5f5", color: "#000000" }}
+                >
+                  تحديث البيانات
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p className="font-ui text-sm" style={{ color: "#8c8c8c" }}>لا توجد بيانات</p>
+        )}
+
+        <p className="font-ui text-xs mt-8" style={{ color: "#aaa" }}>
+          مسجّل كـ {session.user?.email}
+        </p>
+      </main>
+    </div>
   );
 }

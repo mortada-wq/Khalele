@@ -64,10 +64,10 @@ export default function AdminDataPage() {
   return (
     <main className="min-h-screen p-8" dir="rtl">
       <header className="flex items-center justify-between mb-12">
-        <Link href="/admin" className="text-khalele-gold font-bold text-2xl">
+        <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
           خليلي — استخراج البيانات
         </Link>
-        <Link href="/admin" className="text-white/80 hover:text-khalele-gold">
+        <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
           العودة
         </Link>
       </header>
@@ -77,11 +77,11 @@ export default function AdminDataPage() {
           onClick={() => setUploadType("training")}
           className={`p-6 rounded-2xl border transition-colors text-right ${
             uploadType === "training"
-              ? "bg-khalele-gold/20 border-khalele-gold/40"
+              ? "bg-kheleel-gold/20 border-kheleel-gold/40"
               : "bg-white/5 border-white/10 hover:bg-white/10"
           }`}
         >
-          <FileText className="w-10 h-10 text-khalele-gold mb-4" />
+          <FileText className="w-10 h-10 text-kheleel-gold mb-4" />
           <h3 className="text-lg font-bold mb-2">بيانات التدريب</h3>
           <p className="text-white/60 text-sm">محادثات المتطوعين، JSONL</p>
         </button>
@@ -89,11 +89,11 @@ export default function AdminDataPage() {
           onClick={() => setUploadType("media")}
           className={`p-6 rounded-2xl border transition-colors text-right ${
             uploadType === "media"
-              ? "bg-khalele-gold/20 border-khalele-gold/40"
+              ? "bg-kheleel-gold/20 border-kheleel-gold/40"
               : "bg-white/5 border-white/10 hover:bg-white/10"
           }`}
         >
-          <Music className="w-10 h-10 text-khalele-gold mb-4" />
+          <Music className="w-10 h-10 text-kheleel-gold mb-4" />
           <h3 className="text-lg font-bold mb-2">الميديا</h3>
           <p className="text-white/60 text-sm">تلفزيون، راديو، بودكاست</p>
         </button>
@@ -101,11 +101,11 @@ export default function AdminDataPage() {
           onClick={() => setUploadType("heritage")}
           className={`p-6 rounded-2xl border transition-colors text-right ${
             uploadType === "heritage"
-              ? "bg-khalele-gold/20 border-khalele-gold/40"
+              ? "bg-kheleel-gold/20 border-kheleel-gold/40"
               : "bg-white/5 border-white/10 hover:bg-white/10"
           }`}
         >
-          <BookOpen className="w-10 h-10 text-khalele-gold mb-4" />
+          <BookOpen className="w-10 h-10 text-kheleel-gold mb-4" />
           <h3 className="text-lg font-bold mb-2">التراث اللغوي</h3>
           <p className="text-white/60 text-sm">مخطوطات، كتب اللهجات</p>
         </button>
@@ -116,7 +116,7 @@ export default function AdminDataPage() {
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-khalele-gold/40 transition-colors cursor-pointer"
+          className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-kheleel-gold/40 transition-colors cursor-pointer"
         >
           <input
             type="file"

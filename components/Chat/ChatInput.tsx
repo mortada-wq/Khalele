@@ -43,12 +43,12 @@ export function ChatInput({
         placeholder={placeholder}
         disabled={disabled}
         rows={1}
-        className="flex-1 resize-none bg-transparent p-3 rounded-xl border border-white/5 focus:border-khalele-gold/40 focus:outline-none min-h-[48px] max-h-[200px] placeholder:text-white/40"
+        className="flex-1 resize-none bg-transparent p-3 rounded-xl border border-white/5 focus:border-kheleel-gold/40 focus:outline-none min-h-[48px] max-h-[200px] placeholder:text-white/40"
       />
       <button
         onClick={handleSubmit}
         disabled={disabled || !value.trim()}
-        className="px-6 py-3 bg-khalele-gold text-black font-semibold rounded-xl hover:bg-khalele-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-3 bg-kheleel-gold text-black font-semibold rounded-xl hover:bg-kheleel-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         إرسال
       </button>

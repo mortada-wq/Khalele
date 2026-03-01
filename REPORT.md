@@ -1,11 +1,11 @@
-# Khalele App — Detailed Report
+# Kheleel App — Detailed Report
 
 > **For developers:** Any new UI or feature must follow the **Developer UI Design Language** (Section 2.1). The home page (`app/page.tsx`) and `DESIGN_BIBLE.md` are the canonical references.
 
 ## 1. App Overview
 
 ### Purpose
-**Khalele** (خليلي) is an Arabic-first AI chat application. It targets Arab users across dialects, supports Fusha or Easy Arabic responses, and provides voice input/output for natural Arabic conversation.
+**Kheleel** (خليلي) is an Arabic-first AI chat application. It targets Arab users across dialects, supports Fusha or Easy Arabic responses, and provides voice input/output for natural Arabic conversation.
 
 ### Tech Stack
 | Layer | Technology |
@@ -67,7 +67,7 @@ Voice TTS → SpeakButton → POST /api/voice/synthesize → Polly → MP3 → A
 - **Tokens:** `app/globals.css` — CSS variables; `tailwind.config.ts` — Tailwind theme.
 
 ### Colors
-- **Accent:** Use `var(--color-accent)` (or Tailwind `gold` / `khalele-gold`). Never hardcode `#C68E17`.
+- **Accent:** Use `var(--color-accent)` (or Tailwind `gold` / `kheleel-gold`). Never hardcode `#C68E17`.
 - **Accent variants:** `--color-accent-hover`, `--color-accent-tint-12`, `-tint-08`, `-tint-20`, `-tint-25`, `-tint-10`, `-tint-06`, `-tint-40`.
 - **Avatar/earth:** `--color-accent-avatar-expanded`, `--color-accent-avatar-collapsed`, `--color-earth`.
 - **Neutrals:** `#231f20` (text), `#6b6b6b` (muted), `#8c8c8c` (subtle), `#e5e5e5` (borders), `#fafafa` (light bg), `#ebebec` (light surface).

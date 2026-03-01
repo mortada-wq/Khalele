@@ -28,13 +28,13 @@ export function UserPoints() {
 
   return (
     <div className="flex items-center gap-4">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-khalele-gold/15 border border-khalele-gold/30">
-        <Star size={16} className="text-khalele-gold" />
-        <span className="text-sm font-medium text-khalele-gold">{points}</span>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-kheleel-gold/15 border border-kheleel-gold/30">
+        <Star size={16} className="text-kheleel-gold" />
+        <span className="text-sm font-medium text-kheleel-gold">{points}</span>
       </div>
       {badges.length > 0 && (
         <div className="flex items-center gap-1">
-          <Award size={16} className="text-khalele-gold" />
+          <Award size={16} className="text-kheleel-gold" />
           {badges.slice(0, 2).map((id) => (
             <span key={id} className="text-xs text-white/70">
               {BADGES.find((b) => b.id === id)?.name ?? id}

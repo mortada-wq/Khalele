@@ -93,14 +93,14 @@ export default function AdminTrainingPage() {
   return (
     <main className="min-h-screen p-8" dir="rtl">
       <header className="flex items-center justify-between mb-12">
-        <Link href="/admin" className="text-khalele-gold font-bold text-2xl">
+        <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
           خليلي — جلسات التدريب
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/training" className="text-white/80 hover:text-khalele-gold text-sm">
+          <Link href="/training" className="text-white/80 hover:text-kheleel-gold text-sm">
             صفحة المساهمة
           </Link>
-          <Link href="/admin" className="text-white/80 hover:text-khalele-gold">
+          <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
             العودة
           </Link>
         </div>
@@ -116,7 +116,7 @@ export default function AdminTrainingPage() {
           />
           <button
             onClick={fetchSessions}
-            className="px-4 py-2 rounded-lg bg-khalele-gold/20 border border-khalele-gold/40 text-khalele-gold hover:bg-khalele-gold/30 flex items-center gap-2"
+            className="px-4 py-2 rounded-lg bg-kheleel-gold/20 border border-kheleel-gold/40 text-kheleel-gold hover:bg-kheleel-gold/30 flex items-center gap-2"
           >
             <RefreshCw size={16} />
             تحديث
@@ -126,7 +126,7 @@ export default function AdminTrainingPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <p className="text-white/60 text-sm mb-1">قيد المراجعة</p>
-          <p className="text-2xl font-bold text-khalele-gold">{pendingCount}</p>
+          <p className="text-2xl font-bold text-kheleel-gold">{pendingCount}</p>
         </div>
         <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <p className="text-white/60 text-sm mb-1">مقبولة</p>
@@ -144,7 +144,7 @@ export default function AdminTrainingPage() {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === f ? "bg-khalele-gold/20 border-khalele-gold/40 border" : "bg-white/5 border-white/10 border hover:bg-white/10"
+              filter === f ? "bg-kheleel-gold/20 border-kheleel-gold/40 border" : "bg-white/5 border-white/10 border hover:bg-white/10"
             }`}
           >
             {f === "pending" && "قيد المراجعة"}
@@ -157,12 +157,12 @@ export default function AdminTrainingPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 size={32} className="animate-spin text-khalele-gold" />
+          <Loader2 size={32} className="animate-spin text-kheleel-gold" />
         </div>
       ) : sessions.length === 0 ? (
         <section className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <p className="text-white/60">لا توجد جلسات تدريب.</p>
-          <Link href="/training" className="text-khalele-gold hover:underline mt-2 inline-block">
+          <Link href="/training" className="text-kheleel-gold hover:underline mt-2 inline-block">
             ادعُ المتطوعين للمساهمة
           </Link>
         </section>
@@ -205,7 +205,7 @@ export default function AdminTrainingPage() {
                   <div key={i} className="p-3 rounded-lg bg-white/5">
                     <p className="text-white/80">{prompt}</p>
                     {s.transcripts[i] && (
-                      <p className="text-khalele-gold/80 text-sm mt-1">{s.transcripts[i]}</p>
+                      <p className="text-kheleel-gold/80 text-sm mt-1">{s.transcripts[i]}</p>
                     )}
                     {s.audioFiles[i] && (
                       <button

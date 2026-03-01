@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing audio file in FormData (key: audio)" }, { status: 400 });
     }
 
-    const jobName = `khalele-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const jobName = `kheleel-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const ext = audio.name?.split(".").pop()?.toLowerCase() || "wav";
     const validExt = ["wav", "mp3", "mp4", "ogg", "flac", "amr", "webm"].includes(ext) ? ext : "wav";
     const key = `transcribe-input/${jobName}.${validExt}`;

@@ -160,10 +160,10 @@ export default function AdminTaglinesPage() {
     return (
       <main className="min-h-screen p-8" dir="rtl">
         <header className="flex items-center justify-between mb-12">
-          <Link href="/admin" className="text-khalele-gold font-bold text-2xl">
+          <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
             خليلي — بنك الشعارات
           </Link>
-          <Link href="/admin" className="text-white/80 hover:text-khalele-gold">
+          <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
             العودة
           </Link>
         </header>
@@ -177,10 +177,10 @@ export default function AdminTaglinesPage() {
   return (
     <main className="min-h-screen p-8" dir="rtl">
       <header className="flex items-center justify-between mb-12">
-        <Link href="/admin" className="text-khalele-gold font-bold text-2xl">
+        <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
           خليلي — بنك الشعارات
         </Link>
-        <Link href="/admin" className="text-white/80 hover:text-khalele-gold">
+        <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
           العودة
         </Link>
       </header>
@@ -204,10 +204,10 @@ export default function AdminTaglinesPage() {
         <div className="flex flex-wrap items-center gap-6">
           <button
             onClick={toggleRotation}
-            className="flex items-center gap-2 text-white/80 hover:text-khalele-gold transition-colors"
+            className="flex items-center gap-2 text-white/80 hover:text-kheleel-gold transition-colors"
           >
             {config.rotationEnabled ? (
-              <ToggleRight size={32} className="text-khalele-gold" />
+              <ToggleRight size={32} className="text-kheleel-gold" />
             ) : (
               <ToggleLeft size={32} className="text-white/40" />
             )}
@@ -278,7 +278,7 @@ export default function AdminTaglinesPage() {
                   <button
                     onClick={() => updateTagline(t.id, editText)}
                     disabled={saving || !editText.trim()}
-                    className="p-2 rounded-lg bg-khalele-gold/20 text-khalele-gold hover:bg-khalele-gold/30 disabled:opacity-50"
+                    className="p-2 rounded-lg bg-kheleel-gold/20 text-kheleel-gold hover:bg-kheleel-gold/30 disabled:opacity-50"
                   >
                     <Save size={18} />
                   </button>
@@ -300,7 +300,7 @@ export default function AdminTaglinesPage() {
                       setEditingId(t.id);
                       setEditText(t.text);
                     }}
-                    className="p-2 rounded-lg text-white/60 hover:bg-white/10 hover:text-khalele-gold"
+                    className="p-2 rounded-lg text-white/60 hover:bg-white/10 hover:text-kheleel-gold"
                     title="تعديل"
                   >
                     <Pencil size={18} />
@@ -330,7 +330,7 @@ export default function AdminTaglinesPage() {
           <button
             onClick={addTagline}
             disabled={saving || !newText.trim()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-khalele-gold/20 text-khalele-gold hover:bg-khalele-gold/30 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-kheleel-gold/20 text-kheleel-gold hover:bg-kheleel-gold/30 disabled:opacity-50"
           >
             <Plus size={18} />
             إضافة

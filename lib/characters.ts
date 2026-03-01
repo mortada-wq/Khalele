@@ -11,8 +11,8 @@ export interface Character {
 
 export const DEFAULT_CHARACTERS: Character[] = [
   {
-    id: "khalele-base",
-    name: "Khalele",
+    id: "kheleel-base",
+    name: "Kheleel",
     nameAr: "خليلي",
     region: "baghdad",
     languageStyle: "easy_arabic",

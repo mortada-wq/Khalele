@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const ADMIN_EMAIL = "hello@khalele.com";
+const ADMIN_EMAIL = "hello@kheleel.com";
 const ADMIN_EMAIL_BCC = "mortadagzar@gmail.com";
 
 export async function POST(req: NextRequest) {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM || "Khalele <onboarding@resend.dev>",
+      from: process.env.RESEND_FROM || "Kheleel <onboarding@resend.dev>",
       to: [ADMIN_EMAIL],
       bcc: [ADMIN_EMAIL_BCC],
       subject,

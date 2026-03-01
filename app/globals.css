@@ -187,14 +187,14 @@ body {
   transform: rotate(0deg) scale(1);
 }
 
-/* ── Khalele loading dots ── */
-@keyframes khalele-dot {
+/* ── Kheleel loading dots ── */
+@keyframes kheleel-dot {
   0%, 60%, 100% { opacity: 0; }
   30%           { opacity: 1; }
 }
-.khalele-dots span { animation: khalele-dot 1.4s ease-in-out infinite; }
-.khalele-dots span:nth-child(2) { animation-delay: 0.2s; }
-.khalele-dots span:nth-child(3) { animation-delay: 0.4s; }
+.kheleel-dots span { animation: kheleel-dot 1.4s ease-in-out infinite; }
+.kheleel-dots span:nth-child(2) { animation-delay: 0.2s; }
+.kheleel-dots span:nth-child(3) { animation-delay: 0.4s; }
 
 /* Mic button red pulse when recording */
 .mic-recording-pulse {
@@ -272,6 +272,15 @@ body {
 }
 [data-theme="dark"] .sidebar-scroll:hover {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Admin avatar golden glow pulse */
+@keyframes admin-gold-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(212, 160, 23, 0.5)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 20px rgba(212, 160, 23, 0.3)); }
+}
+.admin-avatar-glow {
+  animation: admin-gold-glow 2.5s ease-in-out infinite;
 }
 
 /* Accent color for checkboxes/radios — uses user palette */

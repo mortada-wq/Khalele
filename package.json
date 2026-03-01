@@ -1,5 +1,5 @@
 {
-  "name": "khalele",
+  "name": "kheleel",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "framer-motion": "^12.34.3",
     "lucide-react": "^0.460.0",
     "next": "14.2.18",
+    "next-auth": "^4.24.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-material-symbols": "^4.4.0",

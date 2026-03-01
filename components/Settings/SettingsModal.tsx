@@ -5,7 +5,7 @@ import { MaterialSymbol } from "react-material-symbols";
 import type { LanguageStyle } from "@/lib/characters";
 import { DEFAULT_ACCENT, getStoredAccent, savePalette, resetPalette } from "@/lib/theme-color";
 
-export interface KhaleleSettings {
+export interface KheleelSettings {
   // عام
   accentColor: string;
   fontSize: "small" | "medium" | "large";
@@ -30,7 +30,7 @@ export interface KhaleleSettings {
   accountEmail: string;
 }
 
-const DEFAULT_SETTINGS: KhaleleSettings = {
+const DEFAULT_SETTINGS: KheleelSettings = {
   accentColor: DEFAULT_ACCENT,
   fontSize: "medium",
   compactMode: false,
@@ -89,9 +89,9 @@ const RECOMMENDED_INTEGRATIONS = [
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
-  initialSettings?: Partial<KhaleleSettings>;
+  initialSettings?: Partial<KheleelSettings>;
   initialSection?: (typeof SECTIONS)[number]["id"];
-  onSave?: (settings: KhaleleSettings) => void;
+  onSave?: (settings: KheleelSettings) => void;
 }
 
 const FEEDBACK_CATEGORIES = [
@@ -103,7 +103,7 @@ const FEEDBACK_CATEGORIES = [
 
 export function SettingsModal({ open, onClose, initialSettings, initialSection, onSave }: SettingsModalProps) {
   const [activeSection, setActiveSection] = useState<(typeof SECTIONS)[number]["id"]>(initialSection ?? "general");
-  const [settings, setSettings] = useState<KhaleleSettings>(() => ({
+  const [settings, setSettings] = useState<KheleelSettings>(() => ({
     ...DEFAULT_SETTINGS,
     ...initialSettings,
   }));
@@ -123,7 +123,7 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
     }
   }, [open]);
 
-  const update = <K extends keyof KhaleleSettings>(key: K, value: KhaleleSettings[K]) => {
+  const update = <K extends keyof KheleelSettings>(key: K, value: KheleelSettings[K]) => {
     setSettings((s) => ({ ...s, [key]: value }));
   };
 
@@ -250,7 +250,7 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                   <label className="block text-sm font-medium mb-2">حجم الخط</label>
                   <select
                     value={settings.fontSize}
-                    onChange={(e) => update("fontSize", e.target.value as KhaleleSettings["fontSize"])}
+                    onChange={(e) => update("fontSize", e.target.value as KheleelSettings["fontSize"])}
                     className="w-full px-4 py-2 rounded-lg border text-sm" style={{ borderColor: "#e0e0e0" }}
                   >
                     <option value="small">صغير</option>
@@ -421,7 +421,7 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                   <label className="block text-sm font-medium mb-2">الأسلوب</label>
                   <select
                     value={settings.tone}
-                    onChange={(e) => update("tone", e.target.value as KhaleleSettings["tone"])}
+                    onChange={(e) => update("tone", e.target.value as KheleelSettings["tone"])}
                     className="w-full px-4 py-2 rounded-lg border text-sm" style={{ borderColor: "#e0e0e0" }}
                   >
                     <option value="formal">رسمي</option>
@@ -433,7 +433,7 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                   <label className="block text-sm font-medium mb-2">الحماس</label>
                   <select
                     value={settings.enthusiasm}
-                    onChange={(e) => update("enthusiasm", e.target.value as KhaleleSettings["enthusiasm"])}
+                    onChange={(e) => update("enthusiasm", e.target.value as KheleelSettings["enthusiasm"])}
                     className="w-full px-4 py-2 rounded-lg border text-sm" style={{ borderColor: "#e0e0e0" }}
                   >
                     <option value="low">منخفض</option>
@@ -511,7 +511,7 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                 <div className="pt-4 border-t" style={{ borderColor: "#e5e5e5" }}>
                   <p className="text-sm font-medium mb-2">أرسل رسالة لإدارة التطبيق لتطوير وتحسين خليلي</p>
                   <p className="text-xs mb-3" style={{ color: "#6b6b6b" }}>
-                    البريد: <a href="mailto:hello@khalele.com" className="hover:underline" style={{ color: "var(--color-accent)" }}>hello@khalele.com</a>
+                    البريد: <a href="mailto:hello@kheleel.com" className="hover:underline" style={{ color: "var(--color-accent)" }}>hello@kheleel.com</a>
                   </p>
                   {feedbackSent ? (
                     <div className="p-4 rounded-xl" style={{ background: "var(--color-accent-tint-08)", border: "1px solid var(--color-accent-tint-25)" }}>

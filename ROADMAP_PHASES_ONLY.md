@@ -1,6 +1,6 @@
-# Master Implementation Roadmap: The 7 Phases of Khalele
+# Master Implementation Roadmap: The 7 Phases of Kheleel
 
-> **Note:** Iraqi-specific features have been moved to a separate app. Khalele is now a pan-Arab Arabic AI.
+> **Note:** Iraqi-specific features have been moved to a separate app. Kheleel is now a pan-Arab Arabic AI.
 
 This section unites the technical, cultural, and administrative building plans into one single continuous flow.
 
@@ -69,4 +69,4 @@ This section unites the technical, cultural, and administrative building plans i
 
 ---
 
-*This roadmap removes conflicting plans and eliminates all timing references. Khalele becomes the digital soul of Iraqi culture—preserving heritage, healing trauma, connecting the diaspora, and ensuring Iraqi identity thrives for generations to come.*
+*This roadmap removes conflicting plans and eliminates all timing references. Kheleel becomes the digital soul of Iraqi culture—preserving heritage, healing trauma, connecting the diaspora, and ensuring Iraqi identity thrives for generations to come.*

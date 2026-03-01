@@ -1,5 +1,5 @@
 /**
- * Khalele Memory System
+ * Kheleel Memory System
  * - Core Memory: User profiles (DynamoDB)
  * - Episodic Memory: Conversation summaries
  * - Semantic Memory: Knowledge nodes (in-memory for now; pgvector in production)

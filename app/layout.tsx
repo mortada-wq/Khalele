@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Aref_Ruqaa, Amiri, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeColorProvider } from "@/components/ThemeColorProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import "react-material-symbols/outlined";
 import "./globals.css";
 
@@ -32,7 +33,7 @@ const notoNastaliq = Noto_Nastaliq_Urdu({
 });
 
 export const metadata: Metadata = {
-  title: "Khalele | خليلي - Arabic AI",
+  title: "Kheleel | خليلي - Arabic AI",
   description:
     "Arabic AI for all Arab countries. Understands every dialect, responds in Fusha or Easy Arabic.",
 };
@@ -54,9 +55,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <ThemeProvider>
-          <ThemeColorProvider>{children}</ThemeColorProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <ThemeColorProvider>{children}</ThemeColorProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

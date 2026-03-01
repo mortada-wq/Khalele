@@ -13,7 +13,7 @@ const config: Config = {
         foreground: "var(--foreground)",
         gold: "var(--color-accent)",
         earth: "var(--color-earth)",
-        "khalele-gold": "var(--color-accent)",
+        "kheleel-gold": "var(--color-accent)",
       },
       fontFamily: {
         title: ["var(--font-title)", "serif"],

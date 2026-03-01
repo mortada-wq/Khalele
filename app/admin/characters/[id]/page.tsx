@@ -17,10 +17,10 @@ export default function CharacterDesignerPage() {
   return (
     <main className="min-h-screen p-8" dir="rtl">
       <header className="flex items-center justify-between mb-12">
-        <Link href="/admin/characters" className="text-khalele-gold font-bold text-2xl">
+        <Link href="/admin/characters" className="text-kheleel-gold font-bold text-2xl">
           خليلي — مصمم الشخصيات
         </Link>
-        <Link href="/admin/characters" className="text-white/80 hover:text-khalele-gold">
+        <Link href="/admin/characters" className="text-white/80 hover:text-kheleel-gold">
           العودة
         </Link>
       </header>
@@ -39,7 +39,7 @@ export default function CharacterDesignerPage() {
                 max="100"
                 value={dialectIntensity}
                 onChange={(e) => setDialectIntensity(Number(e.target.value))}
-                className="w-full accent-khalele-gold"
+                className="w-full accent-kheleel-gold"
               />
               <p className="text-white/40 text-xs mt-1">{dialectIntensity}%</p>
             </div>
@@ -52,7 +52,7 @@ export default function CharacterDesignerPage() {
                 max="100"
                 value={politicalViews}
                 onChange={(e) => setPoliticalViews(Number(e.target.value))}
-                className="w-full accent-khalele-gold"
+                className="w-full accent-kheleel-gold"
               />
             </div>
 
@@ -64,7 +64,7 @@ export default function CharacterDesignerPage() {
                 max="100"
                 value={religiousViews}
                 onChange={(e) => setReligiousViews(Number(e.target.value))}
-                className="w-full accent-khalele-gold"
+                className="w-full accent-kheleel-gold"
               />
             </div>
 
@@ -76,7 +76,7 @@ export default function CharacterDesignerPage() {
                 max="100"
                 value={formality}
                 onChange={(e) => setFormality(Number(e.target.value))}
-                className="w-full accent-khalele-gold"
+                className="w-full accent-kheleel-gold"
               />
             </div>
           </div>

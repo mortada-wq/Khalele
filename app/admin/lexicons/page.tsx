@@ -13,10 +13,10 @@ export default function AdminLexiconsPage() {
   return (
     <main className="min-h-screen p-8" dir="rtl">
       <header className="flex items-center justify-between mb-12">
-        <Link href="/admin" className="text-khalele-gold font-bold text-2xl">
+        <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
           خليلي — معاجم النطق
         </Link>
-        <Link href="/admin" className="text-white/80 hover:text-khalele-gold">
+        <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
           العودة
         </Link>
       </header>
@@ -32,7 +32,7 @@ export default function AdminLexiconsPage() {
         <div className="space-y-4">
           {lexicons.map((l, i) => (
             <div key={i} className="flex gap-4 items-center p-4 rounded-xl bg-white/5">
-              <span className="font-bold text-khalele-gold w-24">{l.grapheme}</span>
+              <span className="font-bold text-kheleel-gold w-24">{l.grapheme}</span>
               <span className="text-white/70 font-mono text-sm">{l.phoneme}</span>
               <span className="text-white/40 text-sm flex items-center gap-1">
                 <MapPin size={14} />
@@ -41,7 +41,7 @@ export default function AdminLexiconsPage() {
             </div>
           ))}
         </div>
-        <button className="mt-4 px-4 py-2 rounded-lg bg-khalele-gold/20 text-khalele-gold hover:bg-khalele-gold/30 transition-colors">
+        <button className="mt-4 px-4 py-2 rounded-lg bg-kheleel-gold/20 text-kheleel-gold hover:bg-kheleel-gold/30 transition-colors">
           إضافة كلمة
         </button>
       </section>

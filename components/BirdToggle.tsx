@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 
-const defaultSize = 44;
+const defaultSize = 57;
 
 function BirdClosed({ id, size = defaultSize }: { id: string; size?: number }) {
   return (

@@ -1,16 +1,11 @@
 "use client";
 
-import { SpeakButton } from "@/components/Voice/SpeakButton";
-
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
-  showSpeak?: boolean;
-  speechSpeed?: number;
-  voiceId?: string;
 }
 
-export function ChatMessage({ role, content, showSpeak = false, speechSpeed = 1, voiceId }: ChatMessageProps) {
+export function ChatMessage({ role, content }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -27,12 +22,9 @@ export function ChatMessage({ role, content, showSpeak = false, speechSpeed = 1,
           padding: "12px 16px",
         }}
       >
-        <div className="flex items-start gap-2">
-          <p className="flex-1 font-ui text-base leading-relaxed whitespace-pre-wrap" style={{ color: "#231f20" }}>
-            {content}
-          </p>
-          {!isUser && showSpeak && <SpeakButton text={content} speechSpeed={speechSpeed} voiceId={voiceId} />}
-        </div>
+        <p className="font-ui text-base leading-relaxed whitespace-pre-wrap" style={{ color: "#231f20" }}>
+          {content}
+        </p>
       </div>
     </div>
   );

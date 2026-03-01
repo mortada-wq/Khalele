@@ -1,8 +1,8 @@
-# Khalele - Arabic AI Platform: Business & Technical Overview
+# Kheleel - Arabic AI Platform: Business & Technical Overview
 
 ## Business Description
 
-**Khalele (خليلي)** is a culturally-intelligent Arabic AI platform that addresses the critical gap in authentic Arabic language AI services. While major AI platforms like ChatGPT and Claude excel in English, they fail to capture the nuances, dialects, and cultural context essential for meaningful Arabic communication.
+**Kheleel (خليلي)** is a culturally-intelligent Arabic AI platform that addresses the critical gap in authentic Arabic language AI services. While major AI platforms like ChatGPT and Claude excel in English, they fail to capture the nuances, dialects, and cultural context essential for meaningful Arabic communication.
 
 ### Problem Statement
 - **400 million Arabic speakers** lack access to AI that understands their dialects and cultural context
@@ -11,7 +11,7 @@
 - Cultural sensitivity and historical context are missing from mainstream AI responses
 
 ### Solution
-Khalele provides an AI companion that:
+Kheleel provides an AI companion that:
 - **Understands authentic Arabic dialects** from different regions
 - **Responds with cultural intelligence** and appropriate social context
 - **Preserves linguistic heritage** through community-driven training

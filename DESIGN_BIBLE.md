@@ -1,4 +1,4 @@
-# Khalele Design Bible
+# Kheleel Design Bible
 
 **Sharp rules. No exceptions.**
 
@@ -60,7 +60,7 @@
 
 ## 4. ChatGPT-Standard Layout (Default When No Design Is Provided)
 
-**When to use:** If there is no specific UI design for a feature, do not invent a new layout. Use the ChatGPT (OpenAI) layout, behavior, and responsiveness, adapted for Arabic (RTL) and the Khalele brand.
+**When to use:** If there is no specific UI design for a feature, do not invent a new layout. Use the ChatGPT (OpenAI) layout, behavior, and responsiveness, adapted for Arabic (RTL) and the Kheleel brand.
 
 **Layout:** Sidebar navigation, centered message thread, bottom-aligned input bar. Use ChatGPT's breakpoints for mobile, tablet, and desktop. RTL mirroring: sidebar on the right; chat flow right-to-left.
 

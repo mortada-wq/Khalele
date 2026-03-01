@@ -1,6 +1,6 @@
-# Step-by-Step Instructions: Updating Your Khalele Google Doc
+# Step-by-Step Instructions: Updating Your Kheleel Google Doc
 
-Follow these steps to consolidate your Khalele roadmap in Google Docs and remove conflicting plans and timing references.
+Follow these steps to consolidate your Kheleel roadmap in Google Docs and remove conflicting plans and timing references.
 
 ---
 
@@ -8,9 +8,9 @@ Follow these steps to consolidate your Khalele roadmap in Google Docs and remove
 
 Before making any changes:
 
-1. Open your Khalele Google Doc
+1. Open your Kheleel Google Doc
 2. Go to **File → Make a copy**
-3. Name the copy: `Khalele Roadmap - Backup [today's date]`
+3. Name the copy: `Kheleel Roadmap - Backup [today's date]`
 4. Save it in the same folder or a backup folder
 5. Continue editing the original (or work on the copy and replace the original when done)
 
@@ -37,7 +37,7 @@ Search for and remove all duplicate or conflicting phase/roadmap content:
    - Scattered "Phase 1-7" or "Phase 1 through 7" content
    - Any implementation steps that conflict with the master 7 Phases
 
-4. **Target for deletion:** Any section that describes phases, steps, or timelines that is NOT the final "Master Implementation Roadmap: The 7 Phases of Khalele"
+4. **Target for deletion:** Any section that describes phases, steps, or timelines that is NOT the final "Master Implementation Roadmap: The 7 Phases of Kheleel"
 
 ---
 
@@ -61,7 +61,7 @@ Search and remove or replace timing references:
 
 **Option A: Full Replacement (Recommended if your doc is messy)**
 
-1. Open `ROADMAP.md` from your Khalele App folder (in Google Drive or locally)
+1. Open `ROADMAP.md` from your Kheleel App folder (in Google Drive or locally)
 2. Select all content in ROADMAP.md (Ctrl/Cmd+A)
 3. Copy (Ctrl/Cmd+C)
 4. In your Google Doc, select all (Ctrl/Cmd+A) and paste (Ctrl/Cmd+V)
@@ -70,7 +70,7 @@ Search and remove or replace timing references:
 **Option B: Partial Replacement (Keep some of your existing content)**
 
 1. Open `ROADMAP_PHASES_ONLY.md` (or the ROADMAP.md file)
-2. Locate **Section IX: Master Implementation Roadmap: The 7 Phases of Khalele**
+2. Locate **Section IX: Master Implementation Roadmap: The 7 Phases of Kheleel**
 3. Copy only that section
 4. In your Google Doc, find where you want the single phases list to live
 5. Delete any other phase/roadmap sections
@@ -108,7 +108,7 @@ Run these checks:
 
 ---
 
-## Quick Reference: Files in Your Khalele App Folder
+## Quick Reference: Files in Your Kheleel App Folder
 
 | File | Use |
 |------|-----|
@@ -121,7 +121,7 @@ Run these checks:
 ## Troubleshooting
 
 **"I have multiple Phase 1 sections"**  
-Keep only the one under "Master Implementation Roadmap: The 7 Phases of Khalele." Delete the others.
+Keep only the one under "Master Implementation Roadmap: The 7 Phases of Kheleel." Delete the others.
 
 **"Some content is missing after I pasted"**  
 The ROADMAP.md file contains the full consolidated content. If something is missing, compare with your backup and copy the missing section from ROADMAP.md.

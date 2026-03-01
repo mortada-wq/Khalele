@@ -17,7 +17,7 @@ export function CharacterSelector({ selected, onSelect }: CharacterSelectorProps
           onClick={() => onSelect(c)}
           className={`px-4 py-2 rounded-xl whitespace-nowrap transition-colors ${
             selected.id === c.id
-              ? "bg-khalele-gold text-black"
+              ? "bg-kheleel-gold text-black"
               : "bg-white/5 text-white/80 hover:bg-white/10 border border-white/10"
           }`}
         >

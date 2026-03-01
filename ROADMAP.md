@@ -1,10 +1,10 @@
-# Project Khalele: Arabic AI Development Roadmap
+# Project Kheleel: Arabic AI Development Roadmap
 
-> **Note:** Iraqi-specific features have been moved to a separate app. Khalele is now a pan-Arab Arabic AI—understands every dialect, responds in Fusha or Easy Arabic.
+> **Note:** Iraqi-specific features have been moved to a separate app. Kheleel is now a pan-Arab Arabic AI—understands every dialect, responds in Fusha or Easy Arabic.
 
 ## I. Introduction & Strategic Vision
 
-Project Khalele is a cultural and technical mission to build the world's most authentic Iraqi Arabic AI. Current AI models fail to capture the soul of regional dialects, often sounding formal or foreign. This project bridges that digital divide by combining AWS Bedrock infrastructure with Iraqi linguistic heritage, native volunteer data, and fictional character personas. The goal is to create a digital guardian of Iraqi identity that doesn't just process language, but understands the history, trauma, and humor of the Iraqi people.
+Project Kheleel is a cultural and technical mission to build the world's most authentic Iraqi Arabic AI. Current AI models fail to capture the soul of regional dialects, often sounding formal or foreign. This project bridges that digital divide by combining AWS Bedrock infrastructure with Iraqi linguistic heritage, native volunteer data, and fictional character personas. The goal is to create a digital guardian of Iraqi identity that doesn't just process language, but understands the history, trauma, and humor of the Iraqi people.
 
 ### 1.1. The 5 Most Significant Points
 
@@ -795,7 +795,7 @@ heritage_digitization = {
 
 ---
 
-## IX. Master Implementation Roadmap: The 7 Phases of Khalele
+## IX. Master Implementation Roadmap: The 7 Phases of Kheleel
 
 This section unites the technical, cultural, and administrative building plans into one single continuous flow.
 
@@ -877,4 +877,4 @@ This section provides a more granular view of the development sequence for techn
 
 ---
 
-*This roadmap integrates knowledge from AWS Bedrock, Amazon Transcribe, Amazon Polly, and Amazon Q Developer. Khalele becomes the digital soul of Iraqi culture—preserving heritage, healing trauma, connecting the diaspora, and ensuring Iraqi identity thrives for generations to come.*
+*This roadmap integrates knowledge from AWS Bedrock, Amazon Transcribe, Amazon Polly, and Amazon Q Developer. Kheleel becomes the digital soul of Iraqi culture—preserving heritage, healing trauma, connecting the diaspora, and ensuring Iraqi identity thrives for generations to come.*

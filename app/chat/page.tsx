@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
 import { ControlsBar } from "@/components/Chat/ControlsBar";
@@ -19,19 +20,36 @@ import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
 import { groupConversationsByDate, getOrCreateUserId, USER_ID_KEY } from "@/lib/chat";
 import type { Message, Conversation, DateGroup } from "@/lib/chat";
 
-function UserAvatarIcon({ expanded }: { expanded: boolean }) {
-  const fillColor = expanded ? "var(--color-accent-avatar-expanded)" : "var(--color-accent-avatar-collapsed)";
-  const strokeEnd = expanded ? "#fff" : "#ebebec";
-  const gradientId = expanded ? "c-avatar-stroke-in" : "c-avatar-stroke-out";
+function UserAvatarIcon({ expanded, role }: { expanded: boolean; role?: "admin" | "user" }) {
+  const isAdmin = role === "admin";
+  const fillColor = isAdmin
+    ? "#D4A017"
+    : expanded
+      ? "var(--color-accent-avatar-expanded)"
+      : "var(--color-accent-avatar-collapsed)";
+  const strokeEnd = isAdmin ? "#FFD700" : expanded ? "#fff" : "#ebebec";
+  const gradientId = isAdmin ? "c-avatar-stroke-admin" : expanded ? "c-avatar-stroke-in" : "c-avatar-stroke-out";
   return (
-    <svg viewBox="0 0 33.5 39.75" width="35" height="42" aria-hidden style={{ opacity: 0.65, textAlign: "center" }}>
+    <svg
+      viewBox="0 0 33.5 39.75"
+      width="35"
+      height="42"
+      aria-hidden
+      className={isAdmin ? "admin-avatar-glow" : ""}
+      style={{ opacity: isAdmin ? 1 : 0.65, textAlign: "center" }}
+    >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="19.87" x2="33.5" y2="19.87" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#5e5e5e" stopOpacity="0" /><stop offset="1" stopColor={strokeEnd} />
+          <stop offset="0" stopColor={isAdmin ? "#B8860B" : "#5e5e5e"} stopOpacity={isAdmin ? 1 : 0} />
+          <stop offset="1" stopColor={strokeEnd} />
         </linearGradient>
       </defs>
       <circle fill={fillColor} cx="16.75" cy="17.55" r="5.83" />
-      <path stroke={`url(#${gradientId})`} strokeMiterlimit="10" strokeWidth=".28"
+      <path
+        stroke={`url(#${gradientId})`}
+        strokeMiterlimit="10"
+        strokeWidth=".28"
+        fill={isAdmin ? "#D4A017" : "none"}
         d="M28.59,9.99c-2.88-3.56-6.76-6.48-10.76-9.49-.64-.48-1.52-.48-2.16,0C7.69,6.52.15,12.2.15,23.26c-.14,4.32,1.46,8.52,4.46,11.64.23.23.45.45.7.66,2.81,2.37,6.31,3.77,9.98,3.97.98.02,1.95.04,2.93.06h0c3.67-.22,7.17-1.61,9.98-3.99,3.38-2.97,5.16-7.24,5.16-12.33,0-5.55-1.88-9.74-4.77-13.3ZM27.41,31.2c-.29.38-.61.74-.95,1.07-1.78-5.35-7.56-8.25-12.91-6.47-2.87.95-5.17,3.13-6.28,5.95-.52-.48-.99-1.01-1.39-1.58-1.89-3.07-2.55-6.74-1.84-10.28,1.18-6.28,5.76-10.43,12.72-15.7,8.13,6.18,13.02,10.81,13.02,19.04.11,2.85-.72,5.65-2.36,7.97Z"
       />
     </svg>
@@ -74,6 +92,8 @@ const SIDEBAR_W_COLLAPSED = 64;
 function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
   const [input, setInput] = useState("");
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -117,6 +137,14 @@ function ChatPageContent() {
       ? (incognitoIdRef.current || (incognitoIdRef.current = `incognito_${crypto.randomUUID()}`))
       : userIdRef.current || getOrCreateUserId(),
   });
+
+  const handleAvatarClick = () => {
+    if (!session) {
+      signIn();
+    } else {
+      setSettingsOpen(true);
+    }
+  };
 
   const SECTIONS = ["فهرس", "أدوات", "خليخانة"] as const;
 
@@ -329,6 +357,39 @@ function ChatPageContent() {
     return sendMessageInternal(content, convId, conv.messages);
   };
 
+  const regenerateMessage = (assistantMessageId: string) => {
+    if (!currentConversationId || isLoading) return;
+    const conv = conversations.find((c) => c.id === currentConversationId);
+    if (!conv) return;
+
+    const msgIndex = conv.messages.findIndex((m) => m.id === assistantMessageId);
+    if (msgIndex < 0) return;
+
+    // Find the user message that preceded this assistant response
+    let userContent = "";
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (conv.messages[i].role === "user") {
+        userContent = conv.messages[i].content;
+        break;
+      }
+    }
+    if (!userContent) return;
+
+    // Remove the old assistant message and regenerate
+    const messagesBeforeAssistant = conv.messages.slice(0, msgIndex);
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === currentConversationId
+          ? { ...c, messages: messagesBeforeAssistant, updatedAt: new Date().toISOString() }
+          : c
+      )
+    );
+
+    // Re-send with conversation history up to (but not including) the user message that triggered it
+    const historyBefore = messagesBeforeAssistant.slice(0, -1);
+    void sendMessageInternal(userContent, currentConversationId, historyBefore);
+  };
+
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -478,11 +539,11 @@ function ChatPageContent() {
         >
           <ThemeToggle />
           <button
-            onClick={() => setSettingsOpen(true)}
+            onClick={handleAvatarClick}
             className="flex items-center justify-center pt-1 rounded-lg hover:bg-black/5 transition-colors p-1"
             aria-label="الحساب والإعدادات"
           >
-            <UserAvatarIcon expanded={sidebarExpanded} />
+            <UserAvatarIcon expanded={sidebarExpanded} role={userRole} />
           </button>
         </div>
       </aside>
@@ -586,13 +647,13 @@ function ChatPageContent() {
               <ThemeToggle />
               <button
                 onClick={() => {
-                  setSettingsOpen(true);
                   setMobileSidebarOpen(false);
+                  handleAvatarClick();
                 }}
                 className="flex items-center justify-center p-2 rounded-lg hover:bg-black/5"
                 aria-label="الإعدادات"
               >
-                <UserAvatarIcon expanded={true} />
+                <UserAvatarIcon expanded={true} role={userRole} />
               </button>
             </div>
           </motion.aside>
@@ -612,6 +673,7 @@ function ChatPageContent() {
           speechSpeed={speechSpeed}
           voiceId={voiceId}
           onSendMessage={sendMessage}
+          onRegenerate={regenerateMessage}
         />
 
         <ControlsBar

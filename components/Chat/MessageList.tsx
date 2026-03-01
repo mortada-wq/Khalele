@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import type { Message } from "@/lib/chat";
 import { ChatMessage } from "./ChatMessage";
-import { FeedbackButtons } from "./FeedbackButtons";
+import { MessageActions } from "./MessageActions";
 
 interface MessageListProps {
   messages: Message[];
@@ -9,6 +9,7 @@ interface MessageListProps {
   speechSpeed: number;
   voiceId: string;
   onSendMessage: (content: string) => void;
+  onRegenerate?: (messageId: string) => void;
 }
 
 const SUGGESTION_CHIPS = [
@@ -24,6 +25,7 @@ export function MessageList({
   speechSpeed,
   voiceId,
   onSendMessage,
+  onRegenerate,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,16 +61,20 @@ export function MessageList({
         )}
 
         {messages.map((msg) => (
-          <div key={msg.id}>
-            <ChatMessage
-              role={msg.role}
-              content={msg.content}
-              showSpeak={msg.role === "assistant"}
-              speechSpeed={speechSpeed}
-              voiceId={voiceId}
-            />
+          <div key={msg.id} className="group/msg">
+            <ChatMessage role={msg.role} content={msg.content} />
             {msg.role === "assistant" && !msg.content.startsWith("عذراً") && (
-              <FeedbackButtons messageId={msg.id} originalResponse={msg.content} />
+              <div className="flex justify-end">
+                <div className="max-w-[85%] md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200">
+                  <MessageActions
+                    messageId={msg.id}
+                    content={msg.content}
+                    speechSpeed={speechSpeed}
+                    voiceId={voiceId}
+                    onRegenerate={onRegenerate ? () => onRegenerate(msg.id) : undefined}
+                  />
+                </div>
+              </div>
             )}
           </div>
         ))}
@@ -85,7 +91,7 @@ export function MessageList({
             >
               <span className="font-ui font-semibold" style={{ color: "var(--color-accent)", fontSize: "0.95rem" }}>
                 خال خليل خلّله مع المخللات
-                <span className="khalele-dots" aria-hidden>
+                <span className="kheleel-dots" aria-hidden>
                   <span>.</span>
                   <span>.</span>
                   <span>.</span>
