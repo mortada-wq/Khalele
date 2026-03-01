@@ -33,9 +33,50 @@ const notoNastaliq = Noto_Nastaliq_Urdu({
 });
 
 export const metadata: Metadata = {
-  title: "Kheleel | خليلي - Arabic AI",
+  metadataBase: new URL("https://kheleel.com"),
+  title: {
+    default: "Kheleel | خليلي — ذكاء اصطناعي عربي",
+    template: "%s | Kheleel خليلي",
+  },
   description:
-    "Arabic AI for all Arab countries. Understands every dialect, responds in Fusha or Easy Arabic.",
+    "ذكاء اصطناعي يتكلم عربي — يفهم كل اللهجات: عراقي، مصري، خليجي، شامي، مغربي. محادثة صوتية، أدوات، وخصوصية كاملة. مجاني.",
+  keywords: [
+    "ذكاء اصطناعي عربي",
+    "Arabic AI",
+    "chatbot عربي",
+    "خليلي",
+    "Kheleel",
+    "لهجات عربية",
+    "محادثة ذكاء اصطناعي",
+    "AI بالعربي",
+  ],
+  authors: [{ name: "Kheleel", url: "https://kheleel.com" }],
+  creator: "Kheleel",
+  openGraph: {
+    type: "website",
+    locale: "ar_SA",
+    url: "https://kheleel.com",
+    siteName: "Kheleel | خليلي",
+    title: "Kheleel | خليلي — ذكاء اصطناعي يتكلم عربي",
+    description:
+      "يفهم كل اللهجات العربية. محادثة نصية وصوتية، أدوات ذكية، وخصوصية كاملة. مجاني.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kheleel — خليلي" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kheleel | خليلي — ذكاء اصطناعي يتكلم عربي",
+    description:
+      "يفهم كل اللهجات العربية. محادثة نصية وصوتية، أدوات ذكية، وخصوصية كاملة.",
+    images: ["/opengraph-image"],
+  },
+  alternates: {
+    canonical: "https://kheleel.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
 };
 
 export default function RootLayout({
