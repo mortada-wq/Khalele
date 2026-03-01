@@ -1,0 +1,141 @@
+"use client";
+
+import { useRef } from "react";
+import { SendIcon, MicIcon, AttachmentIcon, WaveformIcon } from "./Icons";
+import { MicButton } from "@/components/Voice/MicButton";
+
+/**
+ * Home page chat input — EXACT match to design.svg:
+ * - Pill: 57.46px height, 28.73px radius, fill #d9d9d9→#dedede, stroke #f2f2f2→#fff
+ * - Left: waveform | Center: input | Right: send (paper plane)
+ * - Second row: mic + attachment below pill
+ */
+
+interface HomePillInputProps {
+  value: string;
+  onChange: (v: string) => void;
+  onSend: () => void;
+  onMicTranscript?: (text: string) => void;
+  onAttach?: () => void;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+const PILL_HEIGHT = 57.46;
+const PILL_RADIUS = 28.73;
+const PILL_PADDING_X = 22;
+const ICON_SIZE = 22;
+const ROW_ICON_SIZE = 20;
+const ROW_MARGIN_TOP = 12;
+
+export function HomePillInput({
+  value,
+  onChange,
+  onSend,
+  onMicTranscript,
+  onAttach,
+  placeholder = "سلام عليكم..",
+  disabled = false,
+}: HomePillInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
+  };
+
+  const handleAttach = () => {
+    if (onAttach) {
+      onAttach();
+    } else {
+      fileInputRef.current?.click();
+    }
+  };
+
+  return (
+    <div className="w-full max-w-2xl">
+      {/* Main pill bar */}
+      <div
+        className="home-pill-bar relative flex items-center rounded-full transition-all duration-200 focus-within:ring-1 focus-within:ring-[rgba(0,0,0,0.08)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--background)]"
+        style={{
+          height: PILL_HEIGHT,
+          borderRadius: PILL_RADIUS,
+        }}
+      >
+        {/* Left: Send (paper plane) — inside pill */}
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={disabled || !value.trim()}
+          className="shrink-0 flex items-center justify-center text-[#4a4a4a] hover:text-[#231f20] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          style={{ width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+          aria-label="إرسال"
+        >
+          <SendIcon size={ICON_SIZE} />
+        </button>
+
+        {/* Center: Text input — transparent, no border */}
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          disabled={disabled}
+          className="font-ui flex-1 bg-transparent border-0 focus:outline-none text-[#231f20] placeholder:text-[#8c8c8c] min-w-0"
+          style={{
+            paddingLeft: 10,
+            paddingRight: 10,
+            height: PILL_HEIGHT,
+            fontSize: "1rem",
+          }}
+        />
+
+        {/* Right: Waveform (voice indicator) — inside pill, dark gray outline */}
+        <div
+          className="shrink-0 flex items-center justify-center text-[#4a4a4a]"
+          style={{ width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+        >
+          <WaveformIcon size={ICON_SIZE} />
+        </div>
+      </div>
+
+      {/* Second row: Mic + Attachment — below pill, dark gray outline, ~18–24px gap */}
+      <div
+        className="flex items-center gap-6"
+        style={{
+          marginTop: ROW_MARGIN_TOP,
+          marginInlineStart: PILL_PADDING_X,
+        }}
+      >
+        {onMicTranscript ? (
+          <MicButton onTranscript={onMicTranscript} disabled={disabled} variant="minimal" />
+        ) : (
+          <div className="p-2 text-[var(--text-subtle)] opacity-50 cursor-not-allowed" aria-hidden>
+            <MicIcon size={ROW_ICON_SIZE} />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleAttach}
+          disabled={disabled}
+          className="p-2 rounded-lg text-[var(--text-subtle)] hover:text-[var(--foreground)] transition-colors disabled:opacity-50"
+          aria-label="إرفاق ملف"
+        >
+          <AttachmentIcon size={ROW_ICON_SIZE} />
+        </button>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept="*/*"
+      />
+    </div>
+  );
+}
