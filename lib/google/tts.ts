@@ -1,21 +1,34 @@
 import textToSpeech from "@google-cloud/text-to-speech";
 import { VOICE_MAP } from "@/lib/voices";
 
-function createClient() {
+let _client: textToSpeech.TextToSpeechClient | null = null;
+
+function getClient(): textToSpeech.TextToSpeechClient {
+  if (_client) return _client;
+
   const credsJson = process.env.GOOGLE_CLOUD_CREDENTIALS;
   if (credsJson) {
-    const credentials = JSON.parse(credsJson);
-    return new textToSpeech.TextToSpeechClient({ credentials });
+    let credentials: Record<string, unknown>;
+    try {
+      credentials = JSON.parse(credsJson);
+    } catch (e) {
+      throw new Error(
+        `GOOGLE_CLOUD_CREDENTIALS contains invalid JSON: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
+    _client = new textToSpeech.TextToSpeechClient({ credentials });
+  } else {
+    _client = new textToSpeech.TextToSpeechClient();
   }
-  return new textToSpeech.TextToSpeechClient();
-}
 
-const client = createClient();
+  return _client;
+}
 
 export async function synthesizeSpeech(
   text: string,
   options?: { voiceId?: string; speed?: number }
 ): Promise<Buffer> {
+  const client = getClient();
   const voiceId = options?.voiceId || "ar-XA-Wavenet-A";
   const voiceMeta = VOICE_MAP[voiceId];
   const speed = options?.speed ?? 1;
