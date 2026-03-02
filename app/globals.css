@@ -202,6 +202,15 @@ body {
   transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Bird icon colors: black in light mode, white in dark mode */
+.bird-icon path {
+  fill: #000000;
+  transition: fill 0.2s ease;
+}
+[data-theme="dark"] .bird-icon path {
+  fill: #FFFFFF;
+}
+
 /* Default (sidebar collapsed): closed wing visible */
 .toggle-wrapper .icon-open {
   opacity: 0;
