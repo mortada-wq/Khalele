@@ -1,4 +1,4 @@
-import { Navbar, Hero, Features, HowItWorks, Vision, Footer } from "@/components/Landing";
+import { HomeHero } from "@/components/HomeHero";
 
 function JsonLd() {
   const webApp = {
@@ -26,22 +26,13 @@ function JsonLd() {
     url: "https://kheleel.com",
     logo: "https://kheleel.com/logo/logo_black.svg",
     description:
-      "Arabic AI assistant that understands every dialect. Bridging the AI gap for 400 million Arabic speakers.",
+      "ذكاء اصطناعي عربي يفهم كل اللهجات. يسد الفجوة التقنية لأربعمئة مليون ناطق بالعربية.",
     contactPoint: {
       "@type": "ContactPoint",
       email: "hello@kheleel.com",
       contactType: "customer service",
       availableLanguage: ["Arabic", "English"],
     },
-  };
-
-  const breadcrumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://kheleel.com" },
-      { "@type": "ListItem", position: 2, name: "ابدأ المحادثة", item: "https://kheleel.com/chat" },
-    ],
   };
 
   return (
@@ -54,24 +45,15 @@ function JsonLd() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
-      />
     </>
   );
 }
 
 export default function HomePage() {
   return (
-    <div dir="rtl" style={{ background: "#fafafa" }}>
+    <>
       <JsonLd />
-      <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Vision />
-      <Footer />
-    </div>
+      <HomeHero />
+    </>
   );
 }
