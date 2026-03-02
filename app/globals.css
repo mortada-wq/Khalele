@@ -202,24 +202,24 @@ body {
   transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Default (sidebar collapsed): expanded wing visible */
+/* Default (sidebar collapsed): closed wing visible */
 .toggle-wrapper .icon-open {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-}
-.toggle-wrapper .icon-closed {
-  opacity: 0;
-  transform: rotate(-45deg) scale(0.5);
-}
-
-/* Sidebar expanded (.is-open): compact wing visible */
-.toggle-wrapper.is-open .icon-open {
   opacity: 0;
   transform: rotate(45deg) scale(0.5);
 }
-.toggle-wrapper.is-open .icon-closed {
+.toggle-wrapper .icon-closed {
   opacity: 1;
   transform: rotate(0deg) scale(1);
+}
+
+/* Sidebar expanded (.is-open): open wing visible */
+.toggle-wrapper.is-open .icon-open {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+.toggle-wrapper.is-open .icon-closed {
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.5);
 }
 
 /* Typing indicator — ChatGPT bouncing dots (spec: components.md §5) */
@@ -440,4 +440,22 @@ textarea:focus {
 }
 [data-theme="dark"] .conversation-item:hover {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Sidebar section nav — hover gold, active deeper gold */
+.sidebar-nav-item {
+  transition: color 0.15s ease;
+  cursor: pointer;
+}
+.sidebar-nav-item:hover {
+  color: var(--color-accent) !important;
+}
+.sidebar-nav-item:hover .nav-icon {
+  color: var(--color-accent) !important;
+}
+.sidebar-nav-item.is-active {
+  color: var(--color-accent-hover) !important;
+}
+.sidebar-nav-item.is-active .nav-icon {
+  color: var(--color-accent-hover) !important;
 }

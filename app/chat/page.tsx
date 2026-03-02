@@ -227,6 +227,13 @@ function ChatPageContent() {
   };
 
   const SECTIONS = ["بحث", "أدوات", "خليخانة", "دفاتر"] as const;
+  const SECTION_DESCRIPTIONS: Record<string, string> = {
+    "بحث": "ابحث في محادثاتك السابقة",
+    "أدوات": "أدوات ذكية لمساعدتك",
+    "خليخانة": "نظّم مشاريعك وأفكارك",
+    "دفاتر": "دوّن ملاحظاتك هنا",
+  };
+  const [visitedSections, setVisitedSections] = useState<Set<string>>(() => new Set(["بحث"]));
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages ?? [];
@@ -734,7 +741,7 @@ function ChatPageContent() {
         <div className="shrink-0" style={{ height: 72 }}>
           <button
             onClick={() => setSidebarExpanded((p) => !p)}
-            className="absolute flex items-center justify-center"
+            className="absolute flex items-center justify-center outline-none focus:outline-none"
             style={{ top: 0, right: 0, width: SIDEBAR_W_COLLAPSED, height: 72 }}
             aria-label={sidebarExpanded ? "طي القائمة" : "فتح القائمة"}
           >
@@ -764,35 +771,51 @@ function ChatPageContent() {
                 <span>محادثة جديدة</span>
               </button>
 
-              <div className="space-y-1">
-                {SECTIONS.map((section) => (
+              {SECTIONS.map((section) => {
+                const isActive = currentSection === section;
+                const isVisited = visitedSections.has(section);
+                return (
                   <button
                     key={section}
-                    onClick={() => setCurrentSection(section)}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors"
+                    onClick={() => {
+                      setCurrentSection(section);
+                      setVisitedSections((prev) => new Set(prev).add(section));
+                    }}
+                    className={`sidebar-nav-item w-full flex items-start gap-2.5 px-4 py-2.5 font-ui${isActive ? " is-active" : ""}`}
                     style={{
                       fontSize: "0.95rem",
-                      fontWeight: currentSection === section ? 700 : 600,
-                      background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
-                      color: currentSection === section ? "var(--color-accent)" : "var(--text-primary)",
-                      border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
+                      fontWeight: 700,
+                      background: "transparent",
+                      color: isActive ? "var(--color-accent-hover)" : "var(--text-primary)",
+                      border: "none",
                     }}
                   >
-                    <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "var(--text-secondary)"} />
-                    <span>{section}</span>
+                    <span className="nav-icon mt-0.5" style={{ color: isActive ? "var(--color-accent-hover)" : "var(--text-tertiary)" }}>
+                      <SectionIcon section={section} color="currentColor" />
+                    </span>
+                    <span className="text-right">
+                      <span className="block">{section}</span>
+                      {!isVisited && (
+                        <span className="block text-xs font-normal mt-0.5" style={{ color: "var(--text-tertiary)", fontWeight: 400 }}>
+                          {SECTION_DESCRIPTIONS[section]}
+                        </span>
+                      )}
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
 
               <button
                 type="button"
                 onClick={() => router.push("/tahseen-khaleel")}
-                className="w-full flex items-center gap-2.5 px-4 py-3 mt-2 rounded-xl font-ui transition-colors hover:bg-black/5"
-                style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "0.95rem" }}
+                className="sidebar-nav-item w-full flex items-center gap-2.5 px-4 py-2.5 mt-2 font-ui"
+                style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "0.95rem", background: "transparent", border: "none" }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
+                <span className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  </svg>
+                </span>
                 <span>تحسين خليل</span>
               </button>
 
@@ -1021,7 +1044,7 @@ function ChatPageContent() {
       <button
         type="button"
         onClick={() => setMobileSidebarOpen((p) => !p)}
-        className="md:hidden fixed top-4 z-[60] flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation"
+        className="md:hidden fixed top-4 z-[60] flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation outline-none focus:outline-none"
         style={{ right: 12 }}
         aria-label={mobileSidebarOpen ? "إغلاق القائمة" : "فتح القائمة"}
       >
@@ -1070,38 +1093,54 @@ function ChatPageContent() {
                 <span>محادثة جديدة</span>
               </button>
 
-              {SECTIONS.map((section) => (
-                <button
-                  key={section}
-                  onClick={() => {
-                    setCurrentSection(section);
-                    setMobileSidebarOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors"
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: currentSection === section ? 700 : 600,
-                    background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
-                    color: currentSection === section ? "var(--color-accent)" : "var(--text-primary)",
-                    border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
-                  }}
-                >
-                  <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "var(--text-secondary)"} />
-                  <span>{section}</span>
-                </button>
-              ))}
+              {SECTIONS.map((section) => {
+                const isActive = currentSection === section;
+                const isVisited = visitedSections.has(section);
+                return (
+                  <button
+                    key={section}
+                    onClick={() => {
+                      setCurrentSection(section);
+                      setVisitedSections((prev) => new Set(prev).add(section));
+                      setMobileSidebarOpen(false);
+                    }}
+                    className={`sidebar-nav-item w-full flex items-start gap-2.5 px-4 py-2.5 font-ui${isActive ? " is-active" : ""}`}
+                    style={{
+                      fontSize: "0.95rem",
+                      fontWeight: 700,
+                      background: "transparent",
+                      color: isActive ? "var(--color-accent-hover)" : "var(--text-primary)",
+                      border: "none",
+                    }}
+                  >
+                    <span className="nav-icon mt-0.5" style={{ color: isActive ? "var(--color-accent-hover)" : "var(--text-tertiary)" }}>
+                      <SectionIcon section={section} color="currentColor" />
+                    </span>
+                    <span className="text-right">
+                      <span className="block">{section}</span>
+                      {!isVisited && (
+                        <span className="block text-xs font-normal mt-0.5" style={{ color: "var(--text-tertiary)", fontWeight: 400 }}>
+                          {SECTION_DESCRIPTIONS[section]}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
               <button
                 type="button"
                 onClick={() => {
                   setMobileSidebarOpen(false);
                   router.push("/tahseen-khaleel");
                 }}
-                className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors hover:bg-black/5"
-                style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "0.95rem" }}
+                className="sidebar-nav-item w-full flex items-center gap-2.5 px-4 py-2.5 mt-2 font-ui"
+                style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "0.95rem", background: "transparent", border: "none" }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
+                <span className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  </svg>
+                </span>
                 <span>تحسين خليل</span>
               </button>
 
