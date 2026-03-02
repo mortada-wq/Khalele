@@ -32,7 +32,7 @@ async function ensureTable() {
     await client.send(new DescribeTableCommand({ TableName: TABLE }));
     ensured = true;
     return;
-  } catch (err) {
+  } catch {
     // fall through
   }
   await client.send(
