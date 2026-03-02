@@ -1,17 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
 
 export function Hero() {
   const router = useRouter();
   const [input, setInput] = useState("");
+  const [tagline, setTagline] = useState(DEFAULT_TAGLINE);
 
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed) return;
     router.push(`/chat?m=${encodeURIComponent(trimmed)}`);
   };
+
+  useEffect(() => {
+    let canceled = false;
+    let pollId: ReturnType<typeof setInterval> | null = null;
+
+    const loadTagline = async () => {
+      try {
+        const res = await fetch("/api/taglines/active");
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          tagline?: string;
+          rotationEnabled?: boolean;
+          rotationIntervalMinutes?: number;
+        };
+
+        if (!canceled && typeof data.tagline === "string" && data.tagline.trim()) {
+          setTagline(data.tagline.trim());
+        }
+
+        if (!pollId && data.rotationEnabled) {
+          const intervalMins = Math.max(1, Math.min(120, Number(data.rotationIntervalMinutes) || 5));
+          pollId = setInterval(() => {
+            void loadTagline();
+          }, intervalMins * 60 * 1000);
+        }
+      } catch {
+        // Keep default/fallback tagline.
+      }
+    };
+
+    void loadTagline();
+
+    return () => {
+      canceled = true;
+      if (pollId) clearInterval(pollId);
+    };
+  }, []);
 
   return (
     <section className="relative flex flex-col items-center justify-center text-center px-6 pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
@@ -46,7 +86,9 @@ export function Hero() {
         className="font-ui text-base md:text-lg max-w-xl mb-10"
         style={{ color: "#6b6b6b", lineHeight: 1.8 }}
       >
-        يفهم كل اللهجات العربية. تكلم بطريقتك — عراقي، مصري، خليجي، شامي، مغربي — وخليلي يفهمك ويرد بالعربي السهل.
+        {tagline}
+        <br />
+        تكلم بطريقتك — عراقي، مصري، خليجي، شامي، مغربي — وخليلي يفهمك.
       </p>
 
       {/* Dialect trust chips */}

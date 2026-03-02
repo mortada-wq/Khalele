@@ -5,6 +5,8 @@ import {
   type ConversationRecord,
 } from "@/lib/aws/dynamodb";
 
+export const dynamic = "force-dynamic";
+
 const USER_ID_HEADER = "x-user-id";
 const DEFAULT_USER_ID = "anon_anonymous";
 
@@ -36,7 +38,7 @@ export async function POST(req: NextRequest) {
   try {
     const userId = getUserId(req);
     const body = await req.json();
-    const { conversationId, title = "محادثة جديدة", messages = [] } = body;
+    const { conversationId, title = "محادثة جديدة", messages = [], characterId, factCheckMode } = body;
 
     const id = conversationId || crypto.randomUUID();
     const now = new Date().toISOString();
@@ -46,6 +48,10 @@ export async function POST(req: NextRequest) {
       userId,
       title,
       messages: Array.isArray(messages) ? messages : [],
+      ...(typeof characterId === "string" && characterId.length > 0 ? { characterId } : {}),
+      ...(factCheckMode === "off" || factCheckMode === "notify" || factCheckMode === "notify_with_reason"
+        ? { factCheckMode }
+        : {}),
       updatedAt: now,
       createdAt: now,
     };

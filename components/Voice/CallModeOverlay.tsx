@@ -29,6 +29,7 @@ export function CallModeOverlay({
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accumulatedRef = useRef<string>("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
   const onSendRef = useRef(onSendAndGetResponse);
   onSendRef.current = onSendAndGetResponse;
 
@@ -40,17 +41,19 @@ export function CallModeOverlay({
         const res = await fetch("/api/voice/synthesize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, speechSpeed, voiceId }),
+          body: JSON.stringify({ text, speed: speechSpeed, voiceId }),
         });
         if (!res.ok) throw new Error("TTS failed");
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
+        audioUrlRef.current = url;
         const audio = new Audio(url);
         audioRef.current = audio;
         await new Promise<void>((resolve, reject) => {
           audio.onended = () => {
             URL.revokeObjectURL(url);
             audioRef.current = null;
+            audioUrlRef.current = null;
             resolve();
           };
           audio.onerror = reject;
@@ -82,6 +85,10 @@ export function CallModeOverlay({
     recognitionRef.current = null;
     audioRef.current?.pause();
     audioRef.current = null;
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
   }, []);
 
   const processAndRespond = useCallback(

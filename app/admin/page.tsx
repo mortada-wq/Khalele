@@ -43,9 +43,7 @@ export default function AdminPage() {
 
     (async () => {
       try {
-        const res = await fetch("/api/admin/training-sessions", {
-          headers: { "x-admin-secret": "admin" },
-        });
+        const res = await fetch("/api/admin/training-sessions");
         if (res.ok) {
           const data = await res.json();
           const sessions = data.sessions || [];
@@ -128,6 +126,20 @@ export default function AdminPage() {
                   style={{ background: "var(--color-accent)", color: "#fff" }}
                 >
                   فتح المحادثة
+                </button>
+                <button
+                  onClick={() => router.push("/admin/fact-check")}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                  style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)" }}
+                >
+                  فحص الحقائق
+                </button>
+                <button
+                  onClick={() => router.push("/admin/tahseen-khaleel")}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                  style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)" }}
+                >
+                  تحرير تحسين خليل
                 </button>
                 <button
                   onClick={() => {

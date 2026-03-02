@@ -1,12 +1,18 @@
 import {
   DynamoDBClient,
-  CreateTableCommand,
-  DescribeTableCommand,
 } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
+  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    ? {
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        },
+      }
+    : {}),
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
@@ -15,15 +21,43 @@ const TABLE_USERS = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
 const TABLE_CORRECTIONS = process.env.DYNAMODB_CORRECTIONS_TABLE || "khalele-corrections";
 const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "khalele-conversations";
 const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-sessions";
+const inMemoryProfiles = new Map<string, UserProfile>();
 
 export interface UserProfile {
   userId: string;
   preferences: {
     dialectRegion?: "baghdad" | "basra" | "mosul";
     languageStyle?: "formal_msa" | "easy_arabic";
+    nickname?: string;
+  };
+  nicknameSuggestion?: {
+    value: string;
+    generatedAt: string;
+    status: "pending" | "accepted" | "rejected";
+  };
+  nicknameFeedback?: {
+    nickname: string;
+    reason: string;
+    action: "rejected_suggestion" | "deleted_active";
+    createdAt: string;
+  }[];
+  behaviorSnapshot?: {
+    totalMessages: number;
+    avgCharsPerMessage: number;
+    questionRatio: number;
+    lateNightRatio: number;
   };
   createdAt: string;
   updatedAt: string;
+}
+
+function isMissingTableError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    msg.includes("ResourceNotFoundException") ||
+    msg.includes("Cannot do operations on a non-existent table") ||
+    msg.includes("Requested resource not found")
+  );
 }
 
 export interface Correction {
@@ -31,7 +65,7 @@ export interface Correction {
   userId: string;
   originalResponse: string;
   correctedResponse: string;
-  correctionType: "dialect_authenticity" | "grammar" | "cultural_context" | "factual";
+  correctionType: "dialect_authenticity" | "grammar" | "cultural_context" | "factual" | "positive" | "negative" | string;
   region?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
@@ -49,6 +83,8 @@ export interface ConversationRecord {
   userId: string;
   title: string;
   messages: { id: string; role: "user" | "assistant"; content: string }[];
+  characterId?: string;
+  factCheckMode?: "off" | "notify" | "notify_with_reason";
   updatedAt: string;
   createdAt: string;
 }
@@ -76,36 +112,68 @@ export async function listConversationsByUser(
   userId: string,
   limit = 50
 ): Promise<ConversationRecord[]> {
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: TABLE_CONVERSATIONS,
-      IndexName: "userId-updatedAt-index",
-      KeyConditionExpression: "userId = :uid",
-      ExpressionAttributeValues: { ":uid": userId },
-      Limit: limit,
-      ScanIndexForward: false,
-    })
-  );
-  return (result.Items as ConversationRecord[]) ?? [];
+  try {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_CONVERSATIONS,
+        IndexName: "userId-updatedAt-index",
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: { ":uid": userId },
+        Limit: limit,
+        ScanIndexForward: false,
+      })
+    );
+    return (result.Items as ConversationRecord[]) ?? [];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("specified index") || msg.includes("ValidationException")) {
+      // GSI not created — fall back to Scan with filter
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: TABLE_CONVERSATIONS,
+          FilterExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          Limit: limit,
+        })
+      );
+      const items = (result.Items as ConversationRecord[]) ?? [];
+      return items.sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1)).slice(0, limit);
+    }
+    throw err;
+  }
 }
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  const result = await docClient.send(
-    new GetCommand({
-      TableName: TABLE_USERS,
-      Key: { userId },
-    })
-  );
-  return (result.Item as UserProfile) ?? null;
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_USERS,
+        Key: { userId },
+      })
+    );
+    return (result.Item as UserProfile) ?? inMemoryProfiles.get(userId) ?? null;
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return inMemoryProfiles.get(userId) ?? null;
+    }
+    throw error;
+  }
 }
 
 export async function putUserProfile(profile: UserProfile): Promise<void> {
-  await docClient.send(
-    new PutCommand({
-      TableName: TABLE_USERS,
-      Item: profile,
-    })
-  );
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_USERS,
+        Item: profile,
+      })
+    );
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+  }
+  inMemoryProfiles.set(profile.userId, profile);
 }
 
 const inMemoryCorrections: Correction[] = [];
@@ -128,26 +196,34 @@ export function getInMemoryCorrections(): Correction[] {
 }
 
 export async function getCorrectionsByUser(userId: string, limit = 50): Promise<Correction[]> {
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: TABLE_CORRECTIONS,
-      IndexName: "userId-createdAt-index",
-      KeyConditionExpression: "userId = :uid",
-      ExpressionAttributeValues: { ":uid": userId },
-      Limit: limit,
-      ScanIndexForward: false,
-    })
-  );
-  return (result.Items as Correction[]) ?? [];
-}
-
-export async function saveConversationSummary(summary: ConversationSummary): Promise<void> {
-  await docClient.send(
-    new PutCommand({
-      TableName: TABLE_CONVERSATIONS,
-      Item: summary,
-    })
-  );
+  try {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_CORRECTIONS,
+        IndexName: "userId-createdAt-index",
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: { ":uid": userId },
+        Limit: limit,
+        ScanIndexForward: false,
+      })
+    );
+    return (result.Items as Correction[]) ?? [];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("specified index") || msg.includes("ValidationException")) {
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: TABLE_CORRECTIONS,
+          FilterExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          Limit: limit,
+        })
+      );
+      const items = (result.Items as Correction[]) ?? [];
+      return items.sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)).slice(0, limit);
+    }
+    throw err;
+  }
 }
 
 export interface TrainingSession {
@@ -213,5 +289,3 @@ export async function updateTrainingSessionStatus(
   await saveTrainingSession(updated);
   return updated;
 }
-
-export { TABLE_USERS, TABLE_CORRECTIONS, TABLE_CONVERSATIONS, TABLE_TRAINING };

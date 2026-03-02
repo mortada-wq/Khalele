@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const ADMIN_EMAIL = "mortadagzar@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "mortadagzar@gmail.com";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -23,7 +23,3 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
-
-export function isAdmin(email: string | null | undefined): boolean {
-  return email === ADMIN_EMAIL;
-}

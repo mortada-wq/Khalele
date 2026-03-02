@@ -15,11 +15,13 @@ export function CharacterSelector({ selected, onSelect }: CharacterSelectorProps
         <button
           key={c.id}
           onClick={() => onSelect(c)}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap transition-colors ${
-            selected.id === c.id
-              ? "bg-kheleel-gold text-black"
-              : "bg-white/5 text-white/80 hover:bg-white/10 border border-white/10"
-          }`}
+          className="px-4 py-2 rounded-xl whitespace-nowrap transition-colors border font-ui text-sm"
+          aria-label={c.nameAr}
+          style={{
+            background: selected.id === c.id ? "var(--color-accent-tint-12)" : "#ffffff",
+            color: selected.id === c.id ? "var(--color-accent)" : "#5a5a5a",
+            borderColor: selected.id === c.id ? "var(--color-accent-tint-25)" : "#e5e5e5",
+          }}
         >
           <span className="font-medium">{c.nameAr}</span>
         </button>

@@ -69,6 +69,7 @@ export function MicButton({ onTranscript, disabled = false, variant = "default" 
       onClick={toggle}
       disabled={disabled || !!error}
       title={error || (isListening ? "إيقاف" : "تحدث")}
+      aria-label={error || (isListening ? "إيقاف" : "تحدث")}
       className={`${variant === "minimal" ? minimalClass : defaultClass} disabled:opacity-50`}
     >
       {isListening ? <MicOff size={variant === "minimal" ? 20 : 24} /> : <Mic size={variant === "minimal" ? 20 : 24} />}

@@ -29,7 +29,7 @@ export default function TrainingPage() {
   const [dialect, setDialect] = useState("");
   const [region, setRegion] = useState("");
   const [gender, setGender] = useState("");
-  const [prompts, setPrompts] = useState<string[]>(DEFAULT_PROMPTS);
+  const prompts = DEFAULT_PROMPTS;
   const [recordings, setRecordings] = useState<Record<number, Blob>>({});
   const [transcripts, setTranscripts] = useState<Record<number, string>>({});
   const [recordingIndex, setRecordingIndex] = useState<number | null>(null);

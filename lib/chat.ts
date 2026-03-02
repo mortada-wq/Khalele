@@ -8,6 +8,8 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
+  characterId?: string;
+  factCheckMode?: "off" | "notify" | "notify_with_reason";
   updatedAt: string;
 }
 

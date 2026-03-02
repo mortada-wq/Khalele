@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateTrainingSessionStatus } from "@/lib/aws/dynamodb";
-
-function requireAdmin(req: NextRequest): boolean {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return true;
-  const header = req.headers.get("x-admin-secret") || req.headers.get("authorization")?.replace("Bearer ", "");
-  return header === secret;
-}
+import { requireAdminResponse } from "@/lib/admin-auth";
 
 export async function POST(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!requireAdmin(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = await requireAdminResponse();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const session = await updateTrainingSessionStatus(id, "rejected");

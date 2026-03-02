@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getObjectAsBuffer } from "@/lib/aws/s3";
+import { requireAdminResponse } from "@/lib/admin-auth";
 
-function requireAdmin(req: NextRequest): boolean {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return true;
-  const header = req.headers.get("x-admin-secret") || req.headers.get("authorization")?.replace("Bearer ", "");
-  return header === secret;
-}
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  if (!requireAdmin(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = await requireAdminResponse();
+  if (authError) return authError;
+
   try {
     const { searchParams } = new URL(req.url);
     const uri = searchParams.get("uri");
@@ -21,8 +17,9 @@ export async function GET(req: NextRequest) {
     const match = uri.replace("s3://", "").split("/");
     const bucket = match[0];
     const key = match.slice(1).join("/");
-    if (!bucket || !key) {
-      return NextResponse.json({ error: "Invalid S3 URI" }, { status: 400 });
+    const allowedBucket = process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+    if (!bucket || !key || bucket !== allowedBucket || !key.startsWith("training-sessions/")) {
+      return NextResponse.json({ error: "Invalid or disallowed S3 URI" }, { status: 400 });
     }
     const { body, contentType } = await getObjectAsBuffer(bucket, key);
     return new NextResponse(new Uint8Array(body), {

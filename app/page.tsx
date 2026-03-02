@@ -64,15 +64,13 @@ function JsonLd() {
 
 export default function HomePage() {
   return (
-    <div style={{ background: "#ebebec" }} dir="rtl">
+    <div dir="rtl" style={{ background: "#fafafa" }}>
       <JsonLd />
       <Navbar />
-      <main>
-        <Hero />
-        <Features />
-        <HowItWorks />
-        <Vision />
-      </main>
+      <Hero />
+      <Features />
+      <HowItWorks />
+      <Vision />
       <Footer />
     </div>
   );

@@ -7,6 +7,7 @@ import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
 import { ControlsBar } from "@/components/Chat/ControlsBar";
+import { CharacterSelector } from "@/components/Chat/CharacterSelector";
 import { ConversationList } from "@/components/Chat/ConversationList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BirdToggle } from "@/components/BirdToggle";
@@ -17,8 +18,9 @@ import type { Character, LanguageStyle } from "@/lib/characters";
 import { detectIntegrationIntent, INTEGRATION_PROMPTS, type IntegrationSuggestion } from "@/lib/connectors";
 import { ToolsModal } from "@/components/Tools";
 import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
-import { groupConversationsByDate, getOrCreateUserId, USER_ID_KEY } from "@/lib/chat";
-import type { Message, Conversation, DateGroup } from "@/lib/chat";
+import { groupConversationsByDate, getOrCreateUserId } from "@/lib/chat";
+import type { Message, Conversation } from "@/lib/chat";
+import type { FactCheckMode } from "@/lib/factcheck-config";
 
 function UserAvatarIcon({ expanded, role }: { expanded: boolean; role?: "admin" | "user" }) {
   const isAdmin = role === "admin";
@@ -88,6 +90,65 @@ function SectionIcon({ section, color }: { section: string; color: string }) {
 
 const SIDEBAR_W_EXPANDED = 240;
 const SIDEBAR_W_COLLAPSED = 64;
+const MAX_REASON_LENGTH = 180;
+
+interface ProfileNicknameSuggestion {
+  value: string;
+  generatedAt: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+interface ChatUserProfile {
+  userId: string;
+  preferences: {
+    nickname?: string;
+    languageStyle?: LanguageStyle;
+    dialectRegion?: "baghdad" | "basra" | "mosul";
+  };
+  factCheckMode?: FactCheckMode;
+  nicknameSuggestion?: ProfileNicknameSuggestion;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface NicknameStatus {
+  delayHours: number;
+  ready: boolean;
+  hoursRemaining: number;
+}
+
+interface ProfileApiResponse {
+  profile: ChatUserProfile;
+  nicknameStatus: NicknameStatus;
+}
+
+function buildBehaviorSnapshot(conversations: Conversation[]) {
+  let totalMessages = 0;
+  let chars = 0;
+  let questions = 0;
+  let lateNightMessages = 0;
+
+  for (const conv of conversations) {
+    const hour = new Date(conv.updatedAt).getHours();
+    const isLateNight = hour >= 23 || hour < 6;
+    for (const msg of conv.messages) {
+      if (msg.role !== "user") continue;
+      const content = msg.content.trim();
+      if (!content) continue;
+      totalMessages += 1;
+      chars += content.length;
+      if (content.includes("?") || content.includes("؟")) questions += 1;
+      if (isLateNight) lateNightMessages += 1;
+    }
+  }
+
+  return {
+    totalMessages,
+    avgCharsPerMessage: totalMessages > 0 ? Math.round(chars / totalMessages) : 0,
+    questionRatio: totalMessages > 0 ? questions / totalMessages : 0,
+    lateNightRatio: totalMessages > 0 ? lateNightMessages / totalMessages : 0,
+  };
+}
 
 function ChatPageContent() {
   const router = useRouter();
@@ -99,7 +160,13 @@ function ChatPageContent() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const id = crypto.randomUUID();
-    return [{ id, title: "محادثة جديدة", messages: [], updatedAt: new Date().toISOString() }];
+    return [{
+      id,
+      title: "محادثة جديدة",
+      messages: [],
+      characterId: DEFAULT_CHARACTERS[0].id,
+      updatedAt: new Date().toISOString(),
+    }];
   });
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,9 +194,35 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [userToolIds, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
+  const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
+  const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
+  const [nicknameTone, setNicknameTone] = useState("");
+  const [nicknameActionMessage, setNicknameActionMessage] = useState<string | null>(null);
+  const [nicknameActionBusy, setNicknameActionBusy] = useState(false);
+  const [showRejectReasonInput, setShowRejectReasonInput] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [showDeleteReasonInput, setShowDeleteReasonInput] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [factCheckMode, setFactCheckMode] = useState<FactCheckMode>("off");
+  const [factCheckBanner, setFactCheckBanner] = useState<{ verdict: string; reasons: string[] } | null>(null);
+  const updateFactCheckMode = async (mode: FactCheckMode) => {
+    setFactCheckMode(mode);
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === currentConversationId ? { ...c, factCheckMode: mode } : c
+      )
+    );
+    if (currentConversationId) {
+      const conv = conversations.find((c) => c.id === currentConversationId);
+      if (conv) {
+        void persistConversation({ ...conv, factCheckMode: mode });
+      }
+    }
+  };
   const userIdRef = useRef<string>("");
   const incognitoIdRef = useRef<string>("");
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
+  const nicknameSuggestRequestedRef = useRef(false);
 
   const apiHeaders = () => ({
     "Content-Type": "application/json",
@@ -150,11 +243,172 @@ function ChatPageContent() {
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages ?? [];
+  const activeNickname = profileData?.preferences?.nickname?.trim() ?? "";
+  const pendingNickname =
+    profileData?.nicknameSuggestion?.status === "pending" ? profileData.nicknameSuggestion.value : "";
+  const userDisplayName = session?.user?.name?.trim() || "ضيف خليل";
+
+  const loadProfile = async () => {
+    if (incognitoMode) return;
+    try {
+      const res = await fetch("/api/profile", { headers: apiHeaders() });
+      if (!res.ok) return;
+      const data = (await res.json()) as ProfileApiResponse;
+      setProfileData(data.profile);
+      setNicknameStatus(data.nicknameStatus);
+      setNicknameActionMessage(null);
+      setFactCheckMode((profileData?.factCheckMode as FactCheckMode) || factCheckMode);
+    } catch {
+      // Ignore profile load errors and continue chat normally.
+    }
+  };
+
+  const requestNicknameSuggestion = async () => {
+    if (incognitoMode || profileData?.preferences.nickname) return;
+    try {
+      const res = await fetch("/api/profile/nickname", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          action: "suggest",
+          behaviorSnapshot: buildBehaviorSnapshot(conversations),
+        }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        profile: ChatUserProfile;
+        suggestion: ProfileNicknameSuggestion | null;
+        tone?: string;
+        status?: { ready?: boolean; hoursRemaining?: number };
+      };
+      setProfileData(data.profile);
+      if (data.tone) setNicknameTone(data.tone);
+      const hoursRemaining = data.status?.hoursRemaining;
+      if (typeof hoursRemaining === "number") {
+        setNicknameStatus((prev) => ({
+          delayHours: prev?.delayHours ?? 3,
+          ready: data.status?.ready ?? false,
+          hoursRemaining,
+        }));
+      }
+    } catch {
+      // Keep experience uninterrupted.
+    }
+  };
+
+  const acceptSuggestedNickname = async () => {
+    if (!pendingNickname || incognitoMode || nicknameActionBusy) return;
+    setNicknameActionBusy(true);
+    try {
+      const res = await fetch("/api/profile/nickname", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({ action: "accept", nickname: pendingNickname }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { profile: ChatUserProfile };
+      setProfileData(data.profile);
+      setShowRejectReasonInput(false);
+      setRejectReason("");
+      setNicknameActionMessage("تم اعتماد اللقب بنجاح.");
+    } catch {
+      setNicknameActionMessage("تعذر حفظ اللقب حالياً.");
+    } finally {
+      setNicknameActionBusy(false);
+    }
+  };
+
+  const rejectSuggestedNickname = async () => {
+    if (!pendingNickname || incognitoMode || nicknameActionBusy) return;
+    const reason = rejectReason.trim().slice(0, MAX_REASON_LENGTH);
+    if (!reason) {
+      setNicknameActionMessage("اكتب سببًا قصيرًا لرفض اللقب.");
+      return;
+    }
+    setNicknameActionBusy(true);
+    try {
+      const res = await fetch("/api/profile/nickname", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({ action: "reject", nickname: pendingNickname, reason }),
+      });
+      const data = (await res.json()) as { profile: ChatUserProfile; message?: string };
+      if (!res.ok) {
+        setNicknameActionMessage("تعذر إرسال السبب.");
+        return;
+      }
+      setProfileData(data.profile);
+      setShowRejectReasonInput(false);
+      setRejectReason("");
+      setNicknameActionMessage(data.message || "تم إرسال السبب لخليل.");
+      nicknameSuggestRequestedRef.current = false;
+    } catch {
+      setNicknameActionMessage("تعذر إرسال السبب.");
+    } finally {
+      setNicknameActionBusy(false);
+    }
+  };
+
+  const deleteActiveNickname = async () => {
+    if (!activeNickname || incognitoMode || nicknameActionBusy) return;
+    const reason = deleteReason.trim().slice(0, MAX_REASON_LENGTH);
+    if (!reason) {
+      setNicknameActionMessage("اكتب سببًا قصيرًا قبل حذف اللقب.");
+      return;
+    }
+    setNicknameActionBusy(true);
+    try {
+      const res = await fetch("/api/profile/nickname", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({ action: "delete", reason }),
+      });
+      const data = (await res.json()) as { profile: ChatUserProfile; message?: string };
+      if (!res.ok) {
+        setNicknameActionMessage("تعذر حذف اللقب.");
+        return;
+      }
+      setProfileData(data.profile);
+      setShowDeleteReasonInput(false);
+      setDeleteReason("");
+      setNicknameActionMessage(data.message || "تم حذف اللقب.");
+      nicknameSuggestRequestedRef.current = false;
+    } catch {
+      setNicknameActionMessage("تعذر حذف اللقب.");
+    } finally {
+      setNicknameActionBusy(false);
+    }
+  };
+
+  const handleCharacterSelect = (nextCharacter: Character) => {
+    setCharacter(nextCharacter);
+    if (!currentConversationId) return;
+
+    setConversations((prev) => {
+      const updated = prev.map((c) =>
+        c.id === currentConversationId
+          ? { ...c, characterId: nextCharacter.id, updatedAt: new Date().toISOString() }
+          : c
+      );
+      const conv = updated.find((c) => c.id === currentConversationId);
+      if (conv) void persistConversation(conv);
+      return updated;
+    });
+  };
 
   useEffect(() => {
     if (!currentConversationId && conversations.length > 0) {
       setCurrentConversationId(conversations[0].id);
     }
+  }, [conversations, currentConversationId]);
+
+  useEffect(() => {
+    if (!currentConversationId) return;
+    const conv = conversations.find((c) => c.id === currentConversationId);
+    if (!conv) return;
+
+    const nextCharacter = DEFAULT_CHARACTERS.find((c) => c.id === conv.characterId) ?? DEFAULT_CHARACTERS[0];
+    setCharacter((prev) => (prev.id === nextCharacter.id ? prev : nextCharacter));
   }, [conversations, currentConversationId]);
 
   useEffect(() => {
@@ -204,14 +458,25 @@ function ChatPageContent() {
         if (res.ok) {
           const { conversations: list } = await res.json();
           if (Array.isArray(list) && list.length > 0) {
-            const mapped: Conversation[] = list.map((c: { conversationId: string; title: string; messages: { id: string; role: string; content: string }[]; updatedAt: string }) => ({
-              id: c.conversationId,
-              title: c.title,
-              messages: (c.messages || []).map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content })),
-              updatedAt: c.updatedAt,
-            }));
+            const mapped: Conversation[] = list.map(
+              (c: {
+                conversationId: string;
+                title: string;
+                messages: { id: string; role: string; content: string }[];
+                characterId?: string;
+                updatedAt: string;
+              }) => ({
+                id: c.conversationId,
+                title: c.title,
+                messages: (c.messages || []).map((m) => ({ id: m.id, role: m.role as "user" | "assistant", content: m.content })),
+                characterId: typeof c.characterId === "string" ? c.characterId : DEFAULT_CHARACTERS[0].id,
+                updatedAt: c.updatedAt,
+              })
+            );
             setConversations(mapped);
             setCurrentConversationId(mapped[0].id);
+            const initialCharacter = DEFAULT_CHARACTERS.find((ch) => ch.id === mapped[0].characterId) ?? DEFAULT_CHARACTERS[0];
+            setCharacter(initialCharacter);
           }
         }
       } catch {
@@ -222,6 +487,33 @@ function ChatPageContent() {
     })();
     return () => { cancelled = true; };
   }, [incognitoMode]);
+
+  useEffect(() => {
+    if (incognitoMode) {
+      setProfileData(null);
+      setNicknameStatus(null);
+      setNicknameActionMessage(null);
+      setShowDeleteReasonInput(false);
+      setShowRejectReasonInput(false);
+      setFactCheckMode("off");
+      return;
+    }
+    if (!conversationsLoaded) return;
+    nicknameSuggestRequestedRef.current = false;
+    void loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incognitoMode, conversationsLoaded]);
+
+  useEffect(() => {
+    if (incognitoMode || !profileData) return;
+    if (profileData.preferences.nickname) return;
+    if (profileData.nicknameSuggestion?.status === "pending") return;
+    if (nicknameStatus && !nicknameStatus.ready) return;
+    if (nicknameSuggestRequestedRef.current) return;
+    nicknameSuggestRequestedRef.current = true;
+    void requestNicknameSuggestion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incognitoMode, profileData, nicknameStatus, conversations]);
 
   // Auto-send initial message from home page (URL ?m= or sessionStorage)
   const initialSentRef = useRef(false);
@@ -264,6 +556,8 @@ function ChatPageContent() {
         body: JSON.stringify({
           title: conv.title,
           messages: conv.messages,
+          characterId: conv.characterId,
+          factCheckMode: conv.factCheckMode || factCheckMode,
         }),
       });
     } catch {
@@ -276,6 +570,26 @@ function ChatPageContent() {
     convId: string,
     existingMessages: Message[] = []
   ): Promise<string | null> => {
+    if (!incognitoMode && (factCheckMode === "notify" || factCheckMode === "notify_with_reason")) {
+      try {
+        const res = await fetch("/api/fact-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: content }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.result?.verdict === "likely_false") {
+            setFactCheckBanner({
+              verdict: data.result.verdict,
+              reasons: factCheckMode === "notify_with_reason" ? data.result.reasons ?? [] : [],
+            });
+          }
+        }
+      } catch {
+        // swallow
+      }
+    }
     setIsLoading(true);
     const allMessages = [...existingMessages, { role: "user" as const, content }];
     try {
@@ -285,6 +599,7 @@ function ChatPageContent() {
         body: JSON.stringify({
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           languageStyle: character.languageStyle || languageStyle,
+          characterId: character.id,
           useSearch,
           empathyMode,
           ramadanMode,
@@ -331,6 +646,8 @@ function ChatPageContent() {
           id: convId,
           title: content.slice(0, 30) + (content.length > 30 ? "…" : ""),
           messages: [],
+          characterId: character.id,
+          factCheckMode,
           updatedAt: new Date().toISOString(),
         },
       ]);
@@ -353,9 +670,9 @@ function ChatPageContent() {
       if (conv) void persistConversation(conv);
       return updated;
     });
-    const conv = conversations.find((c) => c.id === convId) || { messages: [] };
-    return sendMessageInternal(content, convId, conv.messages);
-  };
+      const conv = conversations.find((c) => c.id === convId) || { messages: [], factCheckMode };
+      return sendMessageInternal(content, convId, conv.messages);
+    };
 
   const regenerateMessage = (assistantMessageId: string) => {
     if (!currentConversationId || isLoading) return;
@@ -410,6 +727,8 @@ function ChatPageContent() {
       id,
       title: "محادثة جديدة",
       messages: [],
+      characterId: character.id,
+      factCheckMode,
       updatedAt: new Date().toISOString(),
     };
     setConversations((prev) => [newConv, ...prev]);
@@ -418,19 +737,20 @@ function ChatPageContent() {
       await fetch("/api/conversations", {
         method: "POST",
         headers: apiHeaders(),
-        body: JSON.stringify({ conversationId: id, title: newConv.title, messages: [] }),
-      });
+          body: JSON.stringify({
+            conversationId: id,
+            title: newConv.title,
+            messages: [],
+            characterId: newConv.characterId,
+            factCheckMode,
+          }),
+        });
     } catch {
       // Fallback: in-memory only
     }
   };
 
   const grouped = groupConversationsByDate(conversations);
-  const hasAnyConversations =
-    grouped.today.length > 0 ||
-    grouped.yesterday.length > 0 ||
-    grouped.last7.length > 0 ||
-    grouped.older.length > 0;
 
   return (
     <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "#ebebec" }}>
@@ -478,6 +798,82 @@ function ChatPageContent() {
                 ))}
               </div>
 
+              <button
+                type="button"
+                onClick={() => router.push("/tahseen-khaleel")}
+                className="w-full flex items-center gap-2 px-4 py-3 mt-2 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
+                style={{ color: "#000000" }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>📘</span>
+                <span>تحسين خليل</span>
+              </button>
+
+              {!incognitoMode && !activeNickname && (
+                <div
+                  className="mt-3 p-3 rounded-xl font-ui"
+                  style={{ background: "var(--color-accent-tint-08)", border: "1px solid var(--color-accent-tint-25)" }}
+                >
+                  {pendingNickname ? (
+                    <div className="space-y-2">
+                      <p className="text-xs" style={{ color: "#555" }}>خليل راقب السلوك شوي واختار لك لقب:</p>
+                      <p className="text-sm font-semibold" style={{ color: "var(--color-accent)" }}>
+                        {pendingNickname}
+                      </p>
+                      {nicknameTone && (
+                        <p className="text-[11px]" style={{ color: "#666" }}>{nicknameTone}</p>
+                      )}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          disabled={nicknameActionBusy}
+                          onClick={acceptSuggestedNickname}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-60"
+                          style={{ background: "var(--color-accent)" }}
+                        >
+                          أعتمده
+                        </button>
+                        <button
+                          type="button"
+                          disabled={nicknameActionBusy}
+                          onClick={() => setShowRejectReasonInput((prev) => !prev)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-60"
+                          style={{ background: "#f3f3f3", color: "#555" }}
+                        >
+                          لا يعجبني
+                        </button>
+                      </div>
+                      {showRejectReasonInput && (
+                        <div className="space-y-1">
+                          <input
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            maxLength={MAX_REASON_LENGTH}
+                            placeholder="سبب الرفض لخليل..."
+                            className="w-full px-2.5 py-2 rounded-lg text-xs"
+                            style={{ border: "1px solid #ddd", background: "#fff" }}
+                          />
+                          <button
+                            type="button"
+                            disabled={nicknameActionBusy}
+                            onClick={rejectSuggestedNickname}
+                            className="px-2.5 py-1.5 rounded-lg text-xs font-medium disabled:opacity-60"
+                            style={{ background: "#ffeaea", color: "#b02a2a" }}
+                          >
+                            إرسال سبب الرفض
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: "#666", lineHeight: 1.7 }}>
+                      {nicknameStatus && !nicknameStatus.ready
+                        ? `خليل يجهز لقبك خلال ${nicknameStatus.hoursRemaining.toFixed(1)} ساعة تقريباً.`
+                        : "خليل يراقب المزاج العام ليقترح لقباً مناسباً."}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {currentSection === "فهرس" && (
                 <ConversationList
                   conversations={conversations}
@@ -486,6 +882,25 @@ function ChatPageContent() {
                   onNewChat={startNewChat}
                   groupedConversations={grouped}
                 />
+              )}
+
+              {sidebarExpanded && (
+                <div className="mt-4 p-3 rounded-xl border" style={{ borderColor: "#efefef", background: "#fdfdfd" }}>
+                  <p className="text-sm font-semibold mb-2" style={{ color: "#000000" }}>فحص الحقائق</p>
+                  <select
+                    value={factCheckMode}
+                    onChange={(e) => updateFactCheckMode(e.target.value as FactCheckMode)}
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
+                    style={{ borderColor: "#e5e5e5" }}
+                  >
+                    <option value="off">إيقاف</option>
+                    <option value="notify">إشعار</option>
+                    <option value="notify_with_reason">إشعار مع السبب</option>
+                  </select>
+                  <p className="text-[11px] mt-1" style={{ color: "#666" }}>
+                    عند تفعيلها، تُظهر تنبيهاً إذا كانت الرسالة مشكوك في صحتها.
+                  </p>
+                </div>
               )}
 
               {currentSection === "أدوات" && (
@@ -533,19 +948,85 @@ function ChatPageContent() {
           )}
         </div>
 
-        <div
-          className="shrink-0 flex flex-col items-center gap-2 pb-4 pt-2"
-          style={{ width: SIDEBAR_W_COLLAPSED, marginInlineEnd: "auto" }}
-        >
-          <ThemeToggle />
-          <button
-            onClick={handleAvatarClick}
-            className="flex items-center justify-center pt-1 rounded-lg hover:bg-black/5 transition-colors p-1"
-            aria-label="الحساب والإعدادات"
+        {sidebarExpanded ? (
+          <div
+            className="shrink-0 pb-4 pt-2 px-3"
+            style={{ borderTop: "1px solid #efefef" }}
           >
-            <UserAvatarIcon expanded={sidebarExpanded} role={userRole} />
-          </button>
-        </div>
+            <div className="flex items-center justify-between">
+              <ThemeToggle />
+            </div>
+            <button
+              onClick={handleAvatarClick}
+              className="w-full mt-2 flex items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-black/5 transition-colors"
+              aria-label="الحساب والإعدادات"
+            >
+              <UserAvatarIcon expanded={true} role={userRole} />
+              <div className="min-w-0 text-right">
+                <p className="font-ui text-xs font-semibold truncate" style={{ color: "#231f20" }}>
+                  {activeNickname || userDisplayName}
+                </p>
+                <p className="font-ui text-[11px] truncate" style={{ color: "#7a7a7a" }}>
+                  {activeNickname ? userDisplayName : "اضغط لفتح الإعدادات"}
+                </p>
+              </div>
+            </button>
+
+            {activeNickname && (
+              <div className="mt-2 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteReasonInput((prev) => !prev)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-medium"
+                  style={{ background: "#ffeaea", color: "#b02a2a" }}
+                >
+                  حذف اللقب
+                </button>
+                {showDeleteReasonInput && (
+                  <div className="space-y-1">
+                    <input
+                      value={deleteReason}
+                      onChange={(e) => setDeleteReason(e.target.value)}
+                      maxLength={MAX_REASON_LENGTH}
+                      placeholder="ليش ما عجبك اللقب؟"
+                      className="w-full px-2.5 py-2 rounded-lg text-xs"
+                      style={{ border: "1px solid #ddd", background: "#fff" }}
+                    />
+                    <button
+                      type="button"
+                      disabled={nicknameActionBusy}
+                      onClick={deleteActiveNickname}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-medium disabled:opacity-60"
+                      style={{ background: "#f3f3f3", color: "#555" }}
+                    >
+                      تأكيد الحذف
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {nicknameActionMessage && (
+              <p className="font-ui text-[11px] mt-2" style={{ color: "#6b6b6b" }}>
+                {nicknameActionMessage}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div
+            className="shrink-0 flex flex-col items-center gap-2 pb-4 pt-2"
+            style={{ width: SIDEBAR_W_COLLAPSED, marginInlineEnd: "auto" }}
+          >
+            <ThemeToggle />
+            <button
+              onClick={handleAvatarClick}
+              className="flex items-center justify-center pt-1 rounded-lg hover:bg-black/5 transition-colors p-1"
+              aria-label="الحساب والإعدادات"
+            >
+              <UserAvatarIcon expanded={sidebarExpanded} role={userRole} />
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Mobile menu - BirdToggle (same icon as desktop sidebar) */}
@@ -612,6 +1093,18 @@ function ChatPageContent() {
                   <span>{section}</span>
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileSidebarOpen(false);
+                  router.push("/tahseen-khaleel");
+                }}
+                className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui transition-colors hover:bg-black/5"
+                style={{ color: "#000000" }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>📘</span>
+                <span>تحسين خليل</span>
+              </button>
               {currentSection === "فهرس" && (
                 <ConversationList
                   conversations={conversations}
@@ -642,19 +1135,67 @@ function ChatPageContent() {
                   </button>
                 </div>
               )}
+              {currentSection === "خليخانة" && (
+                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "#8c8c8c" }}>
+                  أنشئ مشروعاً لتنظيم أفكارك
+                </p>
+              )}
             </div>
-            <div className="shrink-0 flex flex-col items-center gap-2 p-4 border-t border-[#e5e5e5]">
-              <ThemeToggle />
+            <div className="shrink-0 p-4 border-t border-[#e5e5e5] space-y-2">
+              <div className="flex justify-center">
+                <ThemeToggle />
+              </div>
               <button
                 onClick={() => {
                   setMobileSidebarOpen(false);
                   handleAvatarClick();
                 }}
-                className="flex items-center justify-center p-2 rounded-lg hover:bg-black/5"
+                className="w-full flex items-center justify-center gap-2 p-2 rounded-lg hover:bg-black/5"
                 aria-label="الإعدادات"
               >
                 <UserAvatarIcon expanded={true} role={userRole} />
+                <div className="text-right">
+                  <p className="font-ui text-xs font-semibold" style={{ color: "#231f20" }}>
+                    {activeNickname || userDisplayName}
+                  </p>
+                  <p className="font-ui text-[11px]" style={{ color: "#7a7a7a" }}>
+                    {activeNickname ? userDisplayName : "الإعدادات والحساب"}
+                  </p>
+                </div>
               </button>
+              {activeNickname && (
+                <div className="space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteReasonInput((prev) => !prev)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium"
+                    style={{ background: "#ffeaea", color: "#b02a2a" }}
+                  >
+                    حذف اللقب
+                  </button>
+                  {showDeleteReasonInput && (
+                    <>
+                      <input
+                        value={deleteReason}
+                        onChange={(e) => setDeleteReason(e.target.value)}
+                        maxLength={MAX_REASON_LENGTH}
+                        placeholder="سبب حذف اللقب..."
+                        className="w-full px-2.5 py-2 rounded-lg text-xs"
+                        style={{ border: "1px solid #ddd", background: "#fff" }}
+                      />
+                      <button
+                        type="button"
+                        disabled={nicknameActionBusy}
+                        onClick={deleteActiveNickname}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium disabled:opacity-60"
+                        style={{ background: "#f3f3f3", color: "#555" }}
+                      >
+                        تأكيد الحذف
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </motion.aside>
         </>
@@ -667,6 +1208,21 @@ function ChatPageContent() {
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
           transition={{ duration: 0.2 }}
         >
+        <div className="px-4 md:px-6 pt-3 md:pt-4">
+          <div className="max-w-2xl mx-auto flex items-center gap-2 text-xs md:text-sm">
+            <span style={{ color: "#666" }}>فحص الحقائق:</span>
+            <select
+              value={factCheckMode}
+              onChange={(e) => updateFactCheckMode(e.target.value as FactCheckMode)}
+              className="px-3 py-1.5 rounded-lg border text-xs md:text-sm"
+              style={{ borderColor: "#e5e5e5" }}
+            >
+              <option value="off">إيقاف</option>
+              <option value="notify">إشعار</option>
+              <option value="notify_with_reason">إشعار مع السبب</option>
+            </select>
+          </div>
+        </div>
         <MessageList
           messages={messages}
           isLoading={isLoading}
@@ -675,6 +1231,12 @@ function ChatPageContent() {
           onSendMessage={sendMessage}
           onRegenerate={regenerateMessage}
         />
+
+        <div className="shrink-0 px-4 md:px-6 pt-2">
+          <div className="max-w-2xl mx-auto">
+            <CharacterSelector selected={character} onSelect={handleCharacterSelect} />
+          </div>
+        </div>
 
         <ControlsBar
           languageStyle={languageStyle}
@@ -744,6 +1306,45 @@ function ChatPageContent() {
         </motion.div>
       </main>
 
+      {factCheckBanner && (
+        <div
+          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 px-4 py-3 rounded-xl shadow-lg"
+          style={{ background: "#fff6f6", border: "1px solid #f5c2c2" }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "#b02a2a" }}>تنبيه فحص الحقائق</p>
+              {factCheckBanner.reasons.length > 0 && (
+                <ul className="mt-1 space-y-1 text-xs" style={{ color: "#7a3b3b" }}>
+                  {factCheckBanner.reasons.map((r, i) => (
+                    <li key={i}>• {r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button
+              onClick={() => setFactCheckBanner(null)}
+              className="text-sm px-2 py-1 rounded-lg hover:bg-black/5"
+              style={{ color: "#7a3b3b" }}
+            >
+              إغلاق
+            </button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => {
+                setFactCheckBanner(null);
+                void updateFactCheckMode("off");
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background: "#f3f3f3", color: "#555" }}
+            >
+              كتم في هذه المحادثة
+            </button>
+          </div>
+        </div>
+      )}
+
       <ToolsModal
         open={toolsModalOpen}
         onClose={() => setToolsModalOpen(false)}
@@ -756,7 +1357,7 @@ function ChatPageContent() {
           setSettingsOpen(false);
           setSettingsInitialSection(undefined);
         }}
-        initialSettings={{ languageStyle, speechSpeed, voiceId }}
+        initialSettings={{ languageStyle, speechSpeed, voiceId, nickname: activeNickname }}
         initialSection={settingsInitialSection === "apps" ? "apps" : undefined}
         onSave={(s) => {
           setLanguageStyle(s.languageStyle);
@@ -765,6 +1366,38 @@ function ChatPageContent() {
           if (typeof window !== "undefined") {
             localStorage.setItem("khalele_speech_speed", String(s.speechSpeed));
             localStorage.setItem("khalele_voice_id", s.voiceId);
+          }
+          if (!incognitoMode) {
+            const nextNickname = s.nickname.trim();
+            if (nextNickname !== activeNickname) {
+              setProfileData((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      preferences: {
+                        ...prev.preferences,
+                        ...(nextNickname ? { nickname: nextNickname } : { nickname: undefined }),
+                      },
+                      updatedAt: new Date().toISOString(),
+                    }
+                  : prev
+              );
+              void (async () => {
+                try {
+                  const res = await fetch("/api/profile", {
+                    method: "PUT",
+                    headers: apiHeaders(),
+                    body: JSON.stringify({ nickname: nextNickname }),
+                  });
+                  if (!res.ok) return;
+                  const data = (await res.json()) as ProfileApiResponse;
+                  setProfileData(data.profile);
+                  setNicknameStatus(data.nicknameStatus);
+                } catch {
+                  // Ignore sync errors; local state already updated.
+                }
+              })();
+            }
           }
         }}
       />

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Copy,
   Check,
   Share2,
   Play,
-  Pause,
   ThumbsDown,
   ThumbsUp,
   RefreshCw,
@@ -60,6 +59,17 @@ export function MessageActions({
   const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -122,7 +132,7 @@ export function MessageActions({
       const res = await fetch("/api/voice/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: content, speechSpeed, voiceId }),
+        body: JSON.stringify({ text: content, speed: speechSpeed, voiceId }),
       });
       if (!res.ok) throw new Error("TTS failed");
       const blob = await res.blob();
@@ -230,6 +240,7 @@ export function MessageActions({
             onClick={handleCopy}
             className={iconBtnClass}
             title={copied ? "تم النسخ!" : "نسخ"}
+            aria-label={copied ? "تم النسخ!" : "نسخ"}
           >
             {copied ? (
               <Check size={16} style={{ color: "#2E8B57" }} />
@@ -257,6 +268,7 @@ export function MessageActions({
           onClick={handleShare}
           className={iconBtnClass}
           title="مشاركة"
+          aria-label="مشاركة"
         >
           <Share2 size={16} style={{ color: "#999" }} />
         </button>
@@ -268,6 +280,7 @@ export function MessageActions({
           className={iconBtnClass}
           disabled={audioState === "loading"}
           title={audioState === "playing" ? "إيقاف مؤقت" : audioState === "paused" ? "متابعة" : "استمع"}
+          aria-label={audioState === "playing" ? "إيقاف مؤقت" : audioState === "paused" ? "متابعة" : "استمع"}
         >
           {audioState === "loading" ? (
             <Loader2 size={16} className="animate-spin" style={{ color: "var(--color-accent)" }} />
@@ -289,6 +302,7 @@ export function MessageActions({
           disabled={submittingFeedback}
           className={iconBtnClass}
           title="مفيد"
+          aria-label="مفيد"
         >
           <ThumbsUp
             size={16}
@@ -304,6 +318,7 @@ export function MessageActions({
           disabled={submittingFeedback}
           className={iconBtnClass}
           title="غير مفيد"
+          aria-label="غير مفيد"
         >
           <ThumbsDown
             size={16}
@@ -321,6 +336,7 @@ export function MessageActions({
           disabled={regenerating || !onRegenerate}
           className={iconBtnClass}
           title="إعادة توليد"
+          aria-label="إعادة توليد"
         >
           <RefreshCw
             size={16}
@@ -368,6 +384,7 @@ export function MessageActions({
             type="button"
             onClick={() => setShowDislikeForm(false)}
             className="p-1 rounded hover:bg-black/5"
+            aria-label="إغلاق"
           >
             <X size={14} style={{ color: "#999" }} />
           </button>

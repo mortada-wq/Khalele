@@ -19,6 +19,7 @@ export function LanguageStyleSelector({ value, onChange }: LanguageStyleSelector
       onChange={(e) => onChange(e.target.value as LanguageStyle)}
       className="font-ui px-3 py-1.5 rounded-lg text-sm"
       style={{ background: "#f5f5f5", border: "1px solid #e0e0e0", color: "#231f20" }}
+      aria-label="أسلوب اللغة"
     >
       {STYLES.map((s) => (
         <option key={s.value} value={s.value}>

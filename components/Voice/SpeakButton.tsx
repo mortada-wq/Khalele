@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Volume2, Loader2 } from "lucide-react";
 
 interface SpeakButtonProps {
@@ -24,6 +24,19 @@ function VoiceWaveIcon({ size = 18 }: { size?: number }) {
 export function SpeakButton({ text, disabled = false, speechSpeed = 1, voiceId }: SpeakButtonProps) {
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const urlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+      if (urlRef.current) {
+        URL.revokeObjectURL(urlRef.current);
+        urlRef.current = null;
+      }
+    };
+  }, []);
 
   const speak = async () => {
     if (!text || disabled) return;
@@ -33,21 +46,28 @@ export function SpeakButton({ text, disabled = false, speechSpeed = 1, voiceId }
       const res = await fetch("/api/voice/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, speechSpeed, voiceId }),
+        body: JSON.stringify({ text, speed: speechSpeed, voiceId }),
       });
       if (!res.ok) throw new Error("Failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
+      urlRef.current = url;
       const audio = new Audio(url);
+      audioRef.current = audio;
       setSpeaking(true);
       await audio.play();
       audio.onended = () => {
         setSpeaking(false);
-        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        if (urlRef.current) {
+          URL.revokeObjectURL(urlRef.current);
+          urlRef.current = null;
+        }
       };
     } catch {
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "ar-SA";
+      u.rate = Math.max(0.5, Math.min(2, speechSpeed));
       setSpeaking(true);
       speechSynthesis.speak(u);
       u.onend = () => setSpeaking(false);
@@ -63,6 +83,7 @@ export function SpeakButton({ text, disabled = false, speechSpeed = 1, voiceId }
       className="p-2 rounded-lg hover:bg-black/5 hover:text-[var(--color-accent)] transition-colors disabled:opacity-50"
       style={{ color: "#5a5a5a" }}
       title="استمع"
+      aria-label="استمع"
     >
       {loading ? <Loader2 size={18} className="animate-spin" /> : speaking ? <VoiceWaveIcon size={18} /> : <Volume2 size={18} />}
     </button>

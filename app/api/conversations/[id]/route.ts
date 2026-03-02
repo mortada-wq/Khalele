@@ -57,13 +57,14 @@ export async function PUT(
 
     if (!existing) {
       const body = await req.json();
-      const { title = "محادثة جديدة", messages = [] } = body;
+      const { title = "محادثة جديدة", messages = [], characterId } = body;
       const now = new Date().toISOString();
       const conversation: ConversationRecord = {
         conversationId: id,
         userId,
         title,
         messages: Array.isArray(messages) ? messages : [],
+        ...(typeof characterId === "string" && characterId.length > 0 ? { characterId } : {}),
         updatedAt: now,
         createdAt: now,
       };
@@ -76,13 +77,19 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { title, messages } = body;
+    const { title, messages, characterId, factCheckMode } = body;
     const now = new Date().toISOString();
 
     const updated: ConversationRecord = {
       ...existing,
       ...(title !== undefined && { title }),
       ...(messages !== undefined && { messages: Array.isArray(messages) ? messages : existing.messages }),
+      ...(characterId !== undefined && {
+        characterId: typeof characterId === "string" && characterId.length > 0 ? characterId : undefined,
+      }),
+      ...(factCheckMode === "off" || factCheckMode === "notify" || factCheckMode === "notify_with_reason"
+        ? { factCheckMode }
+        : {}),
       updatedAt: now,
     };
 

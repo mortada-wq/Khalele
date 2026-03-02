@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Kheleel — خليلي — ذكاء اصطناعي عربي";
+export const alt = "Kheleel - Arabic AI";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -45,10 +45,10 @@ export default function OGImage() {
             marginBottom: 32,
           }}
         >
-          <span style={{ fontSize: 56, color: "#fff", fontWeight: 700 }}>خ</span>
+          <span style={{ fontSize: 50, color: "#fff", fontWeight: 700 }}>K</span>
         </div>
 
-        {/* Brand name */}
+        {/* Brand name (ASCII only to avoid Arabic shaping issues in @vercel/og) */}
         <div
           style={{
             display: "flex",
@@ -65,16 +65,6 @@ export default function OGImage() {
               letterSpacing: "-1px",
             }}
           >
-            خليلي
-          </span>
-          <span
-            style={{
-              fontSize: 28,
-              color: "rgba(255,255,255,0.5)",
-              letterSpacing: "4px",
-              textTransform: "uppercase",
-            }}
-          >
             KHELEEL
           </span>
         </div>
@@ -87,7 +77,7 @@ export default function OGImage() {
             marginTop: 32,
           }}
         >
-          ذكاء اصطناعي يتكلم عربي — يفهم كل اللهجات
+          Arabic AI for every dialect
         </span>
 
         {/* Dialect chips */}
@@ -98,7 +88,7 @@ export default function OGImage() {
             marginTop: 24,
           }}
         >
-          {["عراقي", "مصري", "خليجي", "شامي", "مغربي"].map((d) => (
+          {["Iraqi", "Egyptian", "Gulf", "Levantine", "Maghrebi"].map((d) => (
             <span
               key={d}
               style={{

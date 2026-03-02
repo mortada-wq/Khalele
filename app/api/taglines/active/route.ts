@@ -7,8 +7,8 @@ import { getCurrentTagline, getTaglineConfig } from "@/lib/taglines";
  */
 export async function GET() {
   try {
-    const config = getTaglineConfig();
-    const tagline = getCurrentTagline();
+    const config = await getTaglineConfig();
+    const tagline = await getCurrentTagline();
     return NextResponse.json({
       tagline,
       rotationEnabled: config.rotationEnabled,

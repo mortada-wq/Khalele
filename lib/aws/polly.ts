@@ -3,12 +3,21 @@ import {
   SynthesizeSpeechCommand,
   type VoiceId,
 } from "@aws-sdk/client-polly";
+import { VOICE_MAP } from "@/lib/voices";
 
 const client = new PollyClient({
   region: process.env.AWS_REGION || "us-east-1",
+  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    ? {
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        },
+      }
+    : {}),
 });
 
-const VOICE_ID = process.env.POLLY_VOICE_ID || "Zeina"; // Arabic neural voice
+const VOICE_ID = process.env.POLLY_VOICE_ID || "Zeina";
 
 function escapeForSsml(text: string): string {
   return text
@@ -24,7 +33,10 @@ export async function synthesizeSpeech(
   options?: { voiceId?: string; ssml?: boolean; speed?: number }
 ): Promise<Buffer> {
   const voiceId = options?.voiceId || VOICE_ID;
+  const voiceMeta = VOICE_MAP[voiceId];
   const speed = options?.speed ?? 1;
+  const engine = voiceMeta?.engine ?? "standard";
+  const languageCode = voiceMeta?.languageCode ?? "arb";
 
   let finalText = text;
   let textType: "text" | "ssml" = "text";
@@ -37,11 +49,11 @@ export async function synthesizeSpeech(
   }
 
   const command = new SynthesizeSpeechCommand({
-    Engine: "neural",
+    Engine: engine,
     Text: finalText,
     OutputFormat: "mp3",
     VoiceId: voiceId as VoiceId,
-    LanguageCode: "arb",
+    LanguageCode: languageCode,
     TextType: textType,
   });
 

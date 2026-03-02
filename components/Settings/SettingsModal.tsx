@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MaterialSymbol } from "react-material-symbols";
 import type { LanguageStyle } from "@/lib/characters";
 import { DEFAULT_ACCENT, getStoredAccent, savePalette, resetPalette } from "@/lib/theme-color";
+import { ARABIC_VOICES, type VoiceOption } from "@/lib/voices";
 
 export interface KheleelSettings {
   // عام
@@ -100,6 +101,74 @@ const FEEDBACK_CATEGORIES = [
   { id: "behavior", label: "ملاحظة عن سلوك أو إجابة خليل" },
   { id: "suggestion", label: "اقتراح" },
 ] as const;
+
+function VoicePreviewButton({ voice, speed }: { voice: VoiceOption; speed: number }) {
+  const [state, setState] = useState<"idle" | "loading" | "playing">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const urlRef = useRef<string | null>(null);
+
+  const stop = useCallback(() => {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
+    }
+    setState("idle");
+  }, []);
+
+  const play = useCallback(async () => {
+    if (state === "playing") {
+      stop();
+      return;
+    }
+    stop();
+    setState("loading");
+    try {
+      const res = await fetch("/api/voice/synthesize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: voice.preview, voiceId: voice.id, speed }),
+      });
+      if (!res.ok) throw new Error("TTS failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      urlRef.current = url;
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => stop();
+      audio.onerror = () => stop();
+      await audio.play();
+      setState("playing");
+    } catch {
+      stop();
+    }
+  }, [voice, speed, state, stop]);
+
+  useEffect(() => () => stop(), [stop]);
+
+  return (
+    <button
+      type="button"
+      onClick={play}
+      disabled={state === "loading"}
+      className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all"
+      style={{
+        background: state === "playing" ? "var(--color-accent)" : "var(--color-accent-tint-12)",
+        color: state === "playing" ? "#fff" : "var(--color-accent)",
+      }}
+      title="جرّب الصوت"
+    >
+      {state === "loading" ? (
+        <MaterialSymbol icon="progress_activity" size={18} fill={false} className="animate-spin" />
+      ) : state === "playing" ? (
+        <MaterialSymbol icon="stop" size={18} fill />
+      ) : (
+        <MaterialSymbol icon="play_arrow" size={18} fill />
+      )}
+    </button>
+  );
+}
 
 export function SettingsModal({ open, onClose, initialSettings, initialSection, onSave }: SettingsModalProps) {
   const [activeSection, setActiveSection] = useState<(typeof SECTIONS)[number]["id"]>(initialSection ?? "general");
@@ -332,32 +401,86 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                 <h3 className="text-lg font-semibold" style={{ color: "var(--color-accent)" }}>
                   الصوت
                 </h3>
+
+                <div>
+                  <label className="block text-sm font-medium mb-3">اختر صوت خليل</label>
+                  <div className="space-y-2">
+                    {ARABIC_VOICES.map((voice) => {
+                      const selected = settings.voiceId === voice.id;
+                      return (
+                        <div
+                          key={voice.id}
+                          onClick={() => update("voiceId", voice.id)}
+                          className="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all"
+                          style={{
+                            borderColor: selected ? "var(--color-accent)" : "#e5e5e5",
+                            background: selected ? "var(--color-accent-tint-08)" : "#fafafa",
+                          }}
+                        >
+                          <div
+                            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
+                            style={{
+                              background: selected ? "var(--color-accent)" : "#e5e5e5",
+                              color: selected ? "#fff" : "#8c8c8c",
+                            }}
+                          >
+                            {voice.gender === "female" ? "♀" : "♂"}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-sm">{voice.nameAr}</span>
+                              <span className="text-xs" style={{ color: "#8c8c8c" }}>({voice.nameEn})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span
+                                className="px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                style={{
+                                  background: voice.gender === "female" ? "#fce4ec" : "#e3f2fd",
+                                  color: voice.gender === "female" ? "#c62828" : "#1565c0",
+                                }}
+                              >
+                                {voice.gender === "female" ? "أنثى" : "ذكر"}
+                              </span>
+                              <span
+                                className="px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                style={{
+                                  background: voice.engine === "neural" ? "#e8f5e9" : "#fff3e0",
+                                  color: voice.engine === "neural" ? "#2e7d32" : "#e65100",
+                                }}
+                              >
+                                {voice.engine === "neural" ? "عصبي" : "قياسي"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <VoicePreviewButton voice={voice} speed={settings.speechSpeed} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">سرعة الكلام</label>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2"
-                    step="0.1"
-                    value={settings.speechSpeed}
-                    onChange={(e) => update("speechSpeed", parseFloat(e.target.value))}
-                    className="w-full accent-accent"
-                  />
-                  <span className="text-sm" style={{ color: "#6b6b6b" }}>{settings.speechSpeed}x</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs shrink-0" style={{ color: "#8c8c8c" }}>بطيء</span>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.1"
+                      value={settings.speechSpeed}
+                      onChange={(e) => update("speechSpeed", parseFloat(e.target.value))}
+                      className="flex-1 accent-accent"
+                    />
+                    <span className="text-xs shrink-0" style={{ color: "#8c8c8c" }}>سريع</span>
+                  </div>
+                  <p className="text-center text-sm mt-1" style={{ color: "var(--color-accent)", fontWeight: 600 }}>
+                    {settings.speechSpeed}x
+                  </p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">الصوت</label>
-                  <select
-                    value={settings.voiceId}
-                    onChange={(e) => update("voiceId", e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border text-sm"
-                    style={{ borderColor: "#e0e0e0" }}
-                  >
-                    <option value="Zeina">زينة (Zeina)</option>
-                    <option value="Hala">هالة (Hala)</option>
-                    <option value="Tarik">طارق (Tarik)</option>
-                  </select>
-                </div>
+
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"

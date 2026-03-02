@@ -30,6 +30,7 @@ export function ConversationList({
         onClick={onNewChat}
         className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
         style={{ color: "#000000" }}
+        aria-label="محادثة جديدة"
       >
         <Plus size={18} style={{ color: "#999" }} />
         <span>محادثة جديدة</span>

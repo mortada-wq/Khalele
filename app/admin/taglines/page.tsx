@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Type,
   Plus,
@@ -31,6 +33,8 @@ interface TaglineConfig {
 }
 
 export default function AdminTaglinesPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [config, setConfig] = useState<TaglineConfig | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -46,8 +50,13 @@ export default function AdminTaglinesPage() {
   };
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (!session || session.user?.role !== "admin") {
+      router.replace("/");
+      return;
+    }
     load();
-  }, []);
+  }, [session, status, router]);
 
   const showMsg = (type: "ok" | "err", text: string) => {
     setMessage({ type, text });
@@ -156,18 +165,26 @@ export default function AdminTaglinesPage() {
     saveConfig({ activeTaglineId: id, rotationEnabled: false });
   };
 
+  if (status === "loading" || session?.user?.role !== "admin") {
+    return (
+      <div className="h-screen flex items-center justify-center" style={{ background: "#ebebec" }}>
+        <span className="font-ui" style={{ color: "#8c8c8c" }}>جاري التحميل...</span>
+      </div>
+    );
+  }
+
   if (!config) {
     return (
-      <main className="min-h-screen p-8" dir="rtl">
+      <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
         <header className="flex items-center justify-between mb-12">
           <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
             خليلي — بنك الشعارات
           </Link>
-          <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
+          <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
             العودة
           </Link>
         </header>
-        <p className="text-white/60">جاري التحميل...</p>
+        <p className="text-[#8c8c8c]">جاري التحميل...</p>
       </main>
     );
   }
@@ -175,12 +192,12 @@ export default function AdminTaglinesPage() {
   const sorted = [...config.taglines].sort((a, b) => a.order - b.order);
 
   return (
-    <main className="min-h-screen p-8" dir="rtl">
+    <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-12">
         <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
           خليلي — بنك الشعارات
         </Link>
-        <Link href="/admin" className="text-white/80 hover:text-kheleel-gold">
+        <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
           العودة
         </Link>
       </header>
@@ -188,7 +205,7 @@ export default function AdminTaglinesPage() {
       {message && (
         <div
           className={`mb-6 px-4 py-3 rounded-xl ${
-            message.type === "ok" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+            message.type === "ok" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
           }`}
         >
           {message.text}
@@ -196,47 +213,47 @@ export default function AdminTaglinesPage() {
       )}
 
       {/* Rotation control */}
-      <section className="p-6 rounded-2xl bg-white/5 border border-white/10 mb-6">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+      <section className="p-6 rounded-2xl bg-white border border-[#e5e5e5] mb-6">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: "#000000" }}>
           <RotateCw size={22} />
           تبديل الشعار تلقائياً
         </h2>
         <div className="flex flex-wrap items-center gap-6">
           <button
             onClick={toggleRotation}
-            className="flex items-center gap-2 text-white/80 hover:text-kheleel-gold transition-colors"
+            className="flex items-center gap-2 text-[#000000] hover:text-kheleel-gold transition-colors"
           >
             {config.rotationEnabled ? (
               <ToggleRight size={32} className="text-kheleel-gold" />
             ) : (
-              <ToggleLeft size={32} className="text-white/40" />
+              <ToggleLeft size={32} className="text-[#8c8c8c]" />
             )}
             <span>{config.rotationEnabled ? "مفعّل" : "معطّل"}</span>
           </button>
 
           {config.rotationEnabled && (
             <div className="flex items-center gap-2">
-              <Clock size={18} className="text-white/50" />
-              <span className="text-white/70 text-sm">كل</span>
+              <Clock size={18} className="text-[#8c8c8c]" />
+              <span className="text-[#231f20] text-sm">كل</span>
               <input
                 type="number"
                 min={1}
                 max={120}
                 value={config.rotationIntervalMinutes}
                 onChange={(e) => setIntervalMinutes(Number(e.target.value))}
-                className="w-16 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-center"
+                className="w-16 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#e5e5e5] text-center"
               />
-              <span className="text-white/70 text-sm">دقيقة</span>
+              <span className="text-[#231f20] text-sm">دقيقة</span>
             </div>
           )}
 
           {!config.rotationEnabled && sorted.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-white/60 text-sm">الشعار الثابت:</span>
+              <span className="text-[#8c8c8c] text-sm">الشعار الثابت:</span>
               <select
                 value={config.activeTaglineId ?? ""}
                 onChange={(e) => setActiveTagline(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-white/5 border border-white/10"
+                className="px-3 py-2 rounded-lg bg-[#fafafa] border border-[#e5e5e5]"
               >
                 {sorted.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -250,12 +267,12 @@ export default function AdminTaglinesPage() {
       </section>
 
       {/* Tagline bank */}
-      <section className="p-6 rounded-2xl bg-white/5 border border-white/10 mb-6">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+      <section className="p-6 rounded-2xl bg-white border border-[#e5e5e5] mb-6">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: "#000000" }}>
           <Type size={22} />
           بنك الشعارات
         </h2>
-        <p className="text-white/60 text-sm mb-6">
+        <p className="text-[#8c8c8c] text-sm mb-6">
           أضف، عدّل، واحذف الشعارات. اختر شعاراً ثابتاً أو فعّل التبديل التلقائي.
         </p>
 
@@ -263,15 +280,15 @@ export default function AdminTaglinesPage() {
           {sorted.map((t) => (
             <div
               key={t.id}
-              className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10"
+              className="flex items-center gap-3 p-4 rounded-xl bg-[#fafafa] border border-[#e5e5e5]"
             >
-              <GripVertical size={18} className="text-white/40 shrink-0" />
+              <GripVertical size={18} className="text-[#8c8c8c] shrink-0" />
               {editingId === t.id ? (
                 <>
                   <input
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[#fafafa] border border-[#e5e5e5]"
                     placeholder="نص الشعار"
                     autoFocus
                   />
@@ -287,20 +304,20 @@ export default function AdminTaglinesPage() {
                       setEditingId(null);
                       setEditText("");
                     }}
-                    className="p-2 rounded-lg text-white/60 hover:text-white"
+                    className="p-2 rounded-lg text-[#8c8c8c] hover:text-[#000000]"
                   >
                     إلغاء
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="flex-1 font-ui">{t.text}</p>
+                  <p className="flex-1 font-ui" style={{ color: "#000000" }}>{t.text}</p>
                   <button
                     onClick={() => {
                       setEditingId(t.id);
                       setEditText(t.text);
                     }}
-                    className="p-2 rounded-lg text-white/60 hover:bg-white/10 hover:text-kheleel-gold"
+                    className="p-2 rounded-lg text-[#8c8c8c] hover:bg-[#f0f0f0] hover:text-kheleel-gold"
                     title="تعديل"
                   >
                     <Pencil size={18} />
@@ -308,7 +325,7 @@ export default function AdminTaglinesPage() {
                   <button
                     onClick={() => deleteTagline(t.id)}
                     disabled={saving}
-                    className="p-2 rounded-lg text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50"
+                    className="p-2 rounded-lg text-red-500/80 hover:bg-red-500/20 hover:text-red-600 disabled:opacity-50"
                     title="حذف"
                   >
                     <Trash2 size={18} />
@@ -324,7 +341,7 @@ export default function AdminTaglinesPage() {
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTagline()}
-            className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10"
+            className="flex-1 px-4 py-2 rounded-lg bg-[#fafafa] border border-[#e5e5e5]"
             placeholder="شعار جديد..."
           />
           <button
@@ -338,7 +355,7 @@ export default function AdminTaglinesPage() {
         </div>
       </section>
 
-      <p className="text-white/40 text-sm">
+      <p className="text-[#8c8c8c] text-sm">
         الشعار يظهر في الصفحة الرئيسية. عند التبديل التلقائي، يتغير كل {config.rotationIntervalMinutes} دقيقة.
       </p>
     </main>

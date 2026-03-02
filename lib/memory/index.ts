@@ -66,15 +66,3 @@ export function getRelevantKnowledge(query: string): string[] {
   }
   return results;
 }
-
-export function buildMemoryContext(
-  preferences?: { dialectRegion?: string; languageStyle?: LanguageStyle },
-  recentMessages?: string[],
-  summary?: string
-): MemoryContext {
-  return {
-    userPreferences: preferences,
-    recentTopics: recentMessages?.slice(-5),
-    conversationSummary: summary,
-  };
-}
