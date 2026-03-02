@@ -3,19 +3,47 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────────────────────────────────────
-   GLOBAL BACKGROUND SYSTEM — Design system rule. Do not override.
-   Background is controlled ONLY via CSS variables. All pages inherit from body.
+   HYBRID UI SYSTEM — DeepSeek visual flair + ChatGPT clean usability
+   CSS Variables: light (default :root) + dark ([data-theme="dark"])
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #0e0e0e;
-  --foreground: #f5f5f5;
-  --bg-gradient:
-    radial-gradient(1200px 600px at 50% -200px, rgba(255,255,255,0.06), transparent 60%),
-    linear-gradient(180deg, #0b0b0c 0%, #0e0e0e 100%);
+  /* Layout backgrounds (spec: theme-colors.md) */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F5F5F7;
+  --bg-tertiary: #E8E8ED;
+  --bg-input: #F0F0F2;
+
+  /* Text (spec: theme-colors.md) */
+  --text-primary: #1A1A1C;
+  --text-secondary: #4A4A4F;
+  --text-tertiary: #8A8A8F;
+
+  /* Borders */
+  --border-subtle: 1px solid rgba(0, 0, 0, 0.05);
+  --border-hover: 1px solid rgba(0, 0, 0, 0.1);
+  --border-focus: 1px solid #3B82F6;
+
+  /* Accent (blue from spec) */
+  --accent-blue: #3B82F6;
+  --accent-blue-hover: #2563EB;
+  --accent-purple: #8B5CF6;
+  --accent-green: #10B981;
+
+  /* Legacy compat */
+  --background: #f5f5f5;
+  --foreground: #1A1A1C;
+  --bg-gradient: none;
+  --text-muted: rgba(35, 31, 32, 0.7);
+  --text-subtle: rgba(35, 31, 32, 0.4);
+  --bg-hover: rgba(0, 0, 0, 0.05);
+  --bg-hover-strong: rgba(0, 0, 0, 0.1);
+  --sidebar-bg: var(--bg-secondary);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --overlay-bg: rgba(0, 0, 0, 0.3);
 }
 
-/* Design Bible Rule 3: Palette (fonts set by layout) */
-/* Accent palette — overridden by user choice via JS. One color drives the whole UI. */
+/* Accent palette — overridden by user choice via JS */
 :root {
   --color-accent: #C68E17;
   --color-accent-hover: #a87212;
@@ -32,41 +60,37 @@
   --color-gold: var(--color-accent);
   --color-black: #000000;
   --tile-radius: 28px;
-  --text-muted: rgba(248, 250, 255, 0.7);
-  --text-subtle: rgba(248, 250, 255, 0.4);
-  --border-subtle: rgba(255, 255, 255, 0.1);
+}
+
+/* Logo: black on light, white on dark */
+.logo-theme { filter: none; }
+[data-theme="dark"] .logo-theme { filter: invert(1); }
+
+/* DARK THEME (spec: theme-colors.md) */
+[data-theme="dark"] {
+  --bg-primary: #0A0A0C;
+  --bg-secondary: #141416;
+  --bg-tertiary: #1C1C1F;
+  --bg-input: #1B1B1D;
+
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.35);
+
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.05);
+  --border-hover: 1px solid rgba(255, 255, 255, 0.1);
+  --border-focus: 1px solid #3B82F6;
+
+  --background: #0A0A0C;
+  --foreground: rgba(255, 255, 255, 0.95);
+  --text-muted: rgba(255, 255, 255, 0.7);
+  --text-subtle: rgba(255, 255, 255, 0.4);
   --bg-hover: rgba(255, 255, 255, 0.05);
   --bg-hover-strong: rgba(255, 255, 255, 0.1);
-  --sidebar-bg: rgba(14, 14, 14, 0.95);
+  --sidebar-bg: var(--bg-secondary);
   --glass-bg: rgba(0, 0, 0, 0.25);
   --glass-border: rgba(255, 255, 255, 0.06);
   --overlay-bg: rgba(0, 0, 0, 0.5);
-}
-
-/* Logo: invert on dark (white logo), no invert on light (black logo) */
-.logo-theme { filter: invert(1); }
-[data-theme="light"] .logo-theme { filter: none; }
-
-/* Light mode — milky left→right gradient + palette overrides */
-[data-theme="light"] {
-  --background: #f5f5f5;
-  --foreground: #0e0e0e;
-  --bg-gradient:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0.92) 0%,
-      #f1f1f2 45%,
-      #ebebec 100%
-    );
-  --text-muted: rgba(35, 31, 32, 0.7);
-  --text-subtle: rgba(35, 31, 32, 0.4);
-  --border-subtle: rgba(0, 0, 0, 0.1);
-  --bg-hover: rgba(0, 0, 0, 0.05);
-  --bg-hover-strong: rgba(0, 0, 0, 0.1);
-  --sidebar-bg: rgba(255, 255, 255, 0.95);
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --overlay-bg: rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -103,33 +127,45 @@ body {
   text-align: left;
 }
 
-/* DeepSeek-style glass message bubbles */
+/* Hybrid message bubbles — ChatGPT asymmetric (spec: components.md §3) */
 .chat-message-user {
-  background: var(--color-accent-tint-12) !important;
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid var(--color-accent-tint-25);
-  border-radius: 16px;
-  padding: 1rem 1.25rem;
+  background: var(--accent-blue) !important;
+  color: white !important;
+  border-radius: 20px 20px 4px 20px;
+  padding: 0.75rem 1rem;
   margin: 0.5rem 0;
+  max-width: 70%;
 }
 
 .chat-message-ai {
-  background: rgba(0, 0, 0, 0.25) !important;
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 1rem 1.25rem;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: var(--border-subtle);
+  border-radius: 20px 20px 20px 4px;
+  padding: 0.75rem 1rem;
   margin: 0.5rem 0;
+  max-width: 70%;
 }
 
-/* Home pill input */
+/* Floating capsule input — DeepSeek style (spec: components.md §1) */
 .home-pill-bar {
-  background: rgba(255, 255, 255, 1);
-  border: none;
-  color: var(--color-accent);
-  box-shadow: 1.1px 4px 9.3px 0px rgba(0, 0, 0, 0.15);
+  background: var(--bg-input);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  border-radius: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-pill-bar:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] .home-pill-bar {
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Bird wing-flap animation ─────────────────────────────── */
@@ -186,7 +222,30 @@ body {
   transform: rotate(0deg) scale(1);
 }
 
-/* ── Kheleel loading dots ── */
+/* Typing indicator — ChatGPT bouncing dots (spec: components.md §5) */
+.typing-indicator {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 24px;
+  width: fit-content;
+}
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  animation: dot-bounce 1.4s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Legacy kheleel dots compat */
 @keyframes kheleel-dot {
   0%, 60%, 100% { opacity: 0; }
   30%           { opacity: 1; }

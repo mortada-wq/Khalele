@@ -718,12 +718,12 @@ function ChatPageContent() {
   const grouped = groupConversationsByDate(conversations);
 
   return (
-    <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "#ebebec" }}>
+    <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
       <aside
         className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
           width: sidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
-          background: sidebarExpanded ? "#ffffff" : "#ebebec",
+          background: sidebarExpanded ? "var(--bg-secondary)" : "var(--bg-tertiary)",
           borderTopLeftRadius: sidebarExpanded ? 20 : 0,
           transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10,
