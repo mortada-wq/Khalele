@@ -85,8 +85,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${arefRuqaa.variable} ${amiri.variable} ${notoNaskh.variable} ${notoNastaliq.variable}`}>
+    <html lang="ar" dir="rtl" translate="no" suppressHydrationWarning className={`notranslate ${arefRuqaa.variable} ${amiri.variable} ${notoNaskh.variable} ${notoNastaliq.variable}`}>
       <head>
+        <meta name="google" content="notranslate" />
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script
           suppressHydrationWarning

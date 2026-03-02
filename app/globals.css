@@ -129,24 +129,7 @@ body {
   background: rgba(255, 255, 255, 1);
   border: none;
   color: var(--color-accent);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-}
-[data-theme="dark"] .home-pill-bar {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-[data-theme="dark"] .home-pill-bar input,
-[data-theme="dark"] .home-pill-bar textarea {
-  color: #f5f5f5;
-}
-[data-theme="dark"] .home-pill-bar input::placeholder,
-[data-theme="dark"] .home-pill-bar textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-[data-theme="dark"] .home-pill-bar svg path,
-[data-theme="dark"] .home-pill-bar svg line {
-  stroke: rgba(255, 255, 255, 0.5);
+  box-shadow: 1.1px 4px 9.3px 0px rgba(0, 0, 0, 0.15);
 }
 
 /* ── Bird wing-flap animation ─────────────────────────────── */

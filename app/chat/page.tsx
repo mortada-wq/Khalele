@@ -6,8 +6,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
-import { ControlsBar } from "@/components/Chat/ControlsBar";
-import { CharacterSelector } from "@/components/Chat/CharacterSelector";
 import { ConversationList } from "@/components/Chat/ConversationList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BirdToggle } from "@/components/BirdToggle";
@@ -15,7 +13,7 @@ import { SettingsModal } from "@/components/Settings";
 import { CallModeOverlay } from "@/components/Voice/CallModeOverlay";
 import { DEFAULT_CHARACTERS } from "@/lib/characters";
 import type { Character, LanguageStyle } from "@/lib/characters";
-import { detectIntegrationIntent, INTEGRATION_PROMPTS, type IntegrationSuggestion } from "@/lib/connectors";
+import { detectIntegrationIntent, type IntegrationSuggestion } from "@/lib/connectors";
 import { ToolsModal } from "@/components/Tools";
 import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
 import { groupConversationsByDate, getOrCreateUserId } from "@/lib/chat";
@@ -182,15 +180,15 @@ function ChatPageContent() {
     if (typeof window === "undefined") return "Zeina";
     return localStorage.getItem("khalele_voice_id") || "Zeina";
   });
-  const [useSearch, setUseSearch] = useState(false);
-  const [empathyMode, setEmpathyMode] = useState(false);
-  const [ramadanMode, setRamadanMode] = useState(false);
+  const [useSearch] = useState(false);
+  const [empathyMode] = useState(false);
+  const [ramadanMode] = useState(false);
   const [currentSection, setCurrentSection] = useState("فهرس");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsInitialSection, setSettingsInitialSection] = useState<string | undefined>();
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const [conversationsLoaded, setConversationsLoaded] = useState(false);
-  const [suggestionBanner, setSuggestionBanner] = useState<IntegrationSuggestion>(null);
+  const [, setSuggestionBanner] = useState<IntegrationSuggestion>(null);
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [userToolIds, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
@@ -203,22 +201,7 @@ function ChatPageContent() {
   const [rejectReason, setRejectReason] = useState("");
   const [showDeleteReasonInput, setShowDeleteReasonInput] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
-  const [factCheckMode, setFactCheckMode] = useState<FactCheckMode>("off");
-  const [factCheckBanner, setFactCheckBanner] = useState<{ verdict: string; reasons: string[] } | null>(null);
-  const updateFactCheckMode = async (mode: FactCheckMode) => {
-    setFactCheckMode(mode);
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === currentConversationId ? { ...c, factCheckMode: mode } : c
-      )
-    );
-    if (currentConversationId) {
-      const conv = conversations.find((c) => c.id === currentConversationId);
-      if (conv) {
-        void persistConversation({ ...conv, factCheckMode: mode });
-      }
-    }
-  };
+  const [factCheckMode] = useState<FactCheckMode>("off");
   const userIdRef = useRef<string>("");
   const incognitoIdRef = useRef<string>("");
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
@@ -257,7 +240,7 @@ function ChatPageContent() {
       setProfileData(data.profile);
       setNicknameStatus(data.nicknameStatus);
       setNicknameActionMessage(null);
-      setFactCheckMode((profileData?.factCheckMode as FactCheckMode) || factCheckMode);
+      void (profileData?.factCheckMode); // fact-check mode disabled in UI
     } catch {
       // Ignore profile load errors and continue chat normally.
     }
@@ -380,22 +363,6 @@ function ChatPageContent() {
     }
   };
 
-  const handleCharacterSelect = (nextCharacter: Character) => {
-    setCharacter(nextCharacter);
-    if (!currentConversationId) return;
-
-    setConversations((prev) => {
-      const updated = prev.map((c) =>
-        c.id === currentConversationId
-          ? { ...c, characterId: nextCharacter.id, updatedAt: new Date().toISOString() }
-          : c
-      );
-      const conv = updated.find((c) => c.id === currentConversationId);
-      if (conv) void persistConversation(conv);
-      return updated;
-    });
-  };
-
   useEffect(() => {
     if (!currentConversationId && conversations.length > 0) {
       setCurrentConversationId(conversations[0].id);
@@ -495,7 +462,6 @@ function ChatPageContent() {
       setNicknameActionMessage(null);
       setShowDeleteReasonInput(false);
       setShowRejectReasonInput(false);
-      setFactCheckMode("off");
       return;
     }
     if (!conversationsLoaded) return;
@@ -570,26 +536,6 @@ function ChatPageContent() {
     convId: string,
     existingMessages: Message[] = []
   ): Promise<string | null> => {
-    if (!incognitoMode && (factCheckMode === "notify" || factCheckMode === "notify_with_reason")) {
-      try {
-        const res = await fetch("/api/fact-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: content }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.result?.verdict === "likely_false") {
-            setFactCheckBanner({
-              verdict: data.result.verdict,
-              reasons: factCheckMode === "notify_with_reason" ? data.result.reasons ?? [] : [],
-            });
-          }
-        }
-      } catch {
-        // swallow
-      }
-    }
     setIsLoading(true);
     const allMessages = [...existingMessages, { role: "user" as const, content }];
     try {
@@ -885,22 +831,7 @@ function ChatPageContent() {
               )}
 
               {sidebarExpanded && (
-                <div className="mt-4 p-3 rounded-xl border" style={{ borderColor: "#efefef", background: "#fdfdfd" }}>
-                  <p className="text-sm font-semibold mb-2" style={{ color: "#000000" }}>فحص الحقائق</p>
-                  <select
-                    value={factCheckMode}
-                    onChange={(e) => updateFactCheckMode(e.target.value as FactCheckMode)}
-                    className="w-full px-3 py-2 rounded-lg border text-sm"
-                    style={{ borderColor: "#e5e5e5" }}
-                  >
-                    <option value="off">إيقاف</option>
-                    <option value="notify">إشعار</option>
-                    <option value="notify_with_reason">إشعار مع السبب</option>
-                  </select>
-                  <p className="text-[11px] mt-1" style={{ color: "#666" }}>
-                    عند تفعيلها، تُظهر تنبيهاً إذا كانت الرسالة مشكوك في صحتها.
-                  </p>
-                </div>
+                <div />
               )}
 
               {currentSection === "أدوات" && (
@@ -1208,21 +1139,6 @@ function ChatPageContent() {
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
           transition={{ duration: 0.2 }}
         >
-        <div className="px-4 md:px-6 pt-3 md:pt-4">
-          <div className="max-w-2xl mx-auto flex items-center gap-2 text-xs md:text-sm">
-            <span style={{ color: "#666" }}>فحص الحقائق:</span>
-            <select
-              value={factCheckMode}
-              onChange={(e) => updateFactCheckMode(e.target.value as FactCheckMode)}
-              className="px-3 py-1.5 rounded-lg border text-xs md:text-sm"
-              style={{ borderColor: "#e5e5e5" }}
-            >
-              <option value="off">إيقاف</option>
-              <option value="notify">إشعار</option>
-              <option value="notify_with_reason">إشعار مع السبب</option>
-            </select>
-          </div>
-        </div>
         <MessageList
           messages={messages}
           isLoading={isLoading}
@@ -1231,56 +1147,6 @@ function ChatPageContent() {
           onSendMessage={sendMessage}
           onRegenerate={regenerateMessage}
         />
-
-        <div className="shrink-0 px-4 md:px-6 pt-2">
-          <div className="max-w-2xl mx-auto">
-            <CharacterSelector selected={character} onSelect={handleCharacterSelect} />
-          </div>
-        </div>
-
-        <ControlsBar
-          languageStyle={languageStyle}
-          onLanguageStyleChange={setLanguageStyle}
-          useSearch={useSearch}
-          onUseSearchChange={setUseSearch}
-          empathyMode={empathyMode}
-          onEmpathyModeChange={setEmpathyMode}
-          ramadanMode={ramadanMode}
-          onRamadanModeChange={setRamadanMode}
-        />
-
-        {suggestionBanner && (
-          <div className="shrink-0 px-4 md:px-6 pb-2">
-            <div
-              className="max-w-2xl mx-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-ui text-xs md:text-sm"
-              style={{ background: "var(--color-accent-tint-10)", border: "1px solid var(--color-accent-tint-25)" }}
-            >
-              <span style={{ color: "#000000" }}>{INTEGRATION_PROMPTS[suggestionBanner]}</span>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSettingsInitialSection("apps");
-                    setSettingsOpen(true);
-                  }}
-                  className="px-3 py-1.5 rounded-lg font-medium text-xs md:text-sm"
-                  style={{ background: "var(--color-accent)", color: "#fff" }}
-                >
-                  ربط
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSuggestionBanner(null)}
-                  className="p-1.5 rounded-lg hover:bg-black/5"
-                  style={{ color: "#6b6b6b" }}
-                  aria-label="إغلاق"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="shrink-0 px-4 md:px-6 pb-4 md:pb-6 pt-1">
           <div className="max-w-2xl mx-auto">
@@ -1305,45 +1171,6 @@ function ChatPageContent() {
         </div>
         </motion.div>
       </main>
-
-      {factCheckBanner && (
-        <div
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 px-4 py-3 rounded-xl shadow-lg"
-          style={{ background: "#fff6f6", border: "1px solid #f5c2c2" }}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold" style={{ color: "#b02a2a" }}>تنبيه فحص الحقائق</p>
-              {factCheckBanner.reasons.length > 0 && (
-                <ul className="mt-1 space-y-1 text-xs" style={{ color: "#7a3b3b" }}>
-                  {factCheckBanner.reasons.map((r, i) => (
-                    <li key={i}>• {r}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <button
-              onClick={() => setFactCheckBanner(null)}
-              className="text-sm px-2 py-1 rounded-lg hover:bg-black/5"
-              style={{ color: "#7a3b3b" }}
-            >
-              إغلاق
-            </button>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => {
-                setFactCheckBanner(null);
-                void updateFactCheckMode("off");
-              }}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: "#f3f3f3", color: "#555" }}
-            >
-              كتم في هذه المحادثة
-            </button>
-          </div>
-        </div>
-      )}
 
       <ToolsModal
         open={toolsModalOpen}

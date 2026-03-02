@@ -7,11 +7,23 @@ import { BirdToggle } from "@/components/BirdToggle";
 
 const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
 
-function SettingsIcon({ size = 22 }: { size?: number }) {
+function UserAvatarIcon() {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    <svg viewBox="0 0 33.5 39.75" width="30" height="36" aria-hidden>
+      <defs>
+        <linearGradient id="home-avatar-stroke" x1="0" y1="19.87" x2="33.5" y2="19.87" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#5e5e5e" stopOpacity="0" />
+          <stop offset="1" stopColor="#ebebec" />
+        </linearGradient>
+      </defs>
+      <circle fill="#7a5a20" cx="16.75" cy="17.55" r="5.83" />
+      <path
+        stroke="url(#home-avatar-stroke)"
+        strokeMiterlimit="10"
+        strokeWidth=".28"
+        fill="none"
+        d="M28.59,9.99c-2.88-3.56-6.76-6.48-10.76-9.49-.64-.48-1.52-.48-2.16,0C7.69,6.52.15,12.2.15,23.26c-.14,4.32,1.46,8.52,4.46,11.64.23.23.45.45.7.66,2.81,2.37,6.31,3.77,9.98,3.97.98.02,1.95.04,2.93.06h0c3.67-.22,7.17-1.61,9.98-3.99,3.38-2.97,5.16-7.24,5.16-12.33,0-5.55-1.88-9.74-4.77-13.3ZM27.41,31.2c-.29.38-.61.74-.95,1.07-1.78-5.35-7.56-8.25-12.91-6.47-2.87.95-5.17,3.13-6.28,5.95-.52-.48-.99-1.01-1.39-1.58-1.89-3.07-2.55-6.74-1.84-10.28,1.18-6.28,5.76-10.43,12.72-15.7,8.13,6.18,13.02,10.81,13.02,19.04.11,2.85-.72,5.65-2.36,7.97Z"
+      />
     </svg>
   );
 }
@@ -29,15 +41,17 @@ export function HomeHero() {
         const res = await fetch("/api/taglines/active");
         if (!res.ok) return;
         const data = (await res.json()) as { tagline?: string };
-        if (!canceled && data.tagline?.trim()) setTagline(data.tagline.trim());
+        if (!canceled && data.tagline?.trim()) {
+          const t = data.tagline.trim();
+          const hasArabic = /[\u0600-\u06FF]/.test(t);
+          if (hasArabic) setTagline(t);
+        }
       } catch {
         /* keep default */
       }
     };
     void load();
-    return () => {
-      canceled = true;
-    };
+    return () => { canceled = true; };
   }, []);
 
   const handleSend = () => {
@@ -57,49 +71,49 @@ export function HomeHero() {
 
   return (
     <div
-      className="h-screen flex flex-col items-center justify-center relative overflow-hidden"
+      className="h-[100dvh] flex flex-col items-center justify-center relative"
       dir="rtl"
+      style={{
+        background: "#ebebec",
+        overflow: "hidden",
+      }}
     >
-      {/* Bird toggle — top right */}
+      {/* Bird toggle — top-right (in RTL = visual top-right) */}
       <button
         type="button"
         onClick={() => router.push("/chat")}
-        className="fixed top-5 left-5 z-50 hover:opacity-80 transition-opacity"
+        className="fixed top-4 right-4 z-50 hover:opacity-80 transition-opacity"
         aria-label="فتح المحادثات"
       >
         <BirdToggle expanded={false} size={48} />
       </button>
 
-      {/* Settings — bottom right */}
+      {/* User avatar — bottom-right (in RTL = visual bottom-right) */}
       <button
         type="button"
         onClick={() => router.push("/chat")}
-        className="fixed bottom-6 left-6 z-50 flex items-center justify-center w-11 h-11 rounded-full transition-all hover:scale-105 active:scale-95"
-        style={{
-          background: "var(--glass-bg)",
-          border: "1px solid var(--glass-border)",
-          backdropFilter: "blur(12px)",
-          color: "var(--text-muted)",
-        }}
-        aria-label="الإعدادات"
+        className="fixed bottom-5 right-5 z-50 flex items-center justify-center w-11 h-11 rounded-full transition-all hover:scale-105 active:scale-95"
+        style={{ opacity: 0.65 }}
+        aria-label="الحساب والإعدادات"
       >
-        <SettingsIcon size={20} />
+        <UserAvatarIcon />
       </button>
 
       {/* Center content */}
       <div className="flex flex-col items-center w-full px-6 max-w-xl">
-        {/* Logo */}
+        {/* Logo — black on light bg, larger */}
         <img
           src="/logo/logo_black.svg"
           alt="خليلي"
-          className="logo-theme w-36 md:w-48 h-auto mb-5"
+          className="w-40 md:w-56 h-auto mb-5"
           draggable={false}
+          style={{ filter: "none" }}
         />
 
-        {/* Tagline */}
+        {/* Tagline — Arabic only */}
         <p
           className="font-ui text-sm md:text-base text-center leading-relaxed mb-10"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "#6b6b6b" }}
         >
           {tagline}
         </p>
