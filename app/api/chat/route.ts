@@ -20,10 +20,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      console.error("CHAT API: Missing AWS credentials in environment variables");
+    const awsKey = process.env.AWS_ACCESS_KEY_ID ?? "";
+    const awsSecret = process.env.AWS_SECRET_ACCESS_KEY ?? "";
+    const isPlaceholder = (v: string) => !v || v.startsWith("PASTE_") || v === "your-key-here";
+    if (isPlaceholder(awsKey) || isPlaceholder(awsSecret)) {
+      console.error("CHAT API: AWS credentials missing or still set to placeholder values");
       return NextResponse.json(
-        { error: "AWS credentials not configured. Check .env.local" },
+        { error: "AWS credentials not configured. Update .env.local with real AWS keys, then restart the dev server." },
         { status: 500 }
       );
     }

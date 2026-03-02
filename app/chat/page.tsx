@@ -7,7 +7,7 @@ import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
 import { ConversationList } from "@/components/Chat/ConversationList";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { BirdToggle } from "@/components/BirdToggle";
 import { SettingsModal } from "@/components/Settings";
 import { CallModeOverlay } from "@/components/Voice/CallModeOverlay";
@@ -56,34 +56,36 @@ function UserAvatarIcon({ expanded, role }: { expanded: boolean; role?: "admin" 
   );
 }
 
-/* ── Section navigation icons ── */
+/* ── Section navigation icons — consistent outline style ── */
 function SectionIcon({ section, color }: { section: string; color: string }) {
-  const s = 18;
+  const s = 20;
   const st = { color, flexShrink: 0 } as const;
 
-  if (section === "فهرس") return (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor" style={st}>
-      <path transform="translate(23)" d="M-7.5,16h-10a.5.5,0,0,1-.5-.5.5.5,0,0,1,.5-.5h10a.5.5,0,0,1,.5.5A.5.5,0,0,1-7.5,16Zm.5-5.5a.5.5,0,0,0-.5-.5h-10a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h10A.5.5,0,0,0-7,10.5Zm0-5A.5.5,0,0,0-7.5,5h-10a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h10A.5.5,0,0,0-7,5.5Zm0-5A.5.5,0,0,0-7.5,0h-10a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h10A.5.5,0,0,0-7,.5Zm-13,0a.5.5,0,0,0-.5-.5h-2a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h2A.5.5,0,0,0-20,.5Zm0,5a.5.5,0,0,0-.5-.5h-2a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h2A.5.5,0,0,0-20,5.5Zm0,5a.5.5,0,0,0-.5-.5h-2a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h2A.5.5,0,0,0-20,10.5Zm0,5a.5.5,0,0,0-.5-.5h-2a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h2A.5.5,0,0,0-20,15.5Z" />
+  if (section === "بحث") return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={st}>
+      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 
   if (section === "أدوات") return (
-    <svg width={s} height={s} viewBox="0 0 297 297" fill="currentColor" style={st}>
-      <path d="M107.184,64.421c0-5.775-4.682-10.457-10.457-10.457H89.93v-6.797c0-3.621,4.398-6.797,9.411-6.797h98.296c5.013,0,9.411,3.176,9.411,6.797v6.797h-6.797c-5.775,0-10.457,4.682-10.457,10.457v0.386h55.422v-0.386c0-5.775-4.682-10.457-10.457-10.457h-6.797v-6.797c0-15.28-13.604-27.711-30.325-27.711H99.342c-16.721,0-30.325,12.431-30.325,27.711v6.797h-6.797c-5.775,0-10.457,4.682-10.457,10.457v0.386h55.422V64.421z"/>
-      <path d="M13.625,107.023L0.332,158.535c-0.808,3.132-0.122,6.461,1.859,9.017c1.98,2.557,5.032,4.053,8.267,4.053h49.1l17.795-92.159H47.579C31.737,79.447,16.887,91.534,13.625,107.023z"/>
-      <path d="M296.476,157.868l-13.121-50.845c-3.263-15.489-18.113-27.576-33.955-27.576h-29.773l17.795,92.159h49.1c0,0,0.008-0.001,0.013-0.001c0,0,0.005,0,0.007,0.001c5.776,0,10.457-4.682,10.457-10.457C297,160.003,296.816,158.9,296.476,157.868z"/>
-      <path d="M10.457,186.245c-2.228,0-4.429-0.313-6.55-0.892l10.662,63.684c2.359,15.996,16.83,28.508,33.01,28.508h27.092l-14.87-91.299H10.457z"/>
-      <path d="M286.893,186.245h-0.37h-49.344l-14.87,91.299H249.4c16.181,0,30.652-12.512,33.01-28.51l10.657-63.651c-1.952,0.526-3.998,0.824-6.106,0.858L286.893,186.245z"/>
-      <path d="M96.727,79.447l-17.795,92.159h41.847v-27.711c0-5.775,4.682-10.457,10.457-10.457h34.508c5.775,0,10.457,4.682,10.457,10.457v27.711h41.847l-17.795-92.159H96.727z"/>
-      <path d="M176.201,195.657c0,5.775-4.682,10.457-10.457,10.457h-34.508c-5.775,0-10.457-4.682-10.457-10.457v-9.411H80.991l14.87,91.299h107.183l14.87-91.299h-41.712V195.657z"/>
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={st}>
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
     </svg>
   );
 
-  return (
-    <svg width={s} height={s} viewBox="0 0 28.704 28.704" fill="currentColor" style={st}>
-      <path d="M21.172,17.525c0.208-0.175,0.402-0.367,0.605-0.547C21.008,17.733,20.6,18.053,21.172,17.525z M27.162,19.768c0.047,0.734-0.102,1.527-0.499,2.16c-0.408,0.662-1.032,1.116-1.702,1.397c-0.672,0.282-1.383,0.408-2.087,0.455c-1.167,0.076-2.319-0.067-3.445-0.297c-1.219,3.187-3.06,5.221-5.119,5.221c-2.002,0-3.796-1.935-5.014-4.976c-1.029,0.232-2.082,0.38-3.151,0.348c-0.703-0.023-1.422-0.124-2.101-0.382c-0.679-0.257-1.319-0.689-1.751-1.336c-0.421-0.618-0.595-1.406-0.573-2.141c0.017-0.744,0.195-1.461,0.445-2.138c0.484-1.294,1.215-2.461,2.046-3.532c-0.109-0.126-0.222-0.25-0.328-0.379c-0.205,0.114-0.438,0.185-0.69,0.185c-0.79,0-1.431-0.641-1.431-1.431c0-0.456,0.218-0.858,0.55-1.12c-0.048-0.095-0.104-0.184-0.149-0.281c-0.297-0.642-0.529-1.326-0.605-2.051C1.48,8.752,1.584,7.975,1.961,7.312C2.331,6.645,2.95,6.143,3.62,5.829C4.291,5.51,5.013,5.347,5.73,5.265c1.145-0.125,2.287-0.056,3.406,0.12C10.354,2.107,12.219,0,14.31,0c2.046,0,3.878,2.013,5.096,5.168c1.055-0.192,2.134-0.281,3.221-0.203c0.72,0.058,1.446,0.194,2.13,0.49c0.681,0.293,1.311,0.764,1.714,1.43c0.391,0.637,0.527,1.419,0.474,2.138c-0.049,0.727-0.259,1.418-0.532,2.069c-0.484,1.137-1.178,2.15-1.941,3.097c0.867,1.043,1.637,2.182,2.168,3.459C26.913,18.315,27.119,19.026,27.162,19.768z M19.705,6.019c0.458,1.383,0.804,2.948,1.012,4.636c1.314,1.008,2.549,2.119,3.635,3.385c0.003,0.004,0.006,0.008,0.009,0.012c0.709-0.957,1.324-1.983,1.735-3.084c0.232-0.637,0.396-1.302,0.407-1.964c0.014-0.661-0.133-1.305-0.497-1.839c-0.346-0.512-0.892-0.893-1.492-1.115c-0.605-0.228-1.267-0.323-1.928-0.342C21.626,5.681,20.658,5.812,19.705,6.019z M15.365,21.399c-0.28,0.148-0.56,0.296-0.845,0.434c1.367,0.577,2.777,1.047,4.228,1.351c0.077,0.016,0.155,0.026,0.232,0.041c0.743-2.001,1.238-4.485,1.383-7.211c-0.637-0.144-1.113-0.711-1.113-1.392c0-0.689,0.488-1.264,1.137-1.399c-0.019-0.539-0.049-1.072-0.095-1.592c-0.962-0.733-1.967-1.416-3.007-2.024c-0.988-0.586-2.011-1.11-3.053-1.585c-1.027,0.512-2.032,1.071-2.999,1.692c-1.011,0.642-1.985,1.356-2.915,2.117c-0.067,0.819-0.107,1.659-0.107,2.521c0,1.37,0.091,2.69,0.256,3.94c0.119,0.132,0.109,0.154,0.011,0.097c0.256,1.891,0.689,3.603,1.252,5.055c0.174-0.037,0.348-0.069,0.52-0.11c1.44-0.354,2.832-0.874,4.178-1.499c-1.153-0.512-2.278-1.089-3.361-1.731c1.097,0.641,2.237,1.212,3.407,1.709c0.294-0.137,0.583-0.287,0.873-0.435c-0.183-0.24-0.295-0.537-0.295-0.862c0-0.791,0.641-1.432,1.432-1.432c0.604,0,1.118,0.375,1.329,0.904c0.002-0.001,0.004-0.002,0.005-0.003c-0.002,0.001-0.004,0.002-0.005,0.003c0.065,0.164,0.103,0.341,0.103,0.528c0,0.791-0.641,1.432-1.432,1.432C16.028,21.948,15.627,21.731,15.365,21.399z M7.673,14.352c0-0.698,0.031-1.379,0.076-2.051c-0.967,0.828-1.89,1.712-2.71,2.68c-0.031,0.037-0.06,0.076-0.091,0.113c1.441,1.264,2.368,2.097,2.915,2.606C7.743,16.624,7.673,15.507,7.673,14.352z M10.657,8.805c0.748-0.474,1.524-0.907,2.313-1.318c-1.039-0.414-2.096-0.778-3.179-1.046C9.644,6.406,9.496,6.379,9.349,6.347C8.966,7.56,8.666,8.913,8.472,10.373C9.18,9.823,9.905,9.293,10.657,8.805z M20.132,10.217c-0.206-1.486-0.526-2.855-0.927-4.078c-0.198,0.049-0.398,0.095-0.594,0.149c-1.072,0.306-2.115,0.707-3.139,1.156c0.802,0.382,1.592,0.788,2.356,1.234C18.62,9.153,19.384,9.674,20.132,10.217z M9.644,5.475C9.76,5.497,9.878,5.513,9.993,5.537c1.45,0.304,2.856,0.765,4.216,1.332c1.339-0.615,2.728-1.126,4.167-1.481c0.173-0.042,0.349-0.074,0.523-0.112C17.78,2.379,16.14,0.538,14.31,0.538C12.439,0.538,10.763,2.461,9.644,5.475z M4.316,14.406c0.003-0.004,0.006-0.008,0.009-0.012c1.052-1.318,2.262-2.483,3.556-3.546c0.195-1.671,0.52-3.229,0.96-4.61c-1.01-0.192-2.032-0.301-3.044-0.236c-0.662,0.044-1.32,0.162-1.915,0.411C3.287,6.659,2.761,7.05,2.425,7.586C2.087,8.12,1.96,8.778,1.997,9.436c0.036,0.66,0.221,1.32,0.478,1.948c0.034,0.083,0.079,0.161,0.115,0.243c0.184-0.086,0.387-0.137,0.603-0.137c0.79,0,1.431,0.641,1.431,1.431c0,0.47-0.23,0.884-0.58,1.144C4.132,14.182,4.226,14.292,4.316,14.406z M9.222,23.551c-0.62-1.6-1.075-3.5-1.327-5.578c-0.088-0.067-0.177-0.136-0.267-0.208c-0.989-0.775-1.924-1.62-2.789-2.536c-0.791,0.962-1.508,1.992-1.989,3.121c-0.514,1.202-0.772,2.615-0.096,3.732c0.315,0.53,0.852,0.95,1.454,1.208c0.607,0.265,1.28,0.396,1.957,0.45C7.179,23.815,8.207,23.733,9.222,23.551z M18.921,23.374c-0.069-0.016-0.138-0.028-0.206-0.044c-1.458-0.36-2.87-0.868-4.24-1.473c-1.348,0.653-2.742,1.21-4.187,1.622c-0.163,0.045-0.33,0.083-0.495,0.124c1.117,2.794,2.725,4.563,4.516,4.563C16.151,28.166,17.801,26.303,18.921,23.374z M25.968,17.941c-0.521-1.112-1.273-2.116-2.099-3.049c-0.652,0.742-1.356,1.431-2.092,2.086c0.558-0.548,1.305-1.326,2.01-2.181c-0.043-0.048-0.083-0.098-0.127-0.146c-0.854-0.94-1.809-1.791-2.803-2.585c0.028,0.38,0.052,0.762,0.066,1.151c0.674,0.116,1.188,0.699,1.188,1.406c0,0.715-0.526,1.302-1.21,1.408c-0.148,2.737-0.653,5.238-1.412,7.284c1.115,0.181,2.247,0.253,3.358,0.131c0.675-0.078,1.342-0.232,1.938-0.519c0.594-0.279,1.116-0.718,1.414-1.26C26.833,20.527,26.523,19.125,25.968,17.941z"/>
+  if (section === "خليخانة") return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={st}>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   );
+
+  if (section === "دفاتر") return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={st}>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+
+  return null;
 }
 
 const SIDEBAR_W_EXPANDED = 240;
@@ -184,7 +186,7 @@ function ChatPageContent() {
   const [useSearch] = useState(false);
   const [empathyMode] = useState(false);
   const [ramadanMode] = useState(false);
-  const [currentSection, setCurrentSection] = useState("فهرس");
+  const [currentSection, setCurrentSection] = useState("بحث");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsInitialSection, setSettingsInitialSection] = useState<string | undefined>();
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
@@ -224,7 +226,7 @@ function ChatPageContent() {
     }
   };
 
-  const SECTIONS = ["فهرس", "أدوات", "خليخانة"] as const;
+  const SECTIONS = ["بحث", "أدوات", "خليخانة", "دفاتر"] as const;
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages ?? [];
@@ -743,21 +745,40 @@ function ChatPageContent() {
         <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
           {sidebarExpanded ? (
             <div className="sidebar-scroll flex-1 min-h-0 px-3 py-2 overflow-y-auto">
+              <button
+                type="button"
+                onClick={startNewChat}
+                className="w-full flex items-center gap-2.5 px-4 py-3 mb-3 font-ui transition-colors"
+                style={{
+                  background: "transparent",
+                  border: "var(--border-subtle)",
+                  color: "var(--text-primary)",
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>محادثة جديدة</span>
+              </button>
+
               <div className="space-y-1">
                 {SECTIONS.map((section) => (
                   <button
                     key={section}
                     onClick={() => setCurrentSection(section)}
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui transition-colors"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors"
                     style={{
-                      fontSize: "1rem",
-                      fontWeight: currentSection === section ? 600 : 400,
+                      fontSize: "0.95rem",
+                      fontWeight: currentSection === section ? 700 : 600,
                       background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
-                      color: currentSection === section ? "var(--color-accent)" : "#000000",
+                      color: currentSection === section ? "var(--color-accent)" : "var(--text-primary)",
                       border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
                     }}
                   >
-                    <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "#999"} />
+                    <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "var(--text-secondary)"} />
                     <span>{section}</span>
                   </button>
                 ))}
@@ -766,10 +787,12 @@ function ChatPageContent() {
               <button
                 type="button"
                 onClick={() => router.push("/tahseen-khaleel")}
-                className="w-full flex items-center gap-2 px-4 py-3 mt-2 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                style={{ color: "#000000" }}
+                className="w-full flex items-center gap-2.5 px-4 py-3 mt-2 rounded-xl font-ui transition-colors hover:bg-black/5"
+                style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "0.95rem" }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>📘</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
                 <span>تحسين خليل</span>
               </button>
 
@@ -780,12 +803,12 @@ function ChatPageContent() {
                 >
                   {pendingNickname ? (
                     <div className="space-y-2">
-                      <p className="text-xs" style={{ color: "#555" }}>خليل راقب السلوك شوي واختار لك لقب:</p>
+                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>خليل راقب السلوك شوي واختار لك لقب:</p>
                       <p className="text-sm font-semibold" style={{ color: "var(--color-accent)" }}>
                         {pendingNickname}
                       </p>
                       {nicknameTone && (
-                        <p className="text-[11px]" style={{ color: "#666" }}>{nicknameTone}</p>
+                        <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{nicknameTone}</p>
                       )}
                       <div className="flex items-center gap-2 pt-1">
                         <button
@@ -839,18 +862,20 @@ function ChatPageContent() {
                 </div>
               )}
 
-              {currentSection === "فهرس" && (
-                <ConversationList
-                  conversations={conversations}
-                  currentConversationId={currentConversationId}
-                  onSelectConversation={setCurrentConversationId}
-                  onNewChat={startNewChat}
-                  groupedConversations={grouped}
-                />
-              )}
-
-              {sidebarExpanded && (
-                <div />
+              {currentSection === "بحث" && (
+                <div className="mt-4 px-1">
+                  <input
+                    type="text"
+                    placeholder="ابحث في المحادثات..."
+                    className="w-full px-3 py-2.5 rounded-xl font-ui text-sm"
+                    style={{
+                      background: "var(--bg-tertiary)",
+                      border: "var(--border-subtle)",
+                      color: "var(--text-primary)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
               )}
 
               {currentSection === "أدوات" && (
@@ -858,7 +883,7 @@ function ChatPageContent() {
                   <button
                     onClick={() => setToolsModalOpen(true)}
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                    style={{ color: "#000000" }}
+                    style={{ color: "var(--text-primary)" }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     <span>أضف أدوات</span>
@@ -872,7 +897,7 @@ function ChatPageContent() {
                           <button
                             key={tool.id}
                             className="w-full text-right px-4 py-2.5 rounded-lg font-ui text-sm truncate transition-colors hover:bg-black/5 block"
-                            style={{ color: "#000000" }}
+                            style={{ color: "var(--text-primary)" }}
                           >
                             {tool.label}
                           </button>
@@ -880,7 +905,7 @@ function ChatPageContent() {
                       })}
                     </div>
                   ) : (
-                    <p className="px-4 py-2 font-ui text-sm" style={{ color: "#8c8c8c" }}>
+                    <p className="px-4 py-2 font-ui text-sm" style={{ color: "var(--text-tertiary)" }}>
                       لم تضف أدوات بعد — اضغط أضف أدوات لاختيارها
                     </p>
                   )}
@@ -888,10 +913,27 @@ function ChatPageContent() {
               )}
 
               {currentSection === "خليخانة" && (
-                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "#8c8c8c" }}>
+                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "var(--text-tertiary)" }}>
                   أنشئ مشروعاً لتنظيم أفكارك
                 </p>
               )}
+
+              {currentSection === "دفاتر" && (
+                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "var(--text-tertiary)" }}>
+                  لا توجد دفاتر بعد — أنشئ دفتراً جديداً لتبدأ
+                </p>
+              )}
+
+              <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                <p className="px-4 pb-2 font-ui text-xs" style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>المحادثات السابقة</p>
+                <ConversationList
+                  conversations={conversations}
+                  currentConversationId={currentConversationId}
+                  onSelectConversation={setCurrentConversationId}
+                  onNewChat={startNewChat}
+                  groupedConversations={grouped}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex-1" />
@@ -901,22 +943,19 @@ function ChatPageContent() {
         {sidebarExpanded ? (
           <div
             className="shrink-0 pb-4 pt-2 px-3"
-            style={{ borderTop: "1px solid #efefef" }}
+            style={{ borderTop: "var(--border-subtle)" }}
           >
-            <div className="flex items-center justify-between">
-              <ThemeToggle />
-            </div>
             <button
               onClick={handleAvatarClick}
-              className="w-full mt-2 flex items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-black/5 transition-colors"
+              className="w-full flex items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-black/5 transition-colors"
               aria-label="الحساب والإعدادات"
             >
               <UserAvatarIcon expanded={true} role={userRole} />
               <div className="min-w-0 text-right">
-                <p className="font-ui text-xs font-semibold truncate" style={{ color: "#231f20" }}>
+                <p className="font-ui text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
                   {activeNickname || userDisplayName}
                 </p>
-                <p className="font-ui text-[11px] truncate" style={{ color: "#7a7a7a" }}>
+                <p className="font-ui text-[11px] truncate" style={{ color: "var(--text-tertiary)" }}>
                   {activeNickname ? userDisplayName : "اضغط لفتح الإعدادات"}
                 </p>
               </div>
@@ -957,7 +996,7 @@ function ChatPageContent() {
             )}
 
             {nicknameActionMessage && (
-              <p className="font-ui text-[11px] mt-2" style={{ color: "#6b6b6b" }}>
+              <p className="font-ui text-[11px] mt-2" style={{ color: "var(--text-secondary)" }}>
                 {nicknameActionMessage}
               </p>
             )}
@@ -967,7 +1006,6 @@ function ChatPageContent() {
             className="shrink-0 flex flex-col items-center gap-2 pb-4 pt-2"
             style={{ width: SIDEBAR_W_COLLAPSED, marginInlineEnd: "auto" }}
           >
-            <ThemeToggle />
             <button
               onClick={handleAvatarClick}
               className="flex items-center justify-center pt-1 rounded-lg hover:bg-black/5 transition-colors p-1"
@@ -1009,10 +1047,29 @@ function ChatPageContent() {
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[min(320px,85vw)] flex flex-col overflow-hidden"
-            style={{ background: "#ffffff", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
+            style={{ background: "var(--bg-secondary)", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
           >
             <div className="shrink-0" style={{ height: 72 }} />
             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
+              <button
+                type="button"
+                onClick={() => { startNewChat(); setMobileSidebarOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-4 py-3 mb-3 font-ui transition-colors"
+                style={{
+                  background: "transparent",
+                  border: "var(--border-subtle)",
+                  color: "var(--text-primary)",
+                  borderRadius: 12,
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>محادثة جديدة</span>
+              </button>
+
               {SECTIONS.map((section) => (
                 <button
                   key={section}
@@ -1020,16 +1077,16 @@ function ChatPageContent() {
                     setCurrentSection(section);
                     setMobileSidebarOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui transition-colors"
+                  className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors"
                   style={{
-                    fontSize: "1rem",
-                    fontWeight: currentSection === section ? 600 : 400,
+                    fontSize: "0.95rem",
+                    fontWeight: currentSection === section ? 700 : 600,
                     background: currentSection === section ? "var(--color-accent-tint-12)" : "transparent",
-                    color: currentSection === section ? "var(--color-accent)" : "#000000",
+                    color: currentSection === section ? "var(--color-accent)" : "var(--text-primary)",
                     border: currentSection === section ? "1px solid var(--color-accent-tint-25)" : "1px solid transparent",
                   }}
                 >
-                  <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "#999"} />
+                  <SectionIcon section={section} color={currentSection === section ? "var(--color-accent)" : "var(--text-secondary)"} />
                   <span>{section}</span>
                 </button>
               ))}
@@ -1039,13 +1096,58 @@ function ChatPageContent() {
                   setMobileSidebarOpen(false);
                   router.push("/tahseen-khaleel");
                 }}
-                className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui transition-colors hover:bg-black/5"
-                style={{ color: "#000000" }}
+                className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl font-ui transition-colors hover:bg-black/5"
+                style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "0.95rem" }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>📘</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
                 <span>تحسين خليل</span>
               </button>
-              {currentSection === "فهرس" && (
+
+              {currentSection === "بحث" && (
+                <div className="mt-4 px-1">
+                  <input
+                    type="text"
+                    placeholder="ابحث في المحادثات..."
+                    className="w-full px-3 py-2.5 rounded-xl font-ui text-sm"
+                    style={{
+                      background: "var(--bg-tertiary)",
+                      border: "var(--border-subtle)",
+                      color: "var(--text-primary)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              )}
+              {currentSection === "أدوات" && (
+                <div className="mt-4 space-y-4">
+                  <button
+                    onClick={() => {
+                      setToolsModalOpen(true);
+                      setMobileSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                    <span>أضف أدوات</span>
+                  </button>
+                </div>
+              )}
+              {currentSection === "خليخانة" && (
+                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "var(--text-tertiary)" }}>
+                  أنشئ مشروعاً لتنظيم أفكارك
+                </p>
+              )}
+              {currentSection === "دفاتر" && (
+                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "var(--text-tertiary)" }}>
+                  لا توجد دفاتر بعد — أنشئ دفتراً جديداً لتبدأ
+                </p>
+              )}
+
+              <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                <p className="px-4 pb-2 font-ui text-xs" style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>المحادثات السابقة</p>
                 <ConversationList
                   conversations={conversations}
                   currentConversationId={currentConversationId}
@@ -1059,32 +1161,9 @@ function ChatPageContent() {
                   }}
                   groupedConversations={grouped}
                 />
-              )}
-              {currentSection === "أدوات" && (
-                <div className="mt-4 space-y-4">
-                  <button
-                    onClick={() => {
-                      setToolsModalOpen(true);
-                      setMobileSidebarOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                    style={{ color: "#000000" }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                    <span>أضف أدوات</span>
-                  </button>
-                </div>
-              )}
-              {currentSection === "خليخانة" && (
-                <p className="mt-4 px-4 py-2 font-ui text-sm" style={{ color: "#8c8c8c" }}>
-                  أنشئ مشروعاً لتنظيم أفكارك
-                </p>
-              )}
-            </div>
-            <div className="shrink-0 p-4 border-t border-[#e5e5e5] space-y-2">
-              <div className="flex justify-center">
-                <ThemeToggle />
               </div>
+            </div>
+            <div className="shrink-0 p-4 space-y-2" style={{ borderTop: "var(--border-subtle)" }}>
               <button
                 onClick={() => {
                   setMobileSidebarOpen(false);
@@ -1095,10 +1174,10 @@ function ChatPageContent() {
               >
                 <UserAvatarIcon expanded={true} role={userRole} />
                 <div className="text-right">
-                  <p className="font-ui text-xs font-semibold" style={{ color: "#231f20" }}>
+                  <p className="font-ui text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
                     {activeNickname || userDisplayName}
                   </p>
-                  <p className="font-ui text-[11px]" style={{ color: "#7a7a7a" }}>
+                  <p className="font-ui text-[11px]" style={{ color: "var(--text-tertiary)" }}>
                     {activeNickname ? userDisplayName : "الإعدادات والحساب"}
                   </p>
                 </div>
@@ -1153,13 +1232,12 @@ function ChatPageContent() {
             <img
               src="/logo/logo_black.svg"
               alt="خليلي"
-              className="w-40 md:w-56 h-auto mb-5"
+              className="logo-theme w-40 md:w-56 h-auto mb-5"
               draggable={false}
-              style={{ filter: "none" }}
             />
             <p
               className="font-ui text-sm md:text-base text-center leading-relaxed"
-              style={{ color: "#6b6b6b" }}
+              style={{ color: "var(--text-secondary)" }}
             >
               {tagline}
             </p>
@@ -1269,7 +1347,7 @@ function ChatPageContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center" style={{ background: "#ebebec" }}><span style={{ color: "#8c8c8c" }}>جاري التحميل...</span></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center" style={{ background: "var(--bg-tertiary)" }}><span style={{ color: "var(--text-tertiary)" }}>جاري التحميل...</span></div>}>
       <ChatPageContent />
     </Suspense>
   );

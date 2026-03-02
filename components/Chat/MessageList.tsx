@@ -38,7 +38,7 @@ export function MessageList({
       <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6" style={{ minHeight: "50vh" }}>
-            <p className="font-ui text-center text-sm md:text-base" style={{ color: "#8c8c8c" }}>
+            <p className="font-ui text-center text-sm md:text-base" style={{ color: "var(--text-tertiary)" }}>
               ابدأ المحادثة...
             </p>
             <div className="flex flex-wrap justify-center gap-2 max-w-xl">
@@ -81,22 +81,10 @@ export function MessageList({
 
         {isLoading && (
           <div className="flex justify-end">
-            <div
-              style={{
-                background: "#ffffff",
-                borderRadius: 16,
-                padding: "12px 20px",
-                border: "1px solid rgba(0,0,0,0.07)",
-              }}
-            >
-              <span className="font-ui font-semibold" style={{ color: "var(--color-accent)", fontSize: "0.95rem" }}>
-                خال خليل خلّله مع المخللات
-                <span className="kheleel-dots" aria-hidden>
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
-                </span>
-              </span>
+            <div className="typing-indicator">
+              <div className="typing-dot" />
+              <div className="typing-dot" />
+              <div className="typing-dot" />
             </div>
           </div>
         )}

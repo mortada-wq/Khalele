@@ -72,7 +72,7 @@ export function HomePillInput({
     <div className="w-full max-w-2xl">
       {/* Main pill bar */}
       <div
-        className="home-pill-bar relative flex items-center rounded-full transition-all duration-200 focus-within:ring-1 focus-within:ring-[rgba(0,0,0,0.08)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--background)]"
+        className="home-pill-bar relative flex items-center transition-all duration-200"
         style={{
           minHeight: PILL_HEIGHT,
           borderRadius: PILL_RADIUS,
@@ -100,13 +100,14 @@ export function HomePillInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="font-ui flex-1 bg-transparent border-0 focus:outline-none text-[#231f20] placeholder:text-[#8c8c8c] min-w-0 resize-none py-3 leading-normal"
+          className="font-ui flex-1 bg-transparent border-0 focus:outline-none min-w-0 resize-none py-3 leading-normal placeholder:text-[var(--text-tertiary)]"
           style={{
             paddingLeft: 10,
             paddingRight: 10,
             minHeight: 24,
             maxHeight: 120,
             fontSize: "1rem",
+            color: "var(--text-primary)",
           }}
         />
 
