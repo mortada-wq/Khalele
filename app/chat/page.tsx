@@ -89,6 +89,7 @@ function SectionIcon({ section, color }: { section: string; color: string }) {
 const SIDEBAR_W_EXPANDED = 240;
 const SIDEBAR_W_COLLAPSED = 64;
 const MAX_REASON_LENGTH = 180;
+const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
 
 interface ProfileNicknameSuggestion {
   value: string;
@@ -177,8 +178,8 @@ function ChatPageContent() {
     return Number.isFinite(n) && n >= 0.5 && n <= 2 ? n : 1;
   });
   const [voiceId, setVoiceId] = useState(() => {
-    if (typeof window === "undefined") return "Zeina";
-    return localStorage.getItem("khalele_voice_id") || "Zeina";
+    if (typeof window === "undefined") return "ar-XA-Wavenet-A";
+    return localStorage.getItem("khalele_voice_id") || "ar-XA-Wavenet-A";
   });
   const [useSearch] = useState(false);
   const [empathyMode] = useState(false);
@@ -202,6 +203,7 @@ function ChatPageContent() {
   const [showDeleteReasonInput, setShowDeleteReasonInput] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const [factCheckMode] = useState<FactCheckMode>("off");
+  const [tagline, setTagline] = useState(DEFAULT_TAGLINE);
   const userIdRef = useRef<string>("");
   const incognitoIdRef = useRef<string>("");
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
@@ -226,6 +228,7 @@ function ChatPageContent() {
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages ?? [];
+  const showHero = messages.length === 0 && !isLoading;
   const activeNickname = profileData?.preferences?.nickname?.trim() ?? "";
   const pendingNickname =
     profileData?.nicknameSuggestion?.status === "pending" ? profileData.nicknameSuggestion.value : "";
@@ -385,6 +388,22 @@ function ChatPageContent() {
   useEffect(() => {
     if (toolsModalOpen) setUserToolIds(getUserTools());
   }, [toolsModalOpen]);
+
+  useEffect(() => {
+    let canceled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/taglines/active");
+        if (!res.ok) return;
+        const data = (await res.json()) as { tagline?: string };
+        if (!canceled && data.tagline?.trim()) {
+          const t = data.tagline.trim();
+          if (/[\u0600-\u06FF]/.test(t)) setTagline(t);
+        }
+      } catch { /* keep default */ }
+    })();
+    return () => { canceled = true; };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -960,15 +979,15 @@ function ChatPageContent() {
         )}
       </aside>
 
-      {/* Mobile menu - BirdToggle (same icon as desktop sidebar) */}
+      {/* Mobile bird toggle — sole controller for sidebar */}
       <button
         type="button"
-        onClick={() => setMobileSidebarOpen(true)}
-        className="md:hidden fixed top-4 z-50 flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation"
+        onClick={() => setMobileSidebarOpen((p) => !p)}
+        className="md:hidden fixed top-4 z-[60] flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation"
         style={{ right: 12 }}
-        aria-label="فتح القائمة"
+        aria-label={mobileSidebarOpen ? "إغلاق القائمة" : "فتح القائمة"}
       >
-        <BirdToggle expanded={false} size={40} />
+        <BirdToggle expanded={mobileSidebarOpen} size={40} />
       </button>
 
       {/* Mobile sidebar overlay */}
@@ -992,17 +1011,7 @@ function ChatPageContent() {
             className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[min(320px,85vw)] flex flex-col overflow-hidden"
             style={{ background: "#ffffff", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
           >
-            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[#e5e5e5]">
-              <button
-                onClick={() => setMobileSidebarOpen(false)}
-                className="p-2 -m-2 rounded-lg hover:bg-black/5"
-                aria-label="إغلاق"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-              </button>
-              <span className="font-ui font-semibold" style={{ color: "#000000" }}>القائمة</span>
-              <div className="w-10" />
-            </div>
+            <div className="shrink-0" style={{ height: 72 }} />
             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
               {SECTIONS.map((section) => (
                 <button
@@ -1139,14 +1148,32 @@ function ChatPageContent() {
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
           transition={{ duration: 0.2 }}
         >
-        <MessageList
-          messages={messages}
-          isLoading={isLoading}
-          speechSpeed={speechSpeed}
-          voiceId={voiceId}
-          onSendMessage={sendMessage}
-          onRegenerate={regenerateMessage}
-        />
+        {showHero ? (
+          <div className="flex-1 flex flex-col items-center justify-center px-6">
+            <img
+              src="/logo/logo_black.svg"
+              alt="خليلي"
+              className="w-40 md:w-56 h-auto mb-5"
+              draggable={false}
+              style={{ filter: "none" }}
+            />
+            <p
+              className="font-ui text-sm md:text-base text-center leading-relaxed"
+              style={{ color: "#6b6b6b" }}
+            >
+              {tagline}
+            </p>
+          </div>
+        ) : (
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            speechSpeed={speechSpeed}
+            voiceId={voiceId}
+            onSendMessage={sendMessage}
+            onRegenerate={regenerateMessage}
+          />
+        )}
 
         <div className="shrink-0 px-4 md:px-6 pb-4 md:pb-6 pt-1">
           <div className="max-w-2xl mx-auto">
@@ -1164,7 +1191,7 @@ function ChatPageContent() {
               }}
               incognitoMode={incognitoMode}
               onIncognitoChange={setIncognitoMode}
-              placeholder="اكتب رسالتك..."
+              placeholder={showHero ? "سلام عليكم.." : "اكتب رسالتك..."}
               disabled={isLoading}
             />
           </div>

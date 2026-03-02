@@ -21,7 +21,7 @@ export function CallModeOverlay({
   onClose,
   onSendAndGetResponse,
   speechSpeed = 1,
-  voiceId = "Zeina",
+  voiceId = "ar-XA-Wavenet-A",
 }: CallModeOverlayProps) {
   const [state, setState] = useState<CallState>("idle");
   const [interimTranscript, setInterimTranscript] = useState("");

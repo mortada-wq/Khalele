@@ -36,7 +36,7 @@ const DEFAULT_SETTINGS: KheleelSettings = {
   fontSize: "medium",
   compactMode: false,
   speechSpeed: 1,
-  voiceId: "Zeina",
+  voiceId: "ar-XA-Wavenet-A",
   autoResponse: false,
   languageStyle: "easy_arabic",
   tone: "friendly",
@@ -445,11 +445,11 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                               <span
                                 className="px-1.5 py-0.5 rounded text-[10px] font-medium"
                                 style={{
-                                  background: voice.engine === "neural" ? "#e8f5e9" : "#fff3e0",
-                                  color: voice.engine === "neural" ? "#2e7d32" : "#e65100",
+                                  background: voice.engine === "standard" ? "#fff3e0" : "#e8f5e9",
+                                  color: voice.engine === "standard" ? "#e65100" : "#2e7d32",
                                 }}
                               >
-                                {voice.engine === "neural" ? "عصبي" : "قياسي"}
+                                {voice.engine === "standard" ? "قياسي" : "متقدم"}
                               </span>
                             </div>
                           </div>

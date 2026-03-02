@@ -98,7 +98,7 @@ export default function CharacterDesignerPage() {
             Amazon Polly Custom Voices — صوت يطابق العمر والمنطقة
           </p>
           <select className="px-4 py-2 rounded-lg bg-[#fafafa] border border-[#e5e5e5]">
-            <option>Zeina (عربي)</option>
+            <option>ar-XA-Wavenet-A (نورا)</option>
             <option>Zayd (عربي)</option>
           </select>
         </section>

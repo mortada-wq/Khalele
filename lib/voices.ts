@@ -1,42 +1,67 @@
-import type { LanguageCode } from "@aws-sdk/client-polly";
-
 export interface VoiceOption {
   id: string;
   nameAr: string;
   nameEn: string;
   gender: "female" | "male";
-  engine: "standard" | "neural";
-  languageCode: LanguageCode;
+  engine: "standard" | "wavenet" | "neural2" | "chirp";
+  languageCode: string;
   preview: string;
 }
 
 export const ARABIC_VOICES: VoiceOption[] = [
   {
-    id: "Zeina",
-    nameAr: "زينة",
-    nameEn: "Zeina",
+    id: "ar-XA-Wavenet-A",
+    nameAr: "نورا",
+    nameEn: "Noura",
+    gender: "female",
+    engine: "wavenet",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا نورا. كيف يمكنني مساعدتك اليوم؟",
+  },
+  {
+    id: "ar-XA-Wavenet-B",
+    nameAr: "عمر",
+    nameEn: "Omar",
+    gender: "male",
+    engine: "wavenet",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا عمر. كيف يمكنني مساعدتك اليوم؟",
+  },
+  {
+    id: "ar-XA-Wavenet-C",
+    nameAr: "يوسف",
+    nameEn: "Yousef",
+    gender: "male",
+    engine: "wavenet",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا يوسف. كيف يمكنني مساعدتك اليوم؟",
+  },
+  {
+    id: "ar-XA-Wavenet-D",
+    nameAr: "ليلى",
+    nameEn: "Layla",
+    gender: "female",
+    engine: "wavenet",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا ليلى. كيف يمكنني مساعدتك اليوم؟",
+  },
+  {
+    id: "ar-XA-Standard-A",
+    nameAr: "سارة",
+    nameEn: "Sara",
     gender: "female",
     engine: "standard",
-    languageCode: "arb",
-    preview: "مرحباً، أنا زينة. كيف يمكنني مساعدتك اليوم؟",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا سارة. كيف يمكنني مساعدتك اليوم؟",
   },
   {
-    id: "Hala",
-    nameAr: "هالة",
-    nameEn: "Hala",
-    gender: "female",
-    engine: "neural",
-    languageCode: "ar-AE",
-    preview: "مرحباً، أنا هالة. كيف يمكنني مساعدتك اليوم؟",
-  },
-  {
-    id: "Zayd",
-    nameAr: "زيد",
-    nameEn: "Zayd",
+    id: "ar-XA-Standard-B",
+    nameAr: "خالد",
+    nameEn: "Khaled",
     gender: "male",
-    engine: "neural",
-    languageCode: "ar-AE",
-    preview: "مرحباً، أنا زيد. كيف يمكنني مساعدتك اليوم؟",
+    engine: "standard",
+    languageCode: "ar-XA",
+    preview: "مرحباً، أنا خالد. كيف يمكنني مساعدتك اليوم؟",
   },
 ];
 

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { synthesizeSpeech } from "@/lib/aws/polly";
+import { synthesizeSpeech } from "@/lib/google/tts";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      console.error("[Voice API] Missing AWS credentials");
-      return NextResponse.json({ error: "AWS credentials not configured" }, { status: 500 });
+    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.GOOGLE_CLOUD_CREDENTIALS) {
+      console.error("[Voice API] Missing Google Cloud credentials");
+      return NextResponse.json({ error: "Google Cloud credentials not configured" }, { status: 500 });
     }
 
     const body = await req.json();
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
           ? speed
           : undefined;
 
-    console.log(`[Voice API] Synthesizing ${text.length} chars, voice=${voiceId || "Zeina"}, speed=${resolvedSpeed || 1}`);
+    console.log(`[Voice API] Synthesizing ${text.length} chars, voice=${voiceId || "ar-XA-Wavenet-A"}, speed=${resolvedSpeed || 1}`);
 
     const audioBuffer = await synthesizeSpeech(text, {
       voiceId: typeof voiceId === "string" ? voiceId : undefined,
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const errName = error instanceof Error ? error.name : "Unknown";
     console.error(`[Voice API] ERROR (${errName}):`, errMsg);
     return NextResponse.json(
-      { error: `Polly error: ${errName} — ${errMsg}` },
+      { error: `TTS error: ${errName} — ${errMsg}` },
       { status: 500 }
     );
   }

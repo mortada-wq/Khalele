@@ -88,6 +88,44 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" translate="no" suppressHydrationWarning className={`notranslate ${arefRuqaa.variable} ${amiri.variable} ${notoNaskh.variable} ${notoNastaliq.variable}`}>
       <head>
         <meta name="google" content="notranslate" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "Kheleel | خليلي",
+              url: "https://kheleel.com",
+              applicationCategory: "UtilitiesApplication",
+              operatingSystem: "Web",
+              description:
+                "ذكاء اصطناعي يتكلم عربي — يفهم كل اللهجات: عراقي، مصري، خليجي، شامي، مغربي. محادثة صوتية، أدوات ذكية، وخصوصية كاملة.",
+              offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+              inLanguage: ["ar", "ar-IQ", "ar-EG", "ar-SA", "ar-SY", "ar-MA"],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Kheleel",
+              alternateName: "خليلي",
+              url: "https://kheleel.com",
+              logo: "https://kheleel.com/logo/logo_black.svg",
+              description:
+                "ذكاء اصطناعي عربي يفهم كل اللهجات. يسد الفجوة التقنية لأربعمئة مليون ناطق بالعربية.",
+              contactPoint: {
+                "@type": "ContactPoint",
+                email: "hello@kheleel.com",
+                contactType: "customer service",
+                availableLanguage: ["Arabic", "English"],
+              },
+            }),
+          }}
+        />
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script
           suppressHydrationWarning
