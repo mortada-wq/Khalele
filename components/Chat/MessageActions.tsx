@@ -4,13 +4,13 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Copy,
   Check,
-  Share2,
-  Play,
   ThumbsDown,
   ThumbsUp,
   RefreshCw,
   Loader2,
   X,
+  Sparkles,
+  FileText,
 } from "lucide-react";
 
 interface MessageActionsProps {
@@ -19,6 +19,8 @@ interface MessageActionsProps {
   speechSpeed?: number;
   voiceId?: string;
   onRegenerate?: () => void;
+  onEnhance?: (content: string) => void;
+  onWriteReport?: (content: string) => void;
 }
 
 type FeedbackReason = "inaccurate" | "not_helpful" | "too_long" | "other";
@@ -30,23 +32,12 @@ const FEEDBACK_REASONS: { value: FeedbackReason; label: string }[] = [
   { value: "other", label: "سبب آخر" },
 ];
 
-function VoiceWaveIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="voice-wave-bars">
-      <rect x="2" y="8" width="3" height="8" rx="1" />
-      <rect x="7" y="5" width="3" height="14" rx="1" />
-      <rect x="12" y="3" width="3" height="18" rx="1" />
-      <rect x="17" y="6" width="3" height="12" rx="1" />
-    </svg>
-  );
-}
-
 export function MessageActions({
   messageId,
   content,
-  speechSpeed = 1,
-  voiceId,
   onRegenerate,
+  onEnhance,
+  onWriteReport,
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<"up" | "down" | null>(null);
@@ -54,22 +45,6 @@ export function MessageActions({
   const [dislikeReason, setDislikeReason] = useState<FeedbackReason>("inaccurate");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-
-  // Audio state
-  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-        audioUrlRef.current = null;
-      }
-    };
-  }, []);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -90,85 +65,6 @@ export function MessageActions({
     }
   }, [content]);
 
-  const handleShare = useCallback(async () => {
-    const shareData = { title: "خليلي", text: content };
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // User cancelled or share failed — fall back to copy
-        await navigator.clipboard.writeText(content);
-      }
-    } else {
-      await navigator.clipboard.writeText(content);
-    }
-  }, [content]);
-
-  const handlePlay = useCallback(async () => {
-    if (audioState === "playing" && audioRef.current) {
-      audioRef.current.pause();
-      setAudioState("paused");
-      return;
-    }
-
-    if (audioState === "paused" && audioRef.current) {
-      audioRef.current.play();
-      setAudioState("playing");
-      return;
-    }
-
-    // Stop any existing audio first
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = null;
-    }
-
-    setAudioState("loading");
-    try {
-      const res = await fetch("/api/voice/synthesize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: content, speed: speechSpeed, voiceId }),
-      });
-      if (!res.ok) throw new Error("TTS failed");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      audioUrlRef.current = url;
-      const audio = new Audio(url);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setAudioState("idle");
-        audioRef.current = null;
-        if (audioUrlRef.current) {
-          URL.revokeObjectURL(audioUrlRef.current);
-          audioUrlRef.current = null;
-        }
-      };
-
-      audio.onerror = () => setAudioState("idle");
-      await audio.play();
-      setAudioState("playing");
-    } catch {
-      // Fallback to Web Speech API
-      try {
-        const u = new SpeechSynthesisUtterance(content);
-        u.lang = "ar-SA";
-        u.rate = speechSpeed;
-        u.onend = () => setAudioState("idle");
-        u.onerror = () => setAudioState("idle");
-        speechSynthesis.speak(u);
-        setAudioState("playing");
-      } catch {
-        setAudioState("idle");
-      }
-    }
-  }, [content, speechSpeed, voiceId, audioState]);
-
   const sendFeedback = useCallback(
     async (type: "like" | "dislike", reason?: FeedbackReason) => {
       setSubmittingFeedback(true);
@@ -185,7 +81,7 @@ export function MessageActions({
           }),
         });
       } catch {
-        // Silently fail — don't disrupt UX
+        // Silently fail
       } finally {
         setSubmittingFeedback(false);
       }
@@ -228,12 +124,12 @@ export function MessageActions({
     "p-1.5 rounded-md transition-all duration-150 hover:bg-black/[0.06] active:scale-95 disabled:opacity-30 disabled:pointer-events-none";
 
   const iconColor = (active: boolean, activeColor: string) =>
-    active ? activeColor : "#999";
+    active ? activeColor : "var(--text-tertiary)";
 
   return (
-    <div className="mt-1.5">
+    <div className="mt-1">
       <div className="flex items-center gap-0.5 message-actions-bar">
-        {/* Copy */}
+        {/* 1. Copy */}
         <div className="relative">
           <button
             type="button"
@@ -245,7 +141,7 @@ export function MessageActions({
             {copied ? (
               <Check size={16} style={{ color: "#2E8B57" }} />
             ) : (
-              <Copy size={16} style={{ color: "#999" }} />
+              <Copy size={16} style={{ color: "var(--text-tertiary)" }} />
             )}
           </button>
           {copied && (
@@ -262,40 +158,23 @@ export function MessageActions({
           )}
         </div>
 
-        {/* Share */}
+        {/* 2. Regenerate */}
         <button
           type="button"
-          onClick={handleShare}
+          onClick={handleRegenerate}
+          disabled={regenerating || !onRegenerate}
           className={iconBtnClass}
-          title="مشاركة"
-          aria-label="مشاركة"
+          title="إعادة توليد"
+          aria-label="إعادة توليد"
         >
-          <Share2 size={16} style={{ color: "#999" }} />
+          <RefreshCw
+            size={16}
+            style={{ color: "var(--text-tertiary)" }}
+            className={regenerating ? "animate-spin" : ""}
+          />
         </button>
 
-        {/* Play Audio */}
-        <button
-          type="button"
-          onClick={handlePlay}
-          className={iconBtnClass}
-          disabled={audioState === "loading"}
-          title={audioState === "playing" ? "إيقاف مؤقت" : audioState === "paused" ? "متابعة" : "استمع"}
-          aria-label={audioState === "playing" ? "إيقاف مؤقت" : audioState === "paused" ? "متابعة" : "استمع"}
-        >
-          {audioState === "loading" ? (
-            <Loader2 size={16} className="animate-spin" style={{ color: "var(--color-accent)" }} />
-          ) : audioState === "playing" ? (
-            <VoiceWaveIcon size={16} />
-          ) : audioState === "paused" ? (
-            <Play size={16} style={{ color: "var(--color-accent)" }} />
-          ) : (
-            <Play size={16} style={{ color: "#999" }} />
-          )}
-        </button>
-
-        <span className="w-px h-4 mx-1" style={{ background: "rgba(0,0,0,0.08)" }} />
-
-        {/* Like */}
+        {/* 3. Like */}
         <button
           type="button"
           onClick={handleLike}
@@ -311,7 +190,7 @@ export function MessageActions({
           />
         </button>
 
-        {/* Dislike */}
+        {/* 4. Dislike */}
         <button
           type="button"
           onClick={handleDislike}
@@ -327,22 +206,30 @@ export function MessageActions({
           />
         </button>
 
-        <span className="w-px h-4 mx-1" style={{ background: "rgba(0,0,0,0.08)" }} />
+        <span className="action-separator w-px h-4 mx-1" style={{ background: "rgba(0,0,0,0.08)" }} />
 
-        {/* Regenerate */}
+        {/* 5. زد (Enhance) */}
         <button
           type="button"
-          onClick={handleRegenerate}
-          disabled={regenerating || !onRegenerate}
+          onClick={() => onEnhance?.(content)}
+          disabled={!onEnhance}
           className={iconBtnClass}
-          title="إعادة توليد"
-          aria-label="إعادة توليد"
+          title="زد — وسّع الإجابة"
+          aria-label="زد — وسّع الإجابة"
         >
-          <RefreshCw
-            size={16}
-            style={{ color: "#999" }}
-            className={regenerating ? "animate-spin" : ""}
-          />
+          <Sparkles size={16} style={{ color: "var(--text-tertiary)" }} />
+        </button>
+
+        {/* 6. Write Report */}
+        <button
+          type="button"
+          onClick={() => onWriteReport?.(content)}
+          disabled={!onWriteReport}
+          className={iconBtnClass}
+          title="اكتب تقرير"
+          aria-label="اكتب تقرير"
+        >
+          <FileText size={16} style={{ color: "var(--text-tertiary)" }} />
         </button>
       </div>
 
@@ -357,9 +244,9 @@ export function MessageActions({
             onChange={(e) => setDislikeReason(e.target.value as FeedbackReason)}
             className="px-3 py-1.5 rounded-lg text-xs border"
             style={{
-              background: "#fafafa",
+              background: "var(--bg-input)",
               borderColor: "rgba(0,0,0,0.1)",
-              color: "#231f20",
+              color: "var(--text-primary)",
             }}
           >
             {FEEDBACK_REASONS.map((r) => (
@@ -386,7 +273,7 @@ export function MessageActions({
             className="p-1 rounded hover:bg-black/5"
             aria-label="إغلاق"
           >
-            <X size={14} style={{ color: "#999" }} />
+            <X size={14} style={{ color: "var(--text-tertiary)" }} />
           </button>
         </div>
       )}

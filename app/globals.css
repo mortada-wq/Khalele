@@ -127,24 +127,27 @@ body {
   text-align: left;
 }
 
-/* Hybrid message bubbles — ChatGPT asymmetric (spec: components.md §3) */
+/* Chat bubbles — DeepSeek/ChatGPT style
+   User: has border, colored bg
+   AI: NO border, transparent bg (just text) */
 .chat-message-user {
-  background: var(--accent-blue) !important;
-  color: white !important;
-  border-radius: 20px 20px 4px 20px;
+  background: var(--color-accent-tint-12) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--color-accent-tint-25);
+  border-radius: 18px 18px 4px 18px;
   padding: 0.75rem 1rem;
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   max-width: 70%;
 }
 
 .chat-message-ai {
-  background: var(--bg-tertiary) !important;
+  background: transparent !important;
   color: var(--text-primary) !important;
-  border: var(--border-subtle);
-  border-radius: 20px 20px 20px 4px;
-  padding: 0.75rem 1rem;
-  margin: 0.5rem 0;
-  max-width: 70%;
+  border: none;
+  border-radius: 0;
+  padding: 0.25rem 0;
+  margin: 0.25rem 0;
+  max-width: 85%;
 }
 
 /* Floating capsule input — DeepSeek style (spec: components.md §1) */
@@ -505,4 +508,90 @@ textarea:focus {
 }
 .expandable-dots:hover {
   color: var(--color-accent) !important;
+}
+
+/* ── Top Bar ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  height: 52px;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+}
+
+.top-bar-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.top-bar-action:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-tint-06);
+}
+.top-bar-action-label {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ── Theme Toggle (sun/moon) ── */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.theme-toggle-btn:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-tint-06);
+}
+
+/* ── Stealth Mode Indicator ── */
+.stealth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.12);
+  color: #8B5CF6;
+  pointer-events: none;
+}
+[data-theme="dark"] .stealth-indicator {
+  background: rgba(139, 92, 246, 0.2);
+  color: #A78BFA;
+}
+
+/* ── Message actions bar — DeepSeek style ── */
+.message-actions-bar {
+  padding: 2px 0;
+}
+[data-theme="dark"] .message-actions-bar button {
+  color: rgba(255, 255, 255, 0.4);
+}
+[data-theme="dark"] .message-actions-bar button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .message-actions-bar .action-separator {
+  background: rgba(255, 255, 255, 0.08);
 }

@@ -1,0 +1,31 @@
+name: My Dev Config
+version: 1.0.0
+schema: v1
+
+models:
+  # Your DeepSeek API with $19.99 balance
+  - name: DeepSeek (Main)
+    provider: openai
+    model: deepseek-chat
+    apiBase: https://api.deepseek.com/v1
+    apiKey: sk-34b8ea1d47784070b4a1c56e6c0802cf
+    
+  # DeepSeek Coder - optimized for programming
+  - name: DeepSeek Coder
+    provider: openai
+    model: deepseek-coder
+    apiBase: https://api.deepseek.com/v1
+    apiKey: sk-34b8ea1d47784070b4a1c56e6c0802cf
+    
+  # Your local Ollama as backup (if you want it)
+  - name: Qwen Local
+    provider: ollama
+    model: qwen2.5-coder:7b
+    url: http://localhost:11434
+
+# Fast autocomplete (optional - uses local Ollama)
+tabAutocompleteModel:
+  name: Qwen AutoComplete
+  provider: ollama
+  model: qwen2.5-coder:1.5b
+  url: http://localhost:11434

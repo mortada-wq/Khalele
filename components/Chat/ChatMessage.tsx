@@ -15,7 +15,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
     >
       <div
         className={isUser ? "chat-message-user" : "chat-message-ai"}
-        style={{ maxWidth: "70%" }}
+        style={{ maxWidth: isUser ? "70%" : "85%" }}
       >
         <p
           className="font-ui text-base leading-relaxed whitespace-pre-wrap"
