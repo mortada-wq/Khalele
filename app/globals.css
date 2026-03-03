@@ -191,7 +191,7 @@ body {
   50%       { transform: rotate(28deg); }
 }
 
-/* ── Bird Toggle — Fixed position, wings-only animation ─────────────────── */
+/* ── Bird Toggle — Artistic wings animation ─────────────────── */
 .toggle-wrapper {
   position: relative;
   display: inline-flex;
@@ -204,13 +204,13 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Bird icon colors: black in light mode, white in dark mode */
 .bird-icon path {
   fill: #000000;
-  transition: fill 0.2s ease;
+  transition: fill 0.3s ease;
 }
 [data-theme="dark"] .bird-icon path {
   fill: #FFFFFF;
@@ -224,13 +224,49 @@ body {
   opacity: 1;
 }
 
-/* Sidebar expanded (.is-open): open wing visible */
+/* Sidebar expanded (.is-open): open wing visible with smooth fade */
 .toggle-wrapper.is-open .icon-open {
   opacity: 1;
 }
 .toggle-wrapper.is-open .icon-closed {
   opacity: 0;
 }
+
+/* ── Sidebar Section Animations — Minimalist professional fade ─────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebar-section-content {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.sidebar-item {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.sidebar-item:nth-child(1) { animation-delay: 0.05s; }
+.sidebar-item:nth-child(2) { animation-delay: 0.08s; }
+.sidebar-item:nth-child(3) { animation-delay: 0.11s; }
+.sidebar-item:nth-child(4) { animation-delay: 0.14s; }
+.sidebar-item:nth-child(5) { animation-delay: 0.17s; }
+.sidebar-item:nth-child(n+6) { animation-delay: 0.2s; }
 
 /* Typing indicator — ChatGPT bouncing dots (spec: components.md §5) */
 .typing-indicator {

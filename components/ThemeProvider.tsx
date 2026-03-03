@@ -15,6 +15,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem("theme") as Theme | null;
     if (stored === "light" || stored === "dark") {
       setTheme(stored);
+    } else {
+      // Default to dark if no preference stored
+      setTheme("dark");
+      localStorage.setItem("theme", "dark");
     }
   }, []);
 

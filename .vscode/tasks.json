@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ask Claude (Quick)",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        ".vscode/custom-agent/cli.js",
+        "${input:prompt}"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Ask Claude (With Current File)",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        ".vscode/custom-agent/cli.js",
+        "${input:prompt}",
+        "${relativeFile}"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "prompt",
+      "type": "promptString",
+      "description": "What do you want to ask Claude?"
+    }
+  ]
+}

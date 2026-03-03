@@ -170,25 +170,6 @@ export function Sidebar({
 
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full">
-      {/* New Conversation Button - directly under bird */}
-      {onCreateDiwan && (
-        <div className="px-3 pb-2">
-          <button
-            type="button"
-            onClick={() => {
-              onCreateDiwan();
-              if (isMobile) onClose?.();
-            }}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-            style={{ color: "var(--color-accent)" }}
-            title="ديوان جديد"
-          >
-            <IconPlus />
-            {expanded && <span>ديوان جديد</span>}
-          </button>
-        </div>
-      )}
-
       {/* Sections */}
       <div className="flex-1 overflow-y-auto sidebar-scroll">
         {/* ديوان Section */}
@@ -207,7 +188,7 @@ export function Sidebar({
           </button>
           
           {expanded && activeSection === "diwan" && (
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 sidebar-section-content">
               {/* افرش بساطك button */}
               <button
                 type="button"
@@ -215,7 +196,7 @@ export function Sidebar({
                   onCreateDiwan?.();
                   if (isMobile) onClose?.();
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-2"
+                className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-2"
                 style={{ color: "var(--color-accent)" }}
               >
                 <IconPlus />
@@ -230,7 +211,7 @@ export function Sidebar({
                     onSelectConversation(mostRecentDiwan.id);
                     if (isMobile) onClose?.();
                   }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${
+                  className={`sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${
                     currentConversationId === mostRecentDiwan.id ? "bg-black/5 dark:bg-white/5" : ""
                   }`}
                   style={{ color: "var(--text-primary)" }}
@@ -246,7 +227,7 @@ export function Sidebar({
                   <button
                     type="button"
                     onClick={() => setShowAllDiwans(!showAllDiwans)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mt-1"
+                    className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mt-1"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     <IconMoreHorizontal />
@@ -255,7 +236,7 @@ export function Sidebar({
 
                   {showAllDiwans && (
                     <div className="mt-1 space-y-1">
-                      {olderDiwans.map((conv) => (
+                      {olderDiwans.map((conv, idx) => (
                         <button
                           key={conv.id}
                           type="button"
@@ -263,10 +244,13 @@ export function Sidebar({
                             onSelectConversation(conv.id);
                             if (isMobile) onClose?.();
                           }}
-                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${
+                          className={`sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${
                             currentConversationId === conv.id ? "bg-black/5 dark:bg-white/5" : ""
                           }`}
-                          style={{ color: "var(--text-primary)" }}
+                          style={{ 
+                            color: "var(--text-primary)",
+                            animationDelay: `${0.05 + idx * 0.03}s`
+                          }}
                         >
                           <IconGroup />
                           <span className="flex-1 text-right truncate">{conv.title || "ديوان جديد"}</span>
@@ -296,7 +280,7 @@ export function Sidebar({
           </button>
 
           {expanded && activeSection === "directory" && (
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 sidebar-section-content">
               <input
                 type="text"
                 placeholder="ابحث..."
@@ -305,14 +289,14 @@ export function Sidebar({
                   setDirectorySearch(e.target.value);
                   onSearchDirectory?.(e.target.value);
                 }}
-                className="w-full px-3 py-2 rounded-lg font-ui text-xs mb-2"
+                className="sidebar-item w-full px-3 py-2 rounded-lg font-ui text-xs mb-2"
                 style={{
                   background: "var(--bg-tertiary)",
                   border: "1px solid var(--border-subtle)",
                   color: "var(--text-primary)",
                 }}
               />
-              {contacts.map((contact) => (
+              {contacts.map((contact, idx) => (
                 <button
                   key={contact.id}
                   type="button"
@@ -320,8 +304,11 @@ export function Sidebar({
                     onSelectContact?.(contact.id);
                     if (isMobile) onClose?.();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ color: "var(--text-primary)" }}
+                  className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  style={{ 
+                    color: "var(--text-primary)",
+                    animationDelay: `${0.05 + idx * 0.03}s`
+                  }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -353,7 +340,7 @@ export function Sidebar({
           </button>
 
           {expanded && activeSection === "projects" && (
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 sidebar-section-content">
               {onOpenDefater && (
                 <button
                   type="button"
@@ -361,7 +348,7 @@ export function Sidebar({
                     onOpenDefater();
                     if (isMobile) onClose?.();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-1"
+                  className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-1"
                   style={{ color: "var(--color-accent)" }}
                 >
                   <IconPlus />
@@ -375,14 +362,14 @@ export function Sidebar({
                     onCreateProject();
                     if (isMobile) onClose?.();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-2"
+                  className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-2"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   <IconPlus />
                   <span>دفتر جديد</span>
                 </button>
               )}
-              {projects.map((project) => (
+              {projects.map((project, idx) => (
                 <button
                   key={project.id}
                   type="button"
@@ -390,8 +377,11 @@ export function Sidebar({
                     onSelectProject?.(project.id);
                     if (isMobile) onClose?.();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ color: "var(--text-primary)" }}
+                  className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  style={{ 
+                    color: "var(--text-primary)",
+                    animationDelay: `${0.08 + idx * 0.03}s`
+                  }}
                 >
                   <IconProjects />
                   <span className="flex-1 text-right truncate">{project.name}</span>
@@ -417,7 +407,7 @@ export function Sidebar({
           </button>
 
           {expanded && activeSection === "studies" && (
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 sidebar-section-content">
               <input
                 type="text"
                 placeholder="ابحث..."
@@ -426,14 +416,14 @@ export function Sidebar({
                   setCasesSearch(e.target.value);
                   onSearchCases?.(e.target.value);
                 }}
-                className="w-full px-3 py-2 rounded-lg font-ui text-xs mb-2"
+                className="sidebar-item w-full px-3 py-2 rounded-lg font-ui text-xs mb-2"
                 style={{
                   background: "var(--bg-tertiary)",
                   border: "1px solid var(--border-subtle)",
                   color: "var(--text-primary)",
                 }}
               />
-              {studies.map((study) => (
+              {studies.map((study, idx) => (
                 <button
                   key={study.id}
                   type="button"
@@ -441,8 +431,11 @@ export function Sidebar({
                     onSelectStudy?.(study.id);
                     if (isMobile) onClose?.();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ color: "var(--text-primary)" }}
+                  className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  style={{ 
+                    color: "var(--text-primary)",
+                    animationDelay: `${0.05 + idx * 0.03}s`
+                  }}
                 >
                   <IconStudies />
                   <span className="flex-1 text-right truncate">{study.title}</span>
@@ -474,14 +467,13 @@ export function Sidebar({
           zIndex: 10,
         }}
       >
-        {/* Bird at absolute top - aligned left with menu items */}
-        <div className="shrink-0 flex items-center" style={{ paddingLeft: expanded ? 12 : 0, paddingTop: 8, paddingBottom: 8 }}>
+        {/* Bird at absolute top - NO padding, NO gap, height matches TopBar */}
+        <div className="shrink-0 flex items-center" style={{ paddingLeft: expanded ? 12 : 16, height: 52 }}>
           {onToggleSidebar && (
             <button
               type="button"
               onClick={onToggleSidebar}
-              className="relative flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-              style={{ padding: 4 }}
+              className="relative flex items-center justify-center transition-colors"
               aria-label={expanded ? "طي القائمة" : "فتح القائمة"}
             >
               <BirdToggle expanded={expanded} size={48} />
@@ -493,6 +485,22 @@ export function Sidebar({
             </button>
           )}
         </div>
+
+        {/* + Button directly under bird */}
+        {expanded && onCreateDiwan && (
+          <div className="shrink-0 px-3 pb-2">
+            <button
+              type="button"
+              onClick={() => onCreateDiwan()}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ color: "var(--color-accent)" }}
+              title="ديوان جديد"
+            >
+              <IconPlus />
+              <span>ديوان جديد</span>
+            </button>
+          </div>
+        )}
 
         {expanded ? (
           sidebarContent(false)

@@ -1,0 +1,12 @@
+[
+  {
+    "key": "cmd+shift+a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Ask Claude (Quick)"
+  },
+  {
+    "key": "cmd+shift+c",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Ask Claude (With Current File)"
+  }
+]
