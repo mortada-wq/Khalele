@@ -55,7 +55,7 @@ export default function AdminMessagingPage() {
       } else {
         setError("حدث خطأ في الحفظ");
       }
-    } catch (err) {
+    } catch {
       setError("حدث خطأ في الاتصال");
     } finally {
       setSaving(false);
@@ -87,7 +87,7 @@ export default function AdminMessagingPage() {
       } else {
         setError(data.error || "حدث خطأ في الإرسال");
       }
-    } catch (err) {
+    } catch {
       setError("حدث خطأ في الاتصال");
     } finally {
       setBroadcasting(false);

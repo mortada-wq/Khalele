@@ -19,7 +19,6 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
 const ADMINS_TABLE = process.env.DYNAMODB_ADMINS_TABLE || "khalele-admins";
 
 // GET - List all admins

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 interface NotebookEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onInsertText?: (text: string) => void;
+  onInsertText?: (insertFn: (text: string) => void) => void;
   placeholder?: string;
 }
 
@@ -20,7 +20,6 @@ export function NotebookEditor({
   useEffect(() => {
     if (onInsertText) {
       // توفير دالة لإدراج نصوص من الخارج
-      const originalInsertText = onInsertText;
       const insertText = (text: string) => {
         if (textareaRef.current) {
           const start = textareaRef.current.selectionStart;

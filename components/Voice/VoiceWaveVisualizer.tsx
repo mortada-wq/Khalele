@@ -34,7 +34,7 @@ export function VoiceWaveVisualizer({
       transition: {
         duration: 0.5,
         delay: i * 0.1,
-        ease: "easeInOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     }),
     active: (i: number) => ({
@@ -45,7 +45,7 @@ export function VoiceWaveVisualizer({
         delay: i * 0.15,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut",
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     }),
   };
@@ -75,7 +75,7 @@ export function VoiceWaveVisualizer({
 // Circular voice wave for compact spaces
 export function CircularVoiceWave({
   isActive = true,
-  intensity = 0.7,
+  // intensity = 0.7,
   color = "var(--color-accent)",
   size = "md",
   className = "",

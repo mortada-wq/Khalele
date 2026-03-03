@@ -69,7 +69,7 @@ export default function AdminsPage() {
       } else {
         setError(data.error || "حدث خطأ");
       }
-    } catch (err) {
+    } catch {
       setError("حدث خطأ في الاتصال");
     }
   };

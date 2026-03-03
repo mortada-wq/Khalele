@@ -1,9 +1,9 @@
-import textToSpeech from "@google-cloud/text-to-speech";
+import { TextToSpeechClient } from "@google-cloud/text-to-speech";
 import { VOICE_MAP } from "@/lib/voices";
 
-let _client: textToSpeech.TextToSpeechClient | null = null;
+let _client: TextToSpeechClient | null = null;
 
-function getClient(): textToSpeech.TextToSpeechClient {
+function getClient(): TextToSpeechClient {
   if (_client) return _client;
 
   const credsJson = process.env.GOOGLE_CLOUD_CREDENTIALS;
@@ -16,9 +16,9 @@ function getClient(): textToSpeech.TextToSpeechClient {
         `GOOGLE_CLOUD_CREDENTIALS contains invalid JSON: ${e instanceof Error ? e.message : String(e)}`
       );
     }
-    _client = new textToSpeech.TextToSpeechClient({ credentials });
+    _client = new TextToSpeechClient({ credentials });
   } else {
-    _client = new textToSpeech.TextToSpeechClient();
+    _client = new TextToSpeechClient();
   }
 
   return _client;

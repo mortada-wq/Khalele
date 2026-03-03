@@ -24,6 +24,8 @@ const iconProps = {
   strokeLinejoin: "round" as const,
 };
 
+// Unused icon components - kept for potential future use
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function IconSearch() {
   return (
     <svg {...iconProps}>
@@ -91,6 +93,7 @@ function IconDirectory() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function IconChat() {
   return (
     <svg {...iconProps} width={16} height={16}>
@@ -190,8 +193,8 @@ export function Sidebar({
   reports,
   projects,
   studies,
-  stealthMode,
-  onStealthChange,
+  // stealthMode,
+  // onStealthChange,
   onSelectConversation,
   onCreateDiwan,
   onSelectContact,

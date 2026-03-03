@@ -13,7 +13,6 @@ export function ExpandableList<T>({
   items,
   renderItem,
   initialCount = 3,
-  emptyMessage,
 }: ExpandableListProps<T>) {
   const [expanded, setExpanded] = useState(false);
 

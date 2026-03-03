@@ -16,7 +16,7 @@ import { DEFAULT_CHARACTERS } from "@/lib/characters";
 import type { Character, LanguageStyle } from "@/lib/characters";
 import { detectIntegrationIntent, type IntegrationSuggestion } from "@/lib/connectors";
 import { ToolsModal } from "@/components/Tools";
-import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
+import { getUserTools } from "@/lib/tools";
 import { getOrCreateUserId } from "@/lib/chat";
 import type { Message, Conversation } from "@/lib/chat";
 import type { FactCheckMode } from "@/lib/factcheck-config";
@@ -126,7 +126,7 @@ function ChatPageContent() {
   const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const [, setSuggestionBanner] = useState<IntegrationSuggestion>(null);
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
-  const [userToolIds, setUserToolIds] = useState<string[]>([]);
+  const [, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
@@ -135,12 +135,12 @@ function ChatPageContent() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
-  const [nicknameTone, setNicknameTone] = useState("");
-  const [nicknameActionMessage, setNicknameActionMessage] = useState<string | null>(null);
+  const [, setNicknameTone] = useState("");
+  const [, setNicknameActionMessage] = useState<string | null>(null);
   const [nicknameActionBusy, setNicknameActionBusy] = useState(false);
-  const [showRejectReasonInput, setShowRejectReasonInput] = useState(false);
+  const [, setShowRejectReasonInput] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
-  const [showDeleteReasonInput, setShowDeleteReasonInput] = useState(false);
+  const [, setShowDeleteReasonInput] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const [factCheckMode] = useState<FactCheckMode>("off");
   const [tagline, setTagline] = useState(DEFAULT_TAGLINE);
@@ -170,7 +170,7 @@ function ChatPageContent() {
   const activeNickname = profileData?.preferences?.nickname?.trim() ?? "";
   const pendingNickname =
     profileData?.nicknameSuggestion?.status === "pending" ? profileData.nicknameSuggestion.value : "";
-  const userDisplayName = session?.user?.name?.trim() || "ضيف خليل";
+  // const userDisplayName = session?.user?.name?.trim() || "ضيف خليل";
 
   const loadProfile = async () => {
     if (incognitoMode) return;
@@ -220,6 +220,8 @@ function ChatPageContent() {
     }
   };
 
+  // Commented out - not currently used but may be needed later
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const acceptSuggestedNickname = async () => {
     if (!pendingNickname || incognitoMode || nicknameActionBusy) return;
     setNicknameActionBusy(true);
@@ -242,6 +244,8 @@ function ChatPageContent() {
     }
   };
 
+  // Commented out - not currently used but may be needed later
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rejectSuggestedNickname = async () => {
     if (!pendingNickname || incognitoMode || nicknameActionBusy) return;
     const reason = rejectReason.trim().slice(0, MAX_REASON_LENGTH);
@@ -273,6 +277,8 @@ function ChatPageContent() {
     }
   };
 
+  // Commented out - not currently used but may be needed later
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const deleteActiveNickname = async () => {
     if (!activeNickname || incognitoMode || nicknameActionBusy) return;
     const reason = deleteReason.trim().slice(0, MAX_REASON_LENGTH);
@@ -798,11 +804,8 @@ function ChatPageContent() {
           conversations={conversations}
           currentConversationId={currentConversationId}
           contacts={contacts}
-          reports={[]}
           projects={notebooks}
           studies={studies}
-          stealthMode={incognitoMode}
-          onStealthChange={setIncognitoMode}
           onSelectConversation={setCurrentConversationId}
           onCreateDiwan={startNewDiwan}
           onSelectContact={(contactId) => {
@@ -855,10 +858,6 @@ function ChatPageContent() {
               });
               if (res.ok) setStudies((prev) => prev.map((s) => (s.id === sid ? { ...s, title } : s)));
             } catch { /* ignore */ }
-          }}
-          onSearchDiwan={(query) => {
-            // TODO: Implement diwan search
-            console.log("Search diwan:", query);
           }}
           onSearchDirectory={(query) => {
             // TODO: Implement directory search
