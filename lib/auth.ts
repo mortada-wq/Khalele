@@ -5,6 +5,11 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import bcrypt from "bcryptjs";
 
+// Validate required environment variables
+if (!process.env.NEXTAUTH_SECRET) {
+  console.warn("⚠️  NEXTAUTH_SECRET is not set. Using a default value for development only.");
+}
+
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
   ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
@@ -67,6 +72,7 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/signin",
+    error: "/signin", // Redirect errors to signin page instead of showing error page
   },
   callbacks: {
     async session({ session }) {
@@ -80,4 +86,5 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET || "development-secret-change-in-production",
 };

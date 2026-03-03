@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BirdToggle } from "@/components/BirdToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserProfile } from "./UserProfile";
 import type { Conversation } from "@/lib/chat";
 
 const SIDEBAR_W_EXPANDED = 240;
@@ -446,10 +447,21 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Theme toggle at bottom */}
-      <div className="shrink-0 px-3 py-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-        <div className="flex items-center justify-end">
-          <ThemeToggle />
+      {/* Spacer to push bottom content down */}
+      <div className="flex-1" />
+
+      {/* User Profile and Theme toggle at bottom */}
+      <div className="shrink-0 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+        {/* User Profile */}
+        <div className="px-3 py-2">
+          <UserProfile expanded={expanded} />
+        </div>
+        
+        {/* Theme toggle */}
+        <div className="px-3 py-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          <div className="flex items-center justify-end">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </div>
