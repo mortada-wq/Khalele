@@ -61,7 +61,7 @@ export function TopBar({
       className="top-bar shrink-0 flex items-center justify-between px-4 md:px-6"
       style={{ height: 52, background: "transparent" }}
     >
-      {/* Left side (RTL: visual right) — Start button + Share + Report */}
+      {/* Left side (RTL: visual right) — Start button always visible when sidebar expanded */}
       <div className="flex items-center gap-4">
         {sidebarExpanded && onNewChat && (
           <button

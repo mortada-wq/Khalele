@@ -191,25 +191,6 @@ export function Sidebar({
 
       {/* Sections */}
       <div className="flex-1 overflow-y-auto sidebar-scroll">
-        {/* New Chat Button - between bird and ديوان */}
-        {expanded && onCreateDiwan && (
-          <div className="px-3 pt-2 pb-1">
-            <button
-              type="button"
-              onClick={() => {
-                onCreateDiwan();
-                if (isMobile) onClose?.();
-              }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              style={{ color: "var(--color-accent)" }}
-              title="ابدأ"
-            >
-              <IconPlus />
-              <span>ابدأ</span>
-            </button>
-          </div>
-        )}
-
         {/* ديوان Section */}
         <div className="mb-1">
           <button
