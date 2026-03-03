@@ -7,6 +7,7 @@ import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
 import { MessageList } from "@/components/Chat/MessageList";
 import { Sidebar } from "@/components/Sidebar";
+import { TopBar } from "@/components/TopBar";
 
 import { SettingsModal } from "@/components/Settings";
 import { CallModeOverlay } from "@/components/Voice/CallModeOverlay";
@@ -15,7 +16,7 @@ import type { Character, LanguageStyle } from "@/lib/characters";
 import { detectIntegrationIntent, type IntegrationSuggestion } from "@/lib/connectors";
 import { ToolsModal } from "@/components/Tools";
 import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
-import { groupConversationsByDate, getOrCreateUserId } from "@/lib/chat";
+import { getOrCreateUserId } from "@/lib/chat";
 import type { Message, Conversation } from "@/lib/chat";
 import type { FactCheckMode } from "@/lib/factcheck-config";
 import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
@@ -126,6 +127,8 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [userToolIds, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
   const [nicknameTone, setNicknameTone] = useState("");
@@ -337,6 +340,31 @@ function ChatPageContent() {
   }, []);
 
   useEffect(() => {
+    let canceled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/notebooks?limit=50", {
+          headers: apiHeaders(),
+        });
+        if (!res.ok || canceled) return;
+        const data = (await res.json()) as { notebooks?: { id: string; title: string; content: string; updatedAt: string }[] };
+        const list = data.notebooks ?? [];
+        if (!canceled) {
+          setNotebooks(
+            list.map((n) => ({
+              id: n.id,
+              name: n.title,
+              preview: n.content.split("\n")[0]?.trim().slice(0, 40) || undefined,
+              createdAt: n.updatedAt,
+            }))
+          );
+        }
+      } catch { /* ignore */ }
+    })();
+    return () => { canceled = true; };
+  }, [incognitoMode]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const v = sessionStorage.getItem("khalele_incognito");
     if (v === "1") {
@@ -437,7 +465,9 @@ function ChatPageContent() {
     if (initialSentRef.current || !conversationsLoaded) return;
     const fromUrl = searchParams.get("m");
     const fromStorage = typeof window !== "undefined" ? sessionStorage.getItem("khalele_initial_message") : null;
-    const initial = (fromUrl ? decodeURIComponent(fromUrl) : fromStorage)?.trim();
+    const fromNotebook = typeof window !== "undefined" ? sessionStorage.getItem("khalele_import_from_notebook") : null;
+    if (fromNotebook) sessionStorage.removeItem("khalele_import_from_notebook");
+    const initial = (fromUrl ? decodeURIComponent(fromUrl) : fromStorage ?? fromNotebook)?.trim();
     if (initial) {
       if (fromStorage) sessionStorage.removeItem("khalele_initial_message");
       if (fromUrl) router.replace("/chat");
@@ -647,26 +677,81 @@ function ChatPageContent() {
     }
   };
 
-  const grouped = groupConversationsByDate(conversations);
+  const handleShare = () => {
+    if (typeof navigator?.share !== "undefined" && currentConversation) {
+      const text = currentConversation.messages
+        .map((m) => `${m.role === "user" ? "أنت" : "خليل"}: ${m.content}`)
+        .join("\n\n");
+      void navigator.share({
+        title: currentConversation.title || "محادثة خليل",
+        text,
+      });
+    } else {
+      const text = currentConversation?.messages
+        .map((m) => `${m.role === "user" ? "أنت" : "خليل"}: ${m.content}`)
+        .join("\n\n") ?? "";
+      void navigator.clipboard?.writeText(text);
+    }
+  };
+
+  const handleReport = () => {
+    if (!currentConversation?.messages?.length) return;
+    const reportTitle = `تقرير: ${currentConversation.title || "محادثة"}`;
+    const reportContent = currentConversation.messages
+      .map((m) => `${m.role === "user" ? "المستخدم" : "خليل"}: ${m.content}`)
+      .join("\n\n---\n\n");
+    const blob = new Blob([reportContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${reportTitle.slice(0, 40)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleEnhance = (content: string) => {
+    void sendMessage(`زد في التوضيح:\n\n${content}`);
+  };
 
   return (
-    <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      <Sidebar
-        conversations={conversations}
-        currentConversationId={currentConversationId}
-        groupedConversations={grouped}
-        reports={[]}
-        projects={[]}
-        studies={[]}
-        userDisplayName={userDisplayName}
-        activeNickname={activeNickname}
-        userRole={userRole}
-        onNewChat={startNewChat}
-        onSelectConversation={setCurrentConversationId}
+    <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
+      <TopBar
+        sidebarExpanded={sidebarExpanded}
+        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
         onAvatarClick={handleAvatarClick}
+        onNewChat={startNewChat}
+        onShare={handleShare}
+        onReport={handleReport}
+        userRole={userRole}
       />
 
-      <main className="flex-1 flex flex-col min-w-0 relative">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        <Sidebar
+          expanded={sidebarExpanded}
+          onClose={() => setSidebarExpanded(false)}
+          conversations={conversations}
+          currentConversationId={currentConversationId}
+          reports={[]}
+          projects={notebooks}
+          studies={[]}
+          stealthMode={incognitoMode}
+          onStealthChange={setIncognitoMode}
+          onSelectConversation={setCurrentConversationId}
+          onSelectProject={(nid) => router.push(`/notebooks/${nid}`)}
+          onCreateProject={async () => {
+            try {
+              const res = await fetch("/api/notebooks", {
+                method: "POST",
+                headers: apiHeaders(),
+                body: JSON.stringify({ title: "دفتر جديد" }),
+              });
+              const data = (await res.json()) as { notebook?: { id: string } };
+              if (data?.notebook?.id) router.push(`/notebooks/${data.notebook.id}`);
+            } catch { /* ignore */ }
+          }}
+        />
+
+      <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
         <motion.div
           className="flex-1 flex flex-col min-w-0"
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
@@ -695,6 +780,7 @@ function ChatPageContent() {
             voiceId={voiceId}
             onSendMessage={sendMessage}
             onRegenerate={regenerateMessage}
+            onEnhance={handleEnhance}
           />
         )}
 
@@ -721,6 +807,7 @@ function ChatPageContent() {
         </div>
         </motion.div>
       </main>
+      </div>
 
       <ToolsModal
         open={toolsModalOpen}

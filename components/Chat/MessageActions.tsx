@@ -9,7 +9,6 @@ import {
   RefreshCw,
   X,
   Sparkles,
-  FileText,
 } from "lucide-react";
 
 interface MessageActionsProps {
@@ -19,7 +18,6 @@ interface MessageActionsProps {
   voiceId?: string;
   onRegenerate?: () => void;
   onEnhance?: (content: string) => void;
-  onWriteReport?: (content: string) => void;
 }
 
 type FeedbackReason = "inaccurate" | "not_helpful" | "too_long" | "other";
@@ -36,7 +34,6 @@ export function MessageActions({
   content,
   onRegenerate,
   onEnhance,
-  onWriteReport,
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<"up" | "down" | null>(null);
@@ -219,17 +216,6 @@ export function MessageActions({
           <Sparkles size={16} style={{ color: "var(--text-tertiary)" }} />
         </button>
 
-        {/* 6. Write Report */}
-        <button
-          type="button"
-          onClick={() => onWriteReport?.(content)}
-          disabled={!onWriteReport}
-          className={iconBtnClass}
-          title="اكتب تقرير"
-          aria-label="اكتب تقرير"
-        >
-          <FileText size={16} style={{ color: "var(--text-tertiary)" }} />
-        </button>
       </div>
 
       {/* Dislike reason dropdown */}

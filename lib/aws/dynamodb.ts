@@ -1,7 +1,7 @@
 import {
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -21,6 +21,8 @@ const TABLE_USERS = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
 const TABLE_CORRECTIONS = process.env.DYNAMODB_CORRECTIONS_TABLE || "khalele-corrections";
 const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "khalele-conversations";
 const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-sessions";
+const TABLE_NOTEBOOKS = process.env.DYNAMODB_NOTEBOOKS_TABLE || "khalele-notebooks";
+const TABLE_STUDIES = process.env.DYNAMODB_STUDIES_TABLE || "khalele-studies";
 const inMemoryProfiles = new Map<string, UserProfile>();
 const inMemoryAuthUsers = new Map<string, AuthUser>();
 
@@ -342,5 +344,185 @@ export async function createAuthUser(user: AuthUser): Promise<void> {
       return;
     }
     throw error;
+  }
+}
+
+// ─── Notebooks (دفاتر) ─────────────────────────────────────────────────────
+
+const MAX_NOTEBOOK_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+
+export interface NotebookRecord {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function saveNotebook(notebook: NotebookRecord): Promise<void> {
+  const contentBytes = new TextEncoder().encode(notebook.content).length;
+  if (contentBytes > MAX_NOTEBOOK_SIZE_BYTES) {
+    throw new Error("NOTEBOOK_TOO_LARGE");
+  }
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_NOTEBOOKS,
+        Item: notebook,
+      })
+    );
+  } catch (err) {
+    if (!isMissingTableError(err)) throw err;
+    // Fallback: in-memory if table missing
+    inMemoryNotebooks.set(notebook.id, notebook);
+  }
+}
+
+const inMemoryNotebooks = new Map<string, NotebookRecord>();
+
+export async function getNotebook(notebookId: string): Promise<NotebookRecord | null> {
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_NOTEBOOKS,
+        Key: { id: notebookId },
+      })
+    );
+    return (result.Item as NotebookRecord) ?? inMemoryNotebooks.get(notebookId) ?? null;
+  } catch (err) {
+    if (isMissingTableError(err)) return inMemoryNotebooks.get(notebookId) ?? null;
+    throw err;
+  }
+}
+
+export async function listNotebooksByUser(userId: string, limit = 50): Promise<NotebookRecord[]> {
+  try {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_NOTEBOOKS,
+        IndexName: "userId-updatedAt-index",
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: { ":uid": userId },
+        Limit: limit,
+        ScanIndexForward: false,
+      })
+    );
+    const items = (result.Items as NotebookRecord[]) ?? [];
+    return items;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("specified index") || msg.includes("ValidationException")) {
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: TABLE_NOTEBOOKS,
+          FilterExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          Limit: limit,
+        })
+      );
+      const items = (result.Items as NotebookRecord[]) ?? [];
+      return items.sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1)).slice(0, limit);
+    }
+    if (isMissingTableError(err)) {
+      return Array.from(inMemoryNotebooks.values())
+        .filter((n) => n.userId === userId)
+        .sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1))
+        .slice(0, limit);
+    }
+    throw err;
+  }
+}
+
+export async function deleteNotebook(notebookId: string): Promise<void> {
+  try {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: TABLE_NOTEBOOKS,
+        Key: { id: notebookId },
+      })
+    );
+  } catch {
+    // Ignore if table missing
+  }
+  inMemoryNotebooks.delete(notebookId);
+}
+
+// ─── Studies (قضايا) ─────────────────────────────────────────────────────
+
+export interface StudyRecord {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const inMemoryStudies = new Map<string, StudyRecord>();
+
+export async function saveStudy(study: StudyRecord): Promise<void> {
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_STUDIES,
+        Item: study,
+      })
+    );
+  } catch (err) {
+    if (!isMissingTableError(err)) throw err;
+    inMemoryStudies.set(study.id, study);
+  }
+}
+
+export async function getStudy(studyId: string): Promise<StudyRecord | null> {
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_STUDIES,
+        Key: { id: studyId },
+      })
+    );
+    return (result.Item as StudyRecord) ?? inMemoryStudies.get(studyId) ?? null;
+  } catch (err) {
+    if (isMissingTableError(err)) return inMemoryStudies.get(studyId) ?? null;
+    throw err;
+  }
+}
+
+export async function listStudiesByUser(userId: string, limit = 50): Promise<StudyRecord[]> {
+  try {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_STUDIES,
+        IndexName: "userId-updatedAt-index",
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: { ":uid": userId },
+        Limit: limit,
+        ScanIndexForward: false,
+      })
+    );
+    return (result.Items as StudyRecord[]) ?? [];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("specified index") || msg.includes("ValidationException")) {
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: TABLE_STUDIES,
+          FilterExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          Limit: limit,
+        })
+      );
+      const items = (result.Items as StudyRecord[]) ?? [];
+      return items.sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1)).slice(0, limit);
+    }
+    if (isMissingTableError(err)) {
+      return Array.from(inMemoryStudies.values())
+        .filter((s) => s.userId === userId)
+        .sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1))
+        .slice(0, limit);
+    }
+    throw err;
   }
 }

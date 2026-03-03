@@ -10,6 +10,7 @@ interface MessageListProps {
   voiceId: string;
   onSendMessage: (content: string) => void;
   onRegenerate?: (messageId: string) => void;
+  onEnhance?: (content: string) => void;
 }
 
 const SUGGESTION_CHIPS = [
@@ -26,6 +27,7 @@ export function MessageList({
   voiceId,
   onSendMessage,
   onRegenerate,
+  onEnhance,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +74,7 @@ export function MessageList({
                     speechSpeed={speechSpeed}
                     voiceId={voiceId}
                     onRegenerate={onRegenerate ? () => onRegenerate(msg.id) : undefined}
+                    onEnhance={onEnhance}
                   />
                 </div>
               </div>
