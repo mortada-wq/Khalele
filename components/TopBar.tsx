@@ -61,8 +61,20 @@ export function TopBar({
       className="top-bar shrink-0 flex items-center justify-between px-4 md:px-6"
       style={{ height: 52, background: "transparent" }}
     >
-      {/* Left side (RTL: visual right) — Share + Report only when chat has messages */}
+      {/* Left side (RTL: visual right) — Start button + Share + Report */}
       <div className="flex items-center gap-4">
+        {sidebarExpanded && onNewChat && (
+          <button
+            type="button"
+            onClick={onNewChat}
+            className="top-bar-action"
+            aria-label="ابدأ"
+            title="ابدأ"
+          >
+            <IconStart />
+            <span className="top-bar-action-label">ابدأ</span>
+          </button>
+        )}
         {showChatActions && (
           <>
             <button
@@ -89,7 +101,7 @@ export function TopBar({
         )}
       </div>
 
-      {/* Right side (RTL: visual left) — Profile + Start (when sidebar expanded) */}
+      {/* Right side (RTL: visual left) — Profile only */}
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -101,18 +113,6 @@ export function TopBar({
           <UserAvatarIcon role={userRole} />
           <span className="top-bar-action-label sr-only">الحساب</span>
         </button>
-        {sidebarExpanded && onNewChat && (
-          <button
-            type="button"
-            onClick={onNewChat}
-            className="top-bar-action"
-            aria-label="ابدأ"
-            title="ابدأ"
-          >
-            <IconStart />
-            <span className="top-bar-action-label">ابدأ</span>
-          </button>
-        )}
       </div>
     </div>
   );
