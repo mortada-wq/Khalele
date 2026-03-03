@@ -28,6 +28,7 @@ export default function NotebookPage({ params }: { params: Promise<{ id: string 
   const [notebook, setNotebook] = useState<NotebookRecord | null>(null);
   const [content, setContent] = useState("");
   const [notebooks, setNotebooks] = useState<Project[]>([]);
+  const [studies, setStudies] = useState<Study[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -82,10 +83,22 @@ export default function NotebookPage({ params }: { params: Promise<{ id: string 
     }
   }, []);
 
+  const fetchStudies = useCallback(async () => {
+    try {
+      const res = await fetch("/api/studies?limit=50", { headers: API_HEADERS() });
+      if (!res.ok) return;
+      const data = (await res.json()) as { studies: { id: string; title: string; createdAt: string }[] };
+      setStudies(data.studies ?? []);
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   useEffect(() => {
     fetchNotebook();
     fetchNotebooks();
-  }, [fetchNotebook, fetchNotebooks]);
+    fetchStudies();
+  }, [fetchNotebook, fetchNotebooks, fetchStudies]);
 
   const saveContent = useCallback(
     async (newContent: string) => {
@@ -167,7 +180,7 @@ export default function NotebookPage({ params }: { params: Promise<{ id: string 
   }, [content, notebook?.title, showToast]);
 
   const handleExport = useCallback(
-    (action: "google-doc" | "chat" | "case") => {
+    async (action: "google-doc" | "chat" | "case") => {
       if (!content) {
         showToast("لا يوجد محتوى للتصدير");
         return;
@@ -305,12 +318,35 @@ export default function NotebookPage({ params }: { params: Promise<{ id: string 
           groupedConversations={groupConversationsByDate([])}
           reports={[]}
           projects={notebooks}
-          studies={[]}
+          studies={studies}
           stealthMode={false}
           onStealthChange={() => {}}
           onSelectConversation={() => {}}
           onSelectProject={handleSelectNotebook}
           onCreateProject={handleCreateNotebook}
+          onOpenDefater={() => router.push("/defater")}
+          onRenameProject={async (nid, name) => {
+            try {
+              await fetch(`/api/notebooks/${nid}`, {
+                method: "PUT",
+                headers: API_HEADERS(),
+                body: JSON.stringify({ title: name }),
+              });
+              setNotebooks((prev) => prev.map((n) => (n.id === nid ? { ...n, name } : n)));
+              if (nid === id) setNotebook((prev) => (prev ? { ...prev, title: name } : prev));
+            } catch { showToast("فشل تحديث العنوان"); }
+          }}
+          onSelectStudy={() => router.push("/chat")}
+          onRenameStudy={async (sid, title) => {
+            try {
+              const res = await fetch(`/api/studies/${sid}`, {
+                method: "PUT",
+                headers: API_HEADERS(),
+                body: JSON.stringify({ title }),
+              });
+              if (res.ok) setStudies((prev) => prev.map((s) => (s.id === sid ? { ...s, title } : s)));
+            } catch { showToast("فشل تحديث القضية"); }
+          }}
         />
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
