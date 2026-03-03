@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SidebarSection } from "./SidebarSection";
 import { ExpandableList } from "./ExpandableList";
+import { EditableSidebarItem } from "./EditableSidebarItem";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import type { Conversation, DateGroup } from "@/lib/chat";
 
@@ -108,7 +109,7 @@ export interface SidebarProps {
   onClose?: () => void;
   conversations: Conversation[];
   currentConversationId: string | null;
-  groupedConversations: Record<DateGroup, Conversation[]>;
+  groupedConversations?: Record<DateGroup, Conversation[]>;
   reports: Report[];
   projects: Project[];
   studies: Study[];
@@ -118,8 +119,13 @@ export interface SidebarProps {
   onSelectReport?: (id: string) => void;
   onSelectProject?: (id: string) => void;
   onCreateProject?: () => void;
+  onOpenDefater?: () => void;
   onSelectStudy?: (id: string) => void;
   onDeleteStudy?: (id: string) => void;
+  onRenameConversation?: (id: string, title: string) => void;
+  onRenameReport?: (id: string, title: string) => void;
+  onRenameProject?: (id: string, title: string) => void;
+  onRenameStudy?: (id: string, title: string) => void;
   onSearch?: (query: string) => void;
 }
 
@@ -150,8 +156,13 @@ export function Sidebar({
   onSelectReport,
   onSelectProject,
   onCreateProject,
+  onOpenDefater,
   onSelectStudy,
   onDeleteStudy,
+  onRenameConversation,
+  onRenameReport,
+  onRenameProject,
+  onRenameStudy,
   onSearch,
 }: SidebarProps) {
   const [activeSection, setActiveSection] =
@@ -208,26 +219,18 @@ export function Sidebar({
             initialCount={3}
             emptyMessage="لا محادثات"
             renderItem={(conv) => (
-              <button
+              <EditableSidebarItem
                 key={conv.id}
-                onClick={() => {
+                id={conv.id}
+                title={conv.title || "محادثة جديدة"}
+                isSelected={currentConversationId === conv.id}
+                onSelect={() => {
                   onSelectConversation(conv.id);
                   if (isMobile) onClose?.();
                 }}
-                className="w-full text-right px-3 py-2 rounded-lg font-ui text-xs truncate block transition-colors"
-                style={{
-                  color:
-                    currentConversationId === conv.id
-                      ? "var(--color-accent)"
-                      : "var(--text-primary)",
-                  background:
-                    currentConversationId === conv.id
-                      ? "var(--color-accent-tint-10)"
-                      : "transparent",
-                }}
-              >
-                {conv.title || "محادثة جديدة"}
-              </button>
+                onRename={onRenameConversation}
+                canEdit={!!onRenameConversation}
+              />
             )}
           />
         </div>
@@ -246,23 +249,18 @@ export function Sidebar({
           initialCount={3}
           emptyMessage="لا تقارير"
           renderItem={(report) => (
-            <button
+            <EditableSidebarItem
               key={report.id}
-              onClick={() => {
+              id={report.id}
+              title={report.title}
+              subtitle={fmtDate(report.createdAt)}
+              onSelect={() => {
                 onSelectReport?.(report.id);
                 if (isMobile) onClose?.();
               }}
-              className="w-full text-right px-3 py-2 rounded-lg font-ui text-xs truncate block transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              style={{ color: "var(--text-primary)" }}
-            >
-              <span className="block truncate">{report.title}</span>
-              <span
-                className="block text-[10px] mt-0.5"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                {fmtDate(report.createdAt)}
-              </span>
-            </button>
+              onRename={onRenameReport}
+              canEdit={!!onRenameReport}
+            />
           )}
         />
       </SidebarSection>
@@ -275,6 +273,23 @@ export function Sidebar({
         active={activeSection === "projects"}
         onClick={() => setActiveSection("projects")}
       >
+        {onOpenDefater && (
+          <button
+            type="button"
+            onClick={() => {
+              onOpenDefater();
+              if (isMobile) onClose?.();
+            }}
+            className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 mb-1"
+            style={{ color: "var(--color-accent)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            <span>دفتر سريع</span>
+          </button>
+        )}
         {onCreateProject && (
           <button
             type="button"
@@ -297,26 +312,23 @@ export function Sidebar({
           initialCount={3}
           emptyMessage="لا دفاتر"
           renderItem={(project) => (
-            <button
+            <EditableSidebarItem
               key={project.id}
-              onClick={() => {
+              id={project.id}
+              title={project.name}
+              subtitle={
+                project.preview ? `${project.preview} · ` : "" +
+                (project.createdAt ? fmtDate(project.createdAt) : "") +
+                (!project.createdAt && (project.memberCount ?? 0) > 0 ? `${project.memberCount} عضو` : "") +
+                (!project.createdAt && (project.documentCount ?? 0) > 0 ? ` · ${project.documentCount} ملف` : "")
+              }
+              onSelect={() => {
                 onSelectProject?.(project.id);
                 if (isMobile) onClose?.();
               }}
-              className="w-full text-right px-3 py-2 rounded-lg font-ui text-xs truncate block transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              style={{ color: "var(--text-primary)" }}
-            >
-              <span className="block truncate">{project.name}</span>
-              <span
-                className="block text-[10px] mt-0.5 truncate"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                {project.preview ? `${project.preview} · ` : ""}
-                {project.createdAt ? fmtDate(project.createdAt) : null}
-                {!project.createdAt && (project.memberCount ?? 0) > 0 ? `${project.memberCount} عضو` : null}
-                {!project.createdAt && (project.documentCount ?? 0) > 0 ? ` · ${project.documentCount} ملف` : null}
-              </span>
-            </button>
+              onRename={onRenameProject}
+              canEdit={!!onRenameProject}
+            />
           )}
         />
       </SidebarSection>
@@ -351,38 +363,34 @@ export function Sidebar({
           initialCount={3}
           emptyMessage="لا قضايا"
           renderItem={(study) => (
-            <div key={study.id} className="flex items-center gap-1 group">
-              <button
-                onClick={() => {
-                  onSelectStudy?.(study.id);
-                  if (isMobile) onClose?.();
-                }}
-                className="flex-1 min-w-0 text-right px-3 py-2 rounded-lg font-ui text-xs truncate block transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                style={{ color: "var(--text-primary)" }}
-              >
-                <span className="block truncate">{study.title}</span>
-                <span
-                  className="block text-[10px] mt-0.5"
-                  style={{ color: "var(--text-tertiary)" }}
-                >
-                  {fmtDate(study.createdAt)}
-                </span>
-              </button>
-              {onDeleteStudy && (
-                <button
-                  type="button"
-                  onClick={() => onDeleteStudy(study.id)}
-                  className="shrink-0 p-1 rounded opacity-0 group-hover:opacity-60 transition-opacity"
-                  style={{ color: "var(--text-tertiary)" }}
-                  title="حذف"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-              )}
-            </div>
+            <EditableSidebarItem
+              key={study.id}
+              id={study.id}
+              title={study.title}
+              subtitle={fmtDate(study.createdAt)}
+              onSelect={() => {
+                onSelectStudy?.(study.id);
+                if (isMobile) onClose?.();
+              }}
+              onRename={onRenameStudy}
+              canEdit={!!onRenameStudy}
+              actions={
+                onDeleteStudy ? (
+                  <button
+                    type="button"
+                    onClick={() => onDeleteStudy(study.id)}
+                    className="shrink-0 p-1 rounded opacity-0 group-hover:opacity-60 transition-opacity hover:opacity-100"
+                    style={{ color: "var(--text-tertiary)" }}
+                    title="حذف"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                ) : undefined
+              }
+            />
           )}
         />
       </SidebarSection>

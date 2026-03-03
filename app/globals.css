@@ -62,7 +62,7 @@
   --tile-radius: 28px;
 }
 
-/* Logo: black on light, white on dark */
+/* Logo: theme-aware via KheleelLogo component (logo_black.svg / logo_white.png) */
 .logo-theme { filter: none; }
 [data-theme="dark"] .logo-theme { filter: invert(1); }
 

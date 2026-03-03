@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { HomePillInput } from "@/components/HomePillInput";
+import { KheleelLogo } from "@/components/KheleelLogo";
 import { BirdToggle } from "@/components/BirdToggle";
 
 const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
@@ -206,13 +207,7 @@ export function HomeHero() {
       <main className="flex-1 flex flex-col items-center justify-center min-w-0 relative">
         <div className="flex flex-col items-center w-full px-6 max-w-xl">
           {/* Logo */}
-          <img
-            src="/logo/logo_light.png"
-            alt="خليلي"
-            className="w-40 md:w-56 h-auto mb-5"
-            draggable={false}
-            style={{ filter: "none" }}
-          />
+          <KheleelLogo className="w-40 md:w-56 h-auto mb-5" />
 
           {/* Tagline */}
           <p

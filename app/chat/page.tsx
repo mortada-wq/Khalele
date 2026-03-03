@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { HomePillInput } from "@/components/HomePillInput";
+import { KheleelLogo } from "@/components/KheleelLogo";
 import { MessageList } from "@/components/Chat/MessageList";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -129,6 +130,7 @@ function ChatPageContent() {
   const [incognitoMode, setIncognitoMode] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
+  const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
   const [nicknameTone, setNicknameTone] = useState("");
@@ -361,6 +363,18 @@ function ChatPageContent() {
         }
       } catch { /* ignore */ }
     })();
+    return () => { canceled = true; };
+  }, [incognitoMode]);
+
+  useEffect(() => {
+    if (incognitoMode) return;
+    let canceled = false;
+    fetch("/api/studies?limit=50", { headers: apiHeaders() })
+      .then((r) => r.json())
+      .then((d: { studies?: { id: string; title: string; createdAt: string }[] }) => {
+        if (!canceled && d.studies) setStudies(d.studies);
+      })
+      .catch(() => {});
     return () => { canceled = true; };
   }, [incognitoMode]);
 
@@ -733,7 +747,7 @@ function ChatPageContent() {
           currentConversationId={currentConversationId}
           reports={[]}
           projects={notebooks}
-          studies={[]}
+          studies={studies}
           stealthMode={incognitoMode}
           onStealthChange={setIncognitoMode}
           onSelectConversation={setCurrentConversationId}
@@ -749,6 +763,41 @@ function ChatPageContent() {
               if (data?.notebook?.id) router.push(`/notebooks/${data.notebook.id}`);
             } catch { /* ignore */ }
           }}
+          onOpenDefater={() => router.push("/defater")}
+          onRenameConversation={(id, title) => {
+            setConversations((prev) =>
+              prev.map((c) =>
+                c.id === id ? { ...c, title, updatedAt: new Date().toISOString() } : c
+              )
+            );
+            const conv = conversations.find((c) => c.id === id);
+            if (conv) {
+              void persistConversation({ ...conv, title });
+            }
+          }}
+          onRenameProject={async (id, name) => {
+            try {
+              await fetch(`/api/notebooks/${id}`, {
+                method: "PUT",
+                headers: apiHeaders(),
+                body: JSON.stringify({ title: name }),
+              });
+              setNotebooks((prev) =>
+                prev.map((n) => (n.id === id ? { ...n, name } : n))
+              );
+            } catch { /* ignore */ }
+          }}
+          onSelectStudy={() => {}}
+          onRenameStudy={async (sid, title) => {
+            try {
+              const res = await fetch(`/api/studies/${sid}`, {
+                method: "PUT",
+                headers: apiHeaders(),
+                body: JSON.stringify({ title }),
+              });
+              if (res.ok) setStudies((prev) => prev.map((s) => (s.id === sid ? { ...s, title } : s)));
+            } catch { /* ignore */ }
+          }}
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
@@ -759,12 +808,7 @@ function ChatPageContent() {
         >
         {showHero ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6">
-            <img
-              src="/logo/logo_black.svg"
-              alt="خليلي"
-              className="logo-theme w-40 md:w-56 h-auto mb-5"
-              draggable={false}
-            />
+            <KheleelLogo className="w-40 md:w-56 h-auto mb-5" />
             <p
               className="font-ui text-sm md:text-base text-center leading-relaxed"
               style={{ color: "var(--text-secondary)" }}

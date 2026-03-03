@@ -1,5 +1,6 @@
 "use client";
 
+import { KheleelLogo } from "@/components/KheleelLogo";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useCallback } from "react";
@@ -158,11 +159,7 @@ function AuthContent() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img
-            src="/logo/logo_black.svg"
-            alt="خليلي"
-            className="h-12 w-auto logo-theme"
-          />
+          <KheleelLogo className="h-12 w-auto" />
         </motion.div>
 
         {/* Card */}
