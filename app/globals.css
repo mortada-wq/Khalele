@@ -191,7 +191,7 @@ body {
   50%       { transform: rotate(28deg); }
 }
 
-/* ── Bird Toggle — Plug & Play icon morph ─────────────────── */
+/* ── Bird Toggle — Fixed position, wings-only animation ─────────────────── */
 .toggle-wrapper {
   position: relative;
   display: inline-flex;
@@ -202,7 +202,9 @@ body {
 
 .toggle-wrapper .icon {
   position: absolute;
-  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease;
 }
 
 /* Bird icon colors: black in light mode, white in dark mode */
@@ -217,21 +219,17 @@ body {
 /* Default (sidebar collapsed): closed wing visible */
 .toggle-wrapper .icon-open {
   opacity: 0;
-  transform: rotate(45deg) scale(0.5);
 }
 .toggle-wrapper .icon-closed {
   opacity: 1;
-  transform: rotate(0deg) scale(1);
 }
 
 /* Sidebar expanded (.is-open): open wing visible */
 .toggle-wrapper.is-open .icon-open {
   opacity: 1;
-  transform: rotate(0deg) scale(1);
 }
 .toggle-wrapper.is-open .icon-closed {
   opacity: 0;
-  transform: rotate(-45deg) scale(0.5);
 }
 
 /* Typing indicator — ChatGPT bouncing dots (spec: components.md §5) */

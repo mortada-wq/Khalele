@@ -1,29 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 import { createAuthUser } from "@/lib/aws/dynamodb";
+import bcrypt from "bcryptjs";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { email, password, name } = await req.json();
 
-    if (!name || !email || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "جميع الحقول مطلوبة" },
-        { status: 400 }
-      );
-    }
-
-    if (typeof name !== "string" || name.trim().length < 2) {
-      return NextResponse.json(
-        { error: "الاسم يجب أن يكون حرفين على الأقل" },
-        { status: 400 }
-      );
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "البريد الإلكتروني غير صالح" },
+        { error: "البريد الإلكتروني وكلمة المرور مطلوبان" },
         { status: 400 }
       );
     }
@@ -35,27 +20,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await createAuthUser({
-      email: email.toLowerCase().trim(),
-      name: name.trim(),
-      passwordHash,
-      authProvider: "credentials",
-      createdAt: new Date().toISOString(),
-    });
+    try {
+      await createAuthUser({
+        email: email.toLowerCase().trim(),
+        name: name || email,
+        passwordHash: hashedPassword,
+        authProvider: "credentials",
+        createdAt: new Date().toISOString(),
+      });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    if (error instanceof Error && error.message === "EMAIL_EXISTS") {
-      return NextResponse.json(
-        { error: "هذا البريد الإلكتروني مسجل مسبقاً" },
-        { status: 409 }
-      );
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      if (error instanceof Error && error.message === "EMAIL_EXISTS") {
+        return NextResponse.json(
+          { error: "هذا البريد الإلكتروني مسجل بالفعل" },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
+  } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: "حدث خطأ أثناء إنشاء الحساب" },
+      { error: "حدث خطأ في إنشاء الحساب" },
       { status: 500 }
     );
   }

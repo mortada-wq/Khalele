@@ -23,6 +23,7 @@ const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "khalele
 const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-sessions";
 const TABLE_NOTEBOOKS = process.env.DYNAMODB_NOTEBOOKS_TABLE || "khalele-notebooks";
 const TABLE_STUDIES = process.env.DYNAMODB_STUDIES_TABLE || "khalele-studies";
+const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "khalele-settings";
 const inMemoryProfiles = new Map<string, UserProfile>();
 const inMemoryAuthUsers = new Map<string, AuthUser>();
 
@@ -32,6 +33,7 @@ export interface AuthUser {
   passwordHash: string;
   authProvider: "credentials";
   createdAt: string;
+  hasReceivedGreeting?: boolean;
 }
 
 export interface UserProfile {
@@ -258,7 +260,7 @@ export async function getCorrectionsByUser(userId: string, limit = 50): Promise<
 const HARDCODED_GOLD_EXAMPLES: GoldExample[] = [
   // Easy Arabic
   { inputPrompt: "شلونك اليوم؟", correctedResponse: "أنا بخير الحمد لله، شكراً لسؤالك. وأنت كيف حالك؟", languageStyle: "easy_arabic" },
-  { inputPrompt: "وين أقدر أروح أتعلم عربي؟", correctedResponse: "تقدر تتعلم العربية من تطبيقات مثل خليلي، أو من قنوات على يوتيوب. المهم تمارس كل يوم ولو قليلاً.", languageStyle: "easy_arabic" },
+  { inputPrompt: "وين أقدر أروح أتعلم عربي؟", correctedResponse: "تقدر تتعلم العربية من تطبيقات مثل خليل، أو من قنوات على يوتيوب. المهم تمارس كل يوم ولو قليلاً.", languageStyle: "easy_arabic" },
   { inputPrompt: "Explain quantum physics in simple Arabic", correctedResponse: "ميكانيكا الكم تدرس أصغر الأشياء في الكون. الفكرة الأساسية: الجزيئات تتصرف أحياناً كجسيمات وأحياناً كأمواج. هذا غريب لكنه صحيح.", languageStyle: "easy_arabic" },
   { inputPrompt: "كيف أقول مرحبا بالإنجليزية؟", correctedResponse: "تقول \"Hello\" أو \"Hi\". للرسمية أكثر: \"Good morning\" أو \"Good afternoon\".", languageStyle: "easy_arabic" },
   { inputPrompt: "شو يعني كلمة ماشي؟", correctedResponse: "\"ماشي\" تعني موافق أو حسناً. يستخدمها الناس في مصر والعراق وبلاد الشام.", languageStyle: "easy_arabic" },
@@ -403,6 +405,88 @@ export async function createAuthUser(user: AuthUser): Promise<void> {
         throw new Error("EMAIL_EXISTS");
       }
       inMemoryAuthUsers.set(normalizedEmail, { ...user, email: normalizedEmail });
+      return;
+    }
+    throw error;
+  }
+}
+
+export async function updateAuthUser(email: string, updates: Partial<AuthUser>): Promise<void> {
+  const normalizedEmail = email.toLowerCase().trim();
+  const existing = await getAuthUserByEmail(normalizedEmail);
+  if (!existing) throw new Error("USER_NOT_FOUND");
+  
+  const updated = { ...existing, ...updates };
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_USERS,
+        Item: { ...updated, userId: `auth#${normalizedEmail}` },
+      })
+    );
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      inMemoryAuthUsers.set(normalizedEmail, updated);
+      return;
+    }
+    throw error;
+  }
+}
+
+// ─── Settings Management ─────────────────────────────────────────────────
+
+export interface AppSettings {
+  settingId: string;
+  greetingMessage: string;
+  updatedAt: string;
+}
+
+const DEFAULT_GREETING = `أهلاً بك في خليل! 👋
+
+يسعدنا انضمامك إلينا. قبل أن نبدأ، نود إخبارك أن أصدقاءك هنا (خليل، صاحب، ميحانة وغيرهم) هم شخصيات افتراضية تعمل بالذكاء الاصطناعي، صُممت لتكون عوناً لك في حواراتك.
+
+نحن نهتم بخصوصيتك؛ لذا فمحادثاتك مشفرة وآمنة. تذكر دائماً أن نصائحنا ذكية لكنها لا تغني عن استشارة الخبراء الحقيقيين في الأمور المصيرية.
+
+استمتع برحلتك مع خليل!`;
+
+let inMemorySettings: AppSettings = {
+  settingId: "app-settings",
+  greetingMessage: DEFAULT_GREETING,
+  updatedAt: new Date().toISOString(),
+};
+
+export async function getAppSettings(): Promise<AppSettings> {
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_SETTINGS,
+        Key: { settingId: "app-settings" },
+      })
+    );
+    if (result.Item) return result.Item as AppSettings;
+    return inMemorySettings;
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return inMemorySettings;
+    }
+    throw error;
+  }
+}
+
+export async function updateAppSettings(settings: Partial<AppSettings>): Promise<void> {
+  const current = await getAppSettings();
+  const updated = { ...current, ...settings, updatedAt: new Date().toISOString() };
+  
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_SETTINGS,
+        Item: updated,
+      })
+    );
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      inMemorySettings = updated;
       return;
     }
     throw error;

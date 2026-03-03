@@ -131,6 +131,8 @@ function ChatPageContent() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
   const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
+  const [contacts, setContacts] = useState<{ id: string; name: string; code: string; avatar?: string }[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
   const [nicknameTone, setNicknameTone] = useState("");
@@ -376,6 +378,26 @@ function ChatPageContent() {
       })
       .catch(() => {});
     return () => { canceled = true; };
+  }, [incognitoMode]);
+
+  // Fetch contacts (mock data for now - will be replaced with API)
+  useEffect(() => {
+    if (incognitoMode) return;
+    // TODO: Replace with actual API call to /api/contacts
+    const mockContacts = [
+      { id: "1", name: "أحمد محمد", code: "&mg1" },
+      { id: "2", name: "فاطمة علي", code: "&mg2" },
+      { id: "3", name: "محمود حسن", code: "&mg3" },
+    ];
+    setContacts(mockContacts);
+  }, [incognitoMode]);
+
+  // Fetch notifications count (mock data for now - will be replaced with API)
+  useEffect(() => {
+    if (incognitoMode) return;
+    // TODO: Replace with actual API call to /api/notifications
+    // For now, set to 0 (no notifications)
+    setNotificationCount(0);
   }, [incognitoMode]);
 
   useEffect(() => {
@@ -727,6 +749,35 @@ function ChatPageContent() {
     void sendMessage(`زد في التوضيح:\n\n${content}`);
   };
 
+  const startNewDiwan = async () => {
+    const id = crypto.randomUUID();
+    const newConv: Conversation = {
+      id,
+      title: "ديوان جديد",
+      messages: [],
+      characterId: character.id,
+      factCheckMode,
+      updatedAt: new Date().toISOString(),
+    };
+    setConversations((prev) => [newConv, ...prev]);
+    setCurrentConversationId(id);
+    try {
+      await fetch("/api/conversations", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          conversationId: id,
+          title: newConv.title,
+          messages: [],
+          characterId: newConv.characterId,
+          factCheckMode,
+        }),
+      });
+    } catch {
+      // Fallback: in-memory only
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
       <TopBar
@@ -746,12 +797,18 @@ function ChatPageContent() {
           onToggleSidebar={() => setSidebarExpanded((p) => !p)}
           conversations={conversations}
           currentConversationId={currentConversationId}
+          contacts={contacts}
           reports={[]}
           projects={notebooks}
           studies={studies}
           stealthMode={incognitoMode}
           onStealthChange={setIncognitoMode}
           onSelectConversation={setCurrentConversationId}
+          onCreateDiwan={startNewDiwan}
+          onSelectContact={(contactId) => {
+            // TODO: Implement contact selection - open dialog to start diwan with contact
+            console.log("Selected contact:", contactId);
+          }}
           onSelectProject={(nid) => router.push(`/notebooks/${nid}`)}
           onCreateProject={async () => {
             try {
@@ -799,6 +856,19 @@ function ChatPageContent() {
               if (res.ok) setStudies((prev) => prev.map((s) => (s.id === sid ? { ...s, title } : s)));
             } catch { /* ignore */ }
           }}
+          onSearchDiwan={(query) => {
+            // TODO: Implement diwan search
+            console.log("Search diwan:", query);
+          }}
+          onSearchDirectory={(query) => {
+            // TODO: Implement directory search
+            console.log("Search directory:", query);
+          }}
+          onSearchCases={(query) => {
+            // TODO: Implement cases search
+            console.log("Search cases:", query);
+          }}
+          notificationCount={notificationCount}
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">

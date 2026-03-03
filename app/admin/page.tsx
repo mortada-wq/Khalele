@@ -128,6 +128,20 @@ export default function AdminPage() {
                   فتح المحادثة
                 </button>
                 <button
+                  onClick={() => router.push("/admin/messaging")}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                  style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)" }}
+                >
+                  إدارة الرسائل
+                </button>
+                <button
+                  onClick={() => router.push("/admin/admins")}
+                  className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                  style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)" }}
+                >
+                  إدارة المديرين
+                </button>
+                <button
                   onClick={() => router.push("/admin/fact-check")}
                   className="font-ui text-sm px-4 py-2.5 rounded-xl transition-colors hover:bg-black/5"
                   style={{ background: "var(--color-accent-tint-12)", color: "var(--color-accent)" }}
