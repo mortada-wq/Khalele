@@ -14,24 +14,29 @@ import {
 interface MessageActionsProps {
   messageId: string;
   content: string;
+  inputPrompt?: string;
+  languageStyle?: "easy_arabic" | "formal_msa";
   speechSpeed?: number;
   voiceId?: string;
   onRegenerate?: () => void;
   onEnhance?: (content: string) => void;
 }
 
-type FeedbackReason = "inaccurate" | "not_helpful" | "too_long" | "other";
+type FeedbackReason = "inaccurate" | "not_helpful" | "too_long" | "needs_tweak" | "other";
 
 const FEEDBACK_REASONS: { value: FeedbackReason; label: string }[] = [
   { value: "inaccurate", label: "غير دقيق" },
   { value: "not_helpful", label: "غير مفيد" },
   { value: "too_long", label: "طويل جداً" },
+  { value: "needs_tweak", label: "يحتاج تعديل (اكتب الصيغة الصحيحة)" },
   { value: "other", label: "سبب آخر" },
 ];
 
 export function MessageActions({
   messageId,
   content,
+  inputPrompt,
+  languageStyle = "easy_arabic",
   onRegenerate,
   onEnhance,
 }: MessageActionsProps) {
@@ -39,6 +44,7 @@ export function MessageActions({
   const [liked, setLiked] = useState<"up" | "down" | null>(null);
   const [showDislikeForm, setShowDislikeForm] = useState(false);
   const [dislikeReason, setDislikeReason] = useState<FeedbackReason>("inaccurate");
+  const [correctedText, setCorrectedText] = useState("");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
@@ -62,19 +68,26 @@ export function MessageActions({
   }, [content]);
 
   const sendFeedback = useCallback(
-    async (type: "like" | "dislike", reason?: FeedbackReason) => {
+    async (type: "like" | "dislike", reason?: FeedbackReason, correctedResponse?: string) => {
       setSubmittingFeedback(true);
       try {
+        const payload: Record<string, unknown> = {
+          messageId,
+          feedbackType: type,
+          reason: reason || undefined,
+          originalResponse: content,
+          timestamp: new Date().toISOString(),
+        };
+        if (correctedResponse?.trim()) {
+          payload.correctedResponse = correctedResponse.trim();
+          payload.inputPrompt = inputPrompt;
+          payload.languageStyle = languageStyle;
+          payload.verdict = reason === "needs_tweak" ? "needs_tweak" : undefined;
+        }
         await fetch("/api/feedback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messageId,
-            feedbackType: type,
-            reason: reason || undefined,
-            originalResponse: content,
-            timestamp: new Date().toISOString(),
-          }),
+          body: JSON.stringify(payload),
         });
       } catch {
         // Silently fail
@@ -82,7 +95,7 @@ export function MessageActions({
         setSubmittingFeedback(false);
       }
     },
-    [messageId, content]
+    [messageId, content, inputPrompt, languageStyle]
   );
 
   const handleLike = useCallback(async () => {
@@ -101,10 +114,12 @@ export function MessageActions({
   }, [liked]);
 
   const submitDislike = useCallback(async () => {
+    if (dislikeReason === "needs_tweak" && !correctedText.trim()) return;
     setLiked("down");
     setShowDislikeForm(false);
-    await sendFeedback("dislike", dislikeReason);
-  }, [dislikeReason, sendFeedback]);
+    await sendFeedback("dislike", dislikeReason, dislikeReason === "needs_tweak" ? correctedText : undefined);
+    setCorrectedText("");
+  }, [dislikeReason, correctedText, sendFeedback]);
 
   const handleRegenerate = useCallback(async () => {
     if (!onRegenerate || regenerating) return;
@@ -218,48 +233,64 @@ export function MessageActions({
 
       </div>
 
-      {/* Dislike reason dropdown */}
+      {/* Dislike reason dropdown + Needs Tweak correction */}
       {showDislikeForm && (
         <div
-          className="mt-2 flex items-center gap-2 px-1 font-ui"
+          className="mt-2 flex flex-col gap-2 px-1 font-ui"
           style={{ animation: "message-slide-in 0.2s ease-out" }}
         >
-          <select
-            value={dislikeReason}
-            onChange={(e) => setDislikeReason(e.target.value as FeedbackReason)}
-            className="px-3 py-1.5 rounded-lg text-xs border"
-            style={{
-              background: "var(--bg-input)",
-              borderColor: "rgba(0,0,0,0.1)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {FEEDBACK_REASONS.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={submitDislike}
-            disabled={submittingFeedback}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            style={{
-              background: "var(--color-accent)",
-              color: "#fff",
-            }}
-          >
-            {submittingFeedback ? "..." : "إرسال"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowDislikeForm(false)}
-            className="p-1 rounded hover:bg-black/5"
-            aria-label="إغلاق"
-          >
-            <X size={14} style={{ color: "var(--text-tertiary)" }} />
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={dislikeReason}
+              onChange={(e) => setDislikeReason(e.target.value as FeedbackReason)}
+              className="px-3 py-1.5 rounded-lg text-xs border"
+              style={{
+                background: "var(--bg-input)",
+                borderColor: "rgba(0,0,0,0.1)",
+                color: "var(--text-primary)",
+              }}
+            >
+              {FEEDBACK_REASONS.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={submitDislike}
+              disabled={submittingFeedback || (dislikeReason === "needs_tweak" && !correctedText.trim())}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                background: "var(--color-accent)",
+                color: "#fff",
+              }}
+            >
+              {submittingFeedback ? "..." : "إرسال"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDislikeForm(false)}
+              className="p-1 rounded hover:bg-black/5"
+              aria-label="إغلاق"
+            >
+              <X size={14} style={{ color: "var(--text-tertiary)" }} />
+            </button>
+          </div>
+          {dislikeReason === "needs_tweak" && (
+            <textarea
+              value={correctedText}
+              onChange={(e) => setCorrectedText(e.target.value)}
+              placeholder="اكتب الصيغة الصحيحة للإجابة..."
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg text-xs border resize-none"
+              style={{
+                background: "var(--bg-input)",
+                borderColor: "rgba(0,0,0,0.1)",
+                color: "var(--text-primary)",
+              }}
+            />
+          )}
         </div>
       )}
     </div>

@@ -17,16 +17,7 @@ export function ExpandableList<T>({
 }: ExpandableListProps<T>) {
   const [expanded, setExpanded] = useState(false);
 
-  if (items.length === 0 && emptyMessage) {
-    return (
-      <p
-        className="px-4 py-2 font-ui text-xs"
-        style={{ color: "var(--text-tertiary)" }}
-      >
-        {emptyMessage}
-      </p>
-    );
-  }
+  if (items.length === 0) return null;
 
   const visible = expanded ? items : items.slice(0, initialCount);
   const hasMore = items.length > initialCount;

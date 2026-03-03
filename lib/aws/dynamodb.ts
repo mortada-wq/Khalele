@@ -71,15 +71,32 @@ function isMissingTableError(error: unknown): boolean {
   );
 }
 
+export type GoldVerdict = "perfect" | "needs_tweak" | "wrong_level";
+
 export interface Correction {
   id: string;
   userId: string;
   originalResponse: string;
   correctedResponse: string;
-  correctionType: "dialect_authenticity" | "grammar" | "cultural_context" | "factual" | "positive" | "negative" | string;
+  correctionType: "dialect_authenticity" | "grammar" | "cultural_context" | "factual" | "positive" | "negative" | "needs_tweak" | string;
   region?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
+  /** User prompt that triggered the AI response (for few-shot gold examples) */
+  inputPrompt?: string;
+  /** Target language style for this correction */
+  languageStyle?: "easy_arabic" | "formal_msa";
+  /** Volunteer verdict: perfect, needs_tweak, or wrong_level */
+  verdict?: GoldVerdict;
+  /** Optional message ID for traceability */
+  messageId?: string;
+}
+
+/** Gold example for few-shot injection: input -> output pair */
+export interface GoldExample {
+  inputPrompt: string;
+  correctedResponse: string;
+  languageStyle: "easy_arabic" | "formal_msa";
 }
 
 export interface ConversationSummary {
@@ -235,6 +252,51 @@ export async function getCorrectionsByUser(userId: string, limit = 50): Promise<
     }
     throw err;
   }
+}
+
+/** Hardcoded gold examples used when DB has none (immediate "aha" moment) */
+const HARDCODED_GOLD_EXAMPLES: GoldExample[] = [
+  // Easy Arabic
+  { inputPrompt: "شلونك اليوم؟", correctedResponse: "أنا بخير الحمد لله، شكراً لسؤالك. وأنت كيف حالك؟", languageStyle: "easy_arabic" },
+  { inputPrompt: "وين أقدر أروح أتعلم عربي؟", correctedResponse: "تقدر تتعلم العربية من تطبيقات مثل خليلي، أو من قنوات على يوتيوب. المهم تمارس كل يوم ولو قليلاً.", languageStyle: "easy_arabic" },
+  { inputPrompt: "Explain quantum physics in simple Arabic", correctedResponse: "ميكانيكا الكم تدرس أصغر الأشياء في الكون. الفكرة الأساسية: الجزيئات تتصرف أحياناً كجسيمات وأحياناً كأمواج. هذا غريب لكنه صحيح.", languageStyle: "easy_arabic" },
+  { inputPrompt: "كيف أقول مرحبا بالإنجليزية؟", correctedResponse: "تقول \"Hello\" أو \"Hi\". للرسمية أكثر: \"Good morning\" أو \"Good afternoon\".", languageStyle: "easy_arabic" },
+  { inputPrompt: "شو يعني كلمة ماشي؟", correctedResponse: "\"ماشي\" تعني موافق أو حسناً. يستخدمها الناس في مصر والعراق وبلاد الشام.", languageStyle: "easy_arabic" },
+  // Formal MSA
+  { inputPrompt: "ما رأيكم في التطور التكنولوجي؟", correctedResponse: "التطور التكنولوجي يُمثّل نقلة نوعية في حياة البشر. له إيجابيات كثيرة كتسهيل التواصل، كما أن له تحديات تتطلب وعياً وحكمة في الاستخدام.", languageStyle: "formal_msa" },
+  { inputPrompt: "كيف أقدم نفسي في مقابلة عمل؟", correctedResponse: "ابدأ بالتحية والسلام، ثم قدّم اسمك وتخصصك بإيجاز. اذكر خبراتك ذات الصلة بوضوح، واظهر الثقة دون غرور.", languageStyle: "formal_msa" },
+  { inputPrompt: "ما الفرق بين الفصحى والعامية؟", correctedResponse: "الفصحى لغة الكتابة والخطاب الرسمي، موحّدة في العالم العربي. العامية تختلف باختلاف المنطقة، وتُستخدم في الحياة اليومية.", languageStyle: "formal_msa" },
+];
+
+export async function listApprovedGoldExamples(
+  languageStyle: "easy_arabic" | "formal_msa",
+  limit = 5
+): Promise<GoldExample[]> {
+  try {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: TABLE_CORRECTIONS,
+        FilterExpression: "#s = :status AND #ls = :style AND attribute_exists(inputPrompt)",
+        ExpressionAttributeNames: { "#s": "status", "#ls": "languageStyle" },
+        ExpressionAttributeValues: { ":status": "approved", ":style": languageStyle },
+        Limit: 100,
+      })
+    );
+    const items = (result.Items as Correction[]) ?? [];
+    const gold: GoldExample[] = items
+      .filter((c) => c.inputPrompt && c.correctedResponse)
+      .sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1))
+      .slice(0, limit)
+      .map((c) => ({
+        inputPrompt: c.inputPrompt!,
+        correctedResponse: c.correctedResponse,
+        languageStyle: c.languageStyle!,
+      }));
+    if (gold.length > 0) return gold;
+  } catch {
+    // Fall through to hardcoded
+  }
+  return HARDCODED_GOLD_EXAMPLES.filter((e) => e.languageStyle === languageStyle).slice(0, limit);
 }
 
 export interface TrainingSession {

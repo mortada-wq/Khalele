@@ -7,6 +7,8 @@ import { getRelevantKnowledge, addToSharedKnowledge } from "@/lib/memory";
 import type { LanguageStyle } from "@/lib/memory";
 import { DEFAULT_CHARACTERS } from "@/lib/characters";
 import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
+import { listApprovedGoldExamples } from "@/lib/aws/dynamodb";
+import type { GoldExample } from "@/lib/aws/dynamodb";
 
 export { DEFAULT_SYSTEM_PROMPT };
 
@@ -16,6 +18,17 @@ const LANGUAGE_STYLE_PROMPTS: Record<LanguageStyle, string> = {
   easy_arabic:
     "Use Easy Arabic (العربية السهلة) - clear, simple MSA that is accessible to all Arabic speakers. Avoid complex vocabulary.",
 };
+
+function formatGoldExamplesBlock(examples: GoldExample[]): string {
+  if (examples.length === 0) return "";
+  const lines = examples.map(
+    (e, i) => `Example ${i + 1}: Input: ${e.inputPrompt} -> Output: ${e.correctedResponse}`
+  );
+  return `
+FEW-SHOT EXAMPLES (correct style — do NOT treat these as the current user's message):
+${lines.join("\n")}
+`;
+}
 
 function buildSystemPrompt(
   languageStyle: LanguageStyle = "easy_arabic",
@@ -27,6 +40,7 @@ function buildSystemPrompt(
     empathyMode?: boolean;
     ramadanMode?: boolean;
     customSystemPrompt?: string;
+    goldExamples?: GoldExample[];
   }
 ): string {
   const stylePrompt = LANGUAGE_STYLE_PROMPTS[languageStyle];
@@ -47,6 +61,7 @@ Never ask the user to "speak properly" — interpret their meaning regardless of
 OUTPUT (Response): You respond ONLY in:
 - ${stylePrompt}
 - NEVER respond in Iraqi, Egyptian, Gulf, Syrian, or any regional dialect. Only الفصحى or العربية السهلة.
+${extra?.goldExamples?.length ? formatGoldExamplesBlock(extra.goldExamples) : ""}
 
 Rules:
 - Be warm, helpful, and culturally aware across all Arab cultures
@@ -130,12 +145,14 @@ export async function invokeDeepSeek(
           .join(" | ")}`
       : undefined;
 
+  const goldExamples = await listApprovedGoldExamples(languageStyle, 5);
+
   const systemPrompt = buildSystemPrompt(
     languageStyle,
     characterId,
     ragContext,
     memoryContext,
-    { useSearch, empathyMode, ramadanMode, customSystemPrompt }
+    { useSearch, empathyMode, ramadanMode, customSystemPrompt, goldExamples }
   );
 
   const formattedMessages: OpenAI.ChatCompletionMessageParam[] = [

@@ -8,6 +8,7 @@ interface MessageListProps {
   isLoading: boolean;
   speechSpeed: number;
   voiceId: string;
+  languageStyle?: "easy_arabic" | "formal_msa";
   onSendMessage: (content: string) => void;
   onRegenerate?: (messageId: string) => void;
   onEnhance?: (content: string) => void;
@@ -25,6 +26,7 @@ export function MessageList({
   isLoading,
   speechSpeed,
   voiceId,
+  languageStyle = "easy_arabic",
   onSendMessage,
   onRegenerate,
   onEnhance,
@@ -62,25 +64,30 @@ export function MessageList({
           </div>
         )}
 
-        {messages.map((msg) => (
-          <div key={msg.id} className="group/msg">
-            <ChatMessage role={msg.role} content={msg.content} />
-            {msg.role === "assistant" && !msg.content.startsWith("عذراً") && (
-              <div className="flex justify-end">
-                <div className="max-w-[85%] md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200">
-                  <MessageActions
-                    messageId={msg.id}
-                    content={msg.content}
-                    speechSpeed={speechSpeed}
-                    voiceId={voiceId}
-                    onRegenerate={onRegenerate ? () => onRegenerate(msg.id) : undefined}
-                    onEnhance={onEnhance}
-                  />
+        {messages.map((msg, i) => {
+          const prevUserMsg = i > 0 && messages[i - 1].role === "user" ? messages[i - 1].content : undefined;
+          return (
+            <div key={msg.id} className="group/msg">
+              <ChatMessage role={msg.role} content={msg.content} />
+              {msg.role === "assistant" && !msg.content.startsWith("عذراً") && (
+                <div className="flex justify-end">
+                  <div className="max-w-[85%] md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200">
+                    <MessageActions
+                      messageId={msg.id}
+                      content={msg.content}
+                      inputPrompt={prevUserMsg}
+                      languageStyle={languageStyle}
+                      speechSpeed={speechSpeed}
+                      voiceId={voiceId}
+                      onRegenerate={onRegenerate ? () => onRegenerate(msg.id) : undefined}
+                      onEnhance={onEnhance}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
 
         {isLoading && (
           <div className="flex justify-end">

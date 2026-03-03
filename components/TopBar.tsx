@@ -1,7 +1,6 @@
 "use client";
 
 import { Share2, FileText } from "lucide-react";
-import { BirdToggle } from "@/components/BirdToggle";
 
 function UserAvatarIcon({ role }: { role?: "admin" | "user" }) {
   const isAdmin = role === "admin";
@@ -29,12 +28,14 @@ function UserAvatarIcon({ role }: { role?: "admin" | "user" }) {
 
 export interface TopBarProps {
   sidebarExpanded: boolean;
-  onToggleSidebar: () => void;
+  onToggleSidebar?: () => void;
   onAvatarClick: () => void;
   onNewChat?: () => void;
   onShare?: () => void;
   onReport?: () => void;
   userRole?: "admin" | "user";
+  /** Show Share and Report (only when there's an active chat with messages) */
+  showChatActions?: boolean;
 }
 
 function IconStart() {
@@ -48,43 +49,47 @@ function IconStart() {
 
 export function TopBar({
   sidebarExpanded,
-  onToggleSidebar,
   onAvatarClick,
   onNewChat,
   onShare,
   onReport,
   userRole,
+  showChatActions = false,
 }: TopBarProps) {
   return (
     <div
       className="top-bar shrink-0 flex items-center justify-between px-4 md:px-6"
       style={{ height: 52, background: "transparent" }}
     >
-      {/* Left side (RTL: visual right) — Share + تقرير الكلام */}
+      {/* Left side (RTL: visual right) — Share + Report only when chat has messages */}
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={onShare}
-          className="top-bar-action"
-          aria-label="مشاركة"
-          title="مشاركة"
-        >
-          <Share2 size={20} strokeWidth={2} />
-          <span className="top-bar-action-label">مشاركة</span>
-        </button>
-        <button
-          type="button"
-          onClick={onReport}
-          className="top-bar-action"
-          aria-label="تقرير الكلام"
-          title="تقرير الكلام"
-        >
-          <FileText size={20} strokeWidth={2} />
-          <span className="top-bar-action-label">تقرير الكلام</span>
-        </button>
+        {showChatActions && (
+          <>
+            <button
+              type="button"
+              onClick={onShare}
+              className="top-bar-action"
+              aria-label="مشاركة"
+              title="مشاركة"
+            >
+              <Share2 size={20} strokeWidth={2} />
+              <span className="top-bar-action-label">مشاركة</span>
+            </button>
+            <button
+              type="button"
+              onClick={onReport}
+              className="top-bar-action"
+              aria-label="تقرير الكلام"
+              title="تقرير الكلام"
+            >
+              <FileText size={20} strokeWidth={2} />
+              <span className="top-bar-action-label">تقرير الكلام</span>
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Right side (RTL: visual left) — Profile + Start (when expanded) + Bird */}
+      {/* Right side (RTL: visual left) — Profile + Start (when sidebar expanded) */}
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -108,14 +113,6 @@ export function TopBar({
             <span className="top-bar-action-label">ابدأ</span>
           </button>
         )}
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          className="flex items-center justify-center p-1 rounded-lg hover:bg-black/5 transition-colors"
-          aria-label={sidebarExpanded ? "طي القائمة" : "فتح القائمة"}
-        >
-          <BirdToggle expanded={sidebarExpanded} size={40} />
-        </button>
       </div>
     </div>
   );

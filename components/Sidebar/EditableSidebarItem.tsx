@@ -11,6 +11,8 @@ interface EditableSidebarItemProps {
   onRename?: (id: string, newTitle: string) => void;
   canEdit?: boolean;
   actions?: React.ReactNode;
+  /** Icon shown at start of item (e.g. notebook for دفاتر) */
+  leadingIcon?: React.ReactNode;
 }
 
 export function EditableSidebarItem({
@@ -22,6 +24,7 @@ export function EditableSidebarItem({
   onRename,
   canEdit = true,
   actions,
+  leadingIcon,
 }: EditableSidebarItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
@@ -94,13 +97,19 @@ export function EditableSidebarItem({
     <div className="flex items-center gap-1 group">
       <button
         onClick={onSelect}
-        className="flex-1 min-w-0 text-right px-3 py-2 rounded-lg font-ui text-xs truncate block transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+        className="flex-1 min-w-0 flex items-center gap-2 text-right px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
         style={{
           color: isSelected ? "var(--color-accent)" : "var(--text-primary)",
           background: isSelected ? "var(--color-accent-tint-10)" : "transparent",
         }}
       >
-        <span className="block truncate">{title || "بدون عنوان"}</span>
+        {leadingIcon && (
+          <span className="shrink-0 flex items-center" style={{ color: "var(--text-tertiary)" }}>
+            {leadingIcon}
+          </span>
+        )}
+        <span className="min-w-0 flex-1 text-right">
+          <span className="block truncate">{title || "بدون عنوان"}</span>
         {subtitle && (
           <span
             className="block text-[10px] mt-0.5"
@@ -109,6 +118,7 @@ export function EditableSidebarItem({
             {subtitle}
           </span>
         )}
+        </span>
       </button>
       {canEdit && onRename && (
         <button

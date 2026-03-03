@@ -6,6 +6,7 @@ import { SidebarSection } from "./SidebarSection";
 import { ExpandableList } from "./ExpandableList";
 import { EditableSidebarItem } from "./EditableSidebarItem";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BirdToggle } from "@/components/BirdToggle";
 import type { Conversation, DateGroup } from "@/lib/chat";
 
 const SIDEBAR_W_EXPANDED = 240;
@@ -75,6 +76,14 @@ function IconGroup() {
   );
 }
 
+function IconChat() {
+  return (
+    <svg {...iconProps} width={16} height={16}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
 export type SidebarActiveSection =
   | "diwan"
   | "reports"
@@ -127,6 +136,7 @@ export interface SidebarProps {
   onRenameProject?: (id: string, title: string) => void;
   onRenameStudy?: (id: string, title: string) => void;
   onSearch?: (query: string) => void;
+  onToggleSidebar?: () => void;
 }
 
 function fmtDate(iso: string) {
@@ -164,6 +174,7 @@ export function Sidebar({
   onRenameProject,
   onRenameStudy,
   onSearch,
+  onToggleSidebar,
 }: SidebarProps) {
   const [activeSection, setActiveSection] =
     useState<SidebarActiveSection>("diwan");
@@ -217,7 +228,6 @@ export function Sidebar({
           <ExpandableList
             items={conversations}
             initialCount={3}
-            emptyMessage="لا محادثات"
             renderItem={(conv) => (
               <EditableSidebarItem
                 key={conv.id}
@@ -230,6 +240,7 @@ export function Sidebar({
                 }}
                 onRename={onRenameConversation}
                 canEdit={!!onRenameConversation}
+                leadingIcon={<IconChat />}
               />
             )}
           />
@@ -247,8 +258,7 @@ export function Sidebar({
         <ExpandableList
           items={reports}
           initialCount={3}
-          emptyMessage="لا تقارير"
-          renderItem={(report) => (
+            renderItem={(report) => (
             <EditableSidebarItem
               key={report.id}
               id={report.id}
@@ -260,6 +270,7 @@ export function Sidebar({
               }}
               onRename={onRenameReport}
               canEdit={!!onRenameReport}
+              leadingIcon={<IconReports />}
             />
           )}
         />
@@ -310,7 +321,6 @@ export function Sidebar({
         <ExpandableList
           items={projects}
           initialCount={3}
-          emptyMessage="لا دفاتر"
           renderItem={(project) => (
             <EditableSidebarItem
               key={project.id}
@@ -328,6 +338,7 @@ export function Sidebar({
               }}
               onRename={onRenameProject}
               canEdit={!!onRenameProject}
+              leadingIcon={<IconProjects />}
             />
           )}
         />
@@ -361,7 +372,6 @@ export function Sidebar({
         <ExpandableList
           items={studies}
           initialCount={3}
-          emptyMessage="لا قضايا"
           renderItem={(study) => (
             <EditableSidebarItem
               key={study.id}
@@ -374,6 +384,7 @@ export function Sidebar({
               }}
               onRename={onRenameStudy}
               canEdit={!!onRenameStudy}
+              leadingIcon={<IconStudies />}
               actions={
                 onDeleteStudy ? (
                   <button
@@ -425,7 +436,19 @@ export function Sidebar({
           zIndex: 10,
         }}
       >
-        <div className="shrink-0" style={{ height: 52 }} />
+        {/* Bird toggle — in sidebar, opposite side of مشاركة */}
+        <div className="shrink-0 flex items-center justify-center" style={{ height: 52 }}>
+          {onToggleSidebar && (
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              className="flex items-center justify-center p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              aria-label={expanded ? "طي القائمة" : "فتح القائمة"}
+            >
+              <BirdToggle expanded={expanded} size={40} />
+            </button>
+          )}
+        </div>
         <div className="flex-1 min-h-0 flex flex-col overflow-y-auto sidebar-scroll">
           {expanded ? (
             <div className="flex-1 min-h-0 px-1 py-2">
@@ -482,6 +505,19 @@ export function Sidebar({
         </div>
       </aside>
 
+      {/* Mobile: bird button to open sidebar when collapsed */}
+      {onToggleSidebar && !expanded && (
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className="md:hidden fixed top-4 z-50 flex items-center justify-center p-3 rounded-xl bg-transparent border-none shadow-none hover:opacity-80 active:opacity-70 transition-opacity"
+          style={{ right: 12 }}
+          aria-label="فتح القائمة"
+        >
+          <BirdToggle expanded={false} size={40} />
+        </button>
+      )}
+
       {/* Mobile drawer — shown when expanded on mobile */}
       <AnimatePresence>
         {expanded && (
@@ -500,9 +536,25 @@ export function Sidebar({
             animate={{ width: "min(320px,85vw)" }}
             exit={{ width: 0 }}
             transition={{ type: "tween", duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="md:hidden fixed inset-y-0 right-0 z-40 flex flex-col overflow-hidden"
-            style={{ background: "var(--bg-secondary)", top: 52 }}
+            className="md:hidden fixed inset-0 z-40 flex flex-col overflow-hidden"
+            style={{ background: "var(--bg-secondary)" }}
           >
+            {/* Mobile header: bird in corner, matches TopBar height (52px) */}
+            {onToggleSidebar && (
+              <div
+                className="shrink-0 flex items-center justify-start ps-2 border-b"
+                style={{ height: 52, borderColor: "var(--border-subtle)" }}
+              >
+                <button
+                  type="button"
+                  onClick={onToggleSidebar}
+                  className="flex items-center justify-center p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                  aria-label="طي القائمة"
+                >
+                  <BirdToggle expanded={true} size={36} />
+                </button>
+              </div>
+            )}
             <div className="flex-1 overflow-y-auto sidebar-scroll px-1 py-2">
               {sidebarContent(true)}
             </div>

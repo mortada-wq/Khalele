@@ -224,16 +224,17 @@ export default function DefaterPage() {
     <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
       <TopBar
         sidebarExpanded={sidebarExpanded}
-        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
         onAvatarClick={() => router.push("/chat")}
         onShare={handleShare}
         onReport={() => {}}
+        showChatActions={false}
       />
 
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <Sidebar
           expanded={sidebarExpanded}
           onClose={() => setSidebarExpanded(false)}
+          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
           conversations={[]}
           currentConversationId={null}
           reports={[]}

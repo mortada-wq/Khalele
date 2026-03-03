@@ -731,18 +731,19 @@ function ChatPageContent() {
     <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
       <TopBar
         sidebarExpanded={sidebarExpanded}
-        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
         onAvatarClick={handleAvatarClick}
         onNewChat={startNewChat}
         onShare={handleShare}
         onReport={handleReport}
         userRole={userRole}
+        showChatActions={!showHero}
       />
 
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <Sidebar
           expanded={sidebarExpanded}
           onClose={() => setSidebarExpanded(false)}
+          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
           conversations={conversations}
           currentConversationId={currentConversationId}
           reports={[]}
@@ -822,6 +823,7 @@ function ChatPageContent() {
             isLoading={isLoading}
             speechSpeed={speechSpeed}
             voiceId={voiceId}
+            languageStyle={languageStyle}
             onSendMessage={sendMessage}
             onRegenerate={regenerateMessage}
             onEnhance={handleEnhance}

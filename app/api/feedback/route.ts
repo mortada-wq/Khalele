@@ -16,30 +16,58 @@ export async function POST(req: NextRequest) {
       timestamp,
     } = body;
 
-    // Simple like/dislike feedback
-    if (feedbackType === "like" || feedbackType === "dislike") {
+    // Like feedback
+    if (feedbackType === "like") {
       const feedback = {
         id: crypto.randomUUID(),
         userId,
         messageId: messageId || "unknown",
-        feedbackType,
-        reason: reason || undefined,
         originalResponse: (originalResponse || "").slice(0, 500),
-        status: "logged" as const,
+        correctedResponse: "",
+        correctionType: "positive" as const,
+        status: "pending" as const,
         createdAt: timestamp || new Date().toISOString(),
       };
-
-      await saveCorrection({
-        ...feedback,
-        correctedResponse: "",
-        correctionType: feedbackType === "like" ? "positive" : reason || "negative",
-        status: "pending",
-      });
-
+      await saveCorrection(feedback);
       return NextResponse.json({ success: true, id: feedback.id });
     }
 
-    // Correction feedback (existing flow)
+    // Dislike with "Needs Tweak" (gold-style correction for few-shot)
+    if (feedbackType === "dislike" && reason === "needs_tweak" && correctedResponse?.trim()) {
+      const correction = {
+        id: crypto.randomUUID(),
+        userId: userId || "anonymous",
+        messageId: messageId || "unknown",
+        originalResponse: (originalResponse || "").slice(0, 2000),
+        correctedResponse: correctedResponse.trim().slice(0, 2000),
+        correctionType: "needs_tweak" as const,
+        status: "pending" as const,
+        createdAt: new Date().toISOString(),
+        inputPrompt: (body.inputPrompt as string)?.trim()?.slice(0, 500),
+        languageStyle: (body.languageStyle as "easy_arabic" | "formal_msa") || "easy_arabic",
+        verdict: "needs_tweak" as const,
+      };
+      await saveCorrection(correction);
+      return NextResponse.json({ success: true, id: correction.id });
+    }
+
+    // Simple dislike (no correction)
+    if (feedbackType === "dislike") {
+      const feedback = {
+        id: crypto.randomUUID(),
+        userId,
+        messageId: messageId || "unknown",
+        originalResponse: (originalResponse || "").slice(0, 500),
+        correctedResponse: "",
+        correctionType: (reason as string) || "negative",
+        status: "pending" as const,
+        createdAt: timestamp || new Date().toISOString(),
+      };
+      await saveCorrection(feedback);
+      return NextResponse.json({ success: true, id: feedback.id });
+    }
+
+    // Full correction feedback (existing flow)
     if (!originalResponse || !correctedResponse) {
       return NextResponse.json(
         { error: "originalResponse and correctedResponse required" },
@@ -56,6 +84,9 @@ export async function POST(req: NextRequest) {
       region,
       status: "pending" as const,
       createdAt: new Date().toISOString(),
+      inputPrompt: (body.inputPrompt as string)?.trim()?.slice(0, 500),
+      languageStyle: (body.languageStyle as "easy_arabic" | "formal_msa") || undefined,
+      verdict: (body.verdict as "perfect" | "needs_tweak" | "wrong_level") || undefined,
     };
 
     await saveCorrection(correction);

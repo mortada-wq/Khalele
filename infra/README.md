@@ -43,10 +43,10 @@
 
 ### 4. DynamoDB Tables (optional for Phase 1)
 - `khalele-users` — PK: userId
-- `khalele-corrections` — PK: id, GSI: userId-createdAt-index
+- `khalele-corrections` — PK: id, GSI: userId-createdAt-index. For few-shot gold examples, add optional attributes: `inputPrompt`, `languageStyle`, `verdict`. Approved corrections with these fields are injected into LLM prompts.
 - `khalele-conversations` — see below
 
-App works without DynamoDB; corrections stored in-memory as fallback.
+App works without DynamoDB; corrections stored in-memory as fallback. Add `dynamodb:Scan` to IAM for gold example retrieval.
 
 #### khalele-conversations (chat archive)
 

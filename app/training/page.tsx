@@ -133,9 +133,14 @@ export default function TrainingPage() {
         <Link href="/" className="font-bold text-xl" style={{ color: "var(--color-accent)" }}>
           خليلي — المساهمة بالبيانات
         </Link>
-        <Link href="/" className="text-sm" style={{ color: "#6b6b6b" }}>
-          العودة
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/volunteer" className="text-sm" style={{ color: "var(--color-accent)" }}>
+            صقل التصحيحات
+          </Link>
+          <Link href="/" className="text-sm" style={{ color: "#6b6b6b" }}>
+            العودة
+          </Link>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto space-y-8">
