@@ -207,7 +207,7 @@ export function HomeHero() {
         <div className="flex flex-col items-center w-full px-6 max-w-xl">
           {/* Logo */}
           <img
-            src="/logo/logo_black.svg"
+            src="/logo/logo_light.png"
             alt="خليلي"
             className="w-40 md:w-56 h-auto mb-5"
             draggable={false}
