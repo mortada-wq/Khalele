@@ -18,6 +18,7 @@ import { ADMIN_TOOLS, getUserTools } from "@/lib/tools";
 import { groupConversationsByDate, getOrCreateUserId } from "@/lib/chat";
 import type { Message, Conversation } from "@/lib/chat";
 import type { FactCheckMode } from "@/lib/factcheck-config";
+import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 
 const MAX_REASON_LENGTH = 180;
 const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
@@ -109,6 +110,10 @@ function ChatPageContent() {
   const [voiceId, setVoiceId] = useState(() => {
     if (typeof window === "undefined") return "ar-XA-Wavenet-A";
     return localStorage.getItem("khalele_voice_id") || "ar-XA-Wavenet-A";
+  });
+  const [systemPrompt, setSystemPrompt] = useState(() => {
+    if (typeof window === "undefined") return DEFAULT_SYSTEM_PROMPT;
+    return localStorage.getItem("khalele_system_prompt") || DEFAULT_SYSTEM_PROMPT;
   });
   const [useSearch] = useState(false);
   const [empathyMode] = useState(false);
@@ -494,6 +499,7 @@ function ChatPageContent() {
           useSearch,
           empathyMode,
           ramadanMode,
+          customSystemPrompt: systemPrompt !== DEFAULT_SYSTEM_PROMPT ? systemPrompt : undefined,
         }),
       });
 
@@ -728,15 +734,17 @@ function ChatPageContent() {
           setSettingsOpen(false);
           setSettingsInitialSection(undefined);
         }}
-        initialSettings={{ languageStyle, speechSpeed, voiceId, nickname: activeNickname }}
+        initialSettings={{ languageStyle, speechSpeed, voiceId, systemPrompt, nickname: activeNickname }}
         initialSection={settingsInitialSection === "apps" ? "apps" : undefined}
         onSave={(s) => {
           setLanguageStyle(s.languageStyle);
           setSpeechSpeed(s.speechSpeed);
           setVoiceId(s.voiceId);
+          setSystemPrompt(s.systemPrompt);
           if (typeof window !== "undefined") {
             localStorage.setItem("khalele_speech_speed", String(s.speechSpeed));
             localStorage.setItem("khalele_voice_id", s.voiceId);
+            localStorage.setItem("khalele_system_prompt", s.systemPrompt);
           }
           if (!incognitoMode) {
             const nextNickname = s.nickname.trim();

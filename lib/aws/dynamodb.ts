@@ -22,6 +22,15 @@ const TABLE_CORRECTIONS = process.env.DYNAMODB_CORRECTIONS_TABLE || "khalele-cor
 const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "khalele-conversations";
 const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-sessions";
 const inMemoryProfiles = new Map<string, UserProfile>();
+const inMemoryAuthUsers = new Map<string, AuthUser>();
+
+export interface AuthUser {
+  email: string;
+  name: string;
+  passwordHash: string;
+  authProvider: "credentials";
+  createdAt: string;
+}
 
 export interface UserProfile {
   userId: string;
@@ -288,4 +297,50 @@ export async function updateTrainingSessionStatus(
   const updated = { ...session, status, updatedAt: new Date().toISOString() };
   await saveTrainingSession(updated);
   return updated;
+}
+
+export async function getAuthUserByEmail(email: string): Promise<AuthUser | null> {
+  const normalizedEmail = email.toLowerCase().trim();
+  try {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_USERS,
+        Key: { userId: `auth#${normalizedEmail}` },
+      })
+    );
+    if (result.Item) return result.Item as AuthUser;
+    return inMemoryAuthUsers.get(normalizedEmail) ?? null;
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return inMemoryAuthUsers.get(normalizedEmail) ?? null;
+    }
+    throw error;
+  }
+}
+
+export async function createAuthUser(user: AuthUser): Promise<void> {
+  const normalizedEmail = user.email.toLowerCase().trim();
+  const item = { ...user, userId: `auth#${normalizedEmail}`, email: normalizedEmail };
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_USERS,
+        Item: item,
+        ConditionExpression: "attribute_not_exists(userId)",
+      })
+    );
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes("ConditionalCheckFailedException")) {
+      throw new Error("EMAIL_EXISTS");
+    }
+    if (isMissingTableError(error)) {
+      if (inMemoryAuthUsers.has(normalizedEmail)) {
+        throw new Error("EMAIL_EXISTS");
+      }
+      inMemoryAuthUsers.set(normalizedEmail, { ...user, email: normalizedEmail });
+      return;
+    }
+    throw error;
+  }
 }

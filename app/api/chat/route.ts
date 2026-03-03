@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
       useSearch,
       empathyMode,
       ramadanMode,
+      customSystemPrompt,
     } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
       useSearch,
       empathyMode,
       ramadanMode,
+      customSystemPrompt: typeof customSystemPrompt === "string" ? customSystemPrompt : undefined,
     });
 
     console.log(`[Chat API] Got response (${response.length} chars)`);

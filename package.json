@@ -17,6 +17,7 @@
     "@aws-sdk/client-transcribe": "^3.700.0",
     "@aws-sdk/lib-dynamodb": "^3.700.0",
     "@google-cloud/text-to-speech": "^6.4.0",
+    "bcryptjs": "^3.0.3",
     "framer-motion": "^12.34.3",
     "lucide-react": "^0.460.0",
     "next": "14.2.18",
@@ -28,12 +29,14 @@
     "resend": "^6.9.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.18",
+    "playwright": "^1.58.2",
     "postcss": "^8",
     "tailwindcss": "^3.4.14",
     "typescript": "^5"

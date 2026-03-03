@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   Copy,
   Check,
   ThumbsDown,
   ThumbsUp,
   RefreshCw,
-  Loader2,
   X,
   Sparkles,
   FileText,

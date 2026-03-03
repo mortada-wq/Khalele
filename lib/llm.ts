@@ -1,20 +1,14 @@
 /**
  * LLM client — DeepSeek V3.2 via SiliconFlow (OpenAI-compatible API)
- *
- * Replaces the previous AWS Bedrock / Anthropic Claude integration.
- * Uses the `openai` package with a custom base URL pointing to SiliconFlow.
  */
-import OpenAI from "openai";
+import type OpenAI from "openai";
+import { siliconFlowClient, SILICONFLOW_MODEL } from "@/lib/siliconflow";
 import { getRelevantKnowledge, addToSharedKnowledge } from "@/lib/memory";
 import type { LanguageStyle } from "@/lib/memory";
 import { DEFAULT_CHARACTERS } from "@/lib/characters";
+import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 
-const client = new OpenAI({
-  apiKey: process.env.SILICONFLOW_API_KEY || "",
-  baseURL: process.env.SILICONFLOW_BASE_URL || "https://api.siliconflow.cn/v1",
-});
-
-const MODEL_ID = process.env.SILICONFLOW_MODEL || "deepseek-ai/DeepSeek-V3.2";
+export { DEFAULT_SYSTEM_PROMPT };
 
 const LANGUAGE_STYLE_PROMPTS: Record<LanguageStyle, string> = {
   formal_msa:
@@ -32,9 +26,13 @@ function buildSystemPrompt(
     useSearch?: boolean;
     empathyMode?: boolean;
     ramadanMode?: boolean;
+    customSystemPrompt?: string;
   }
 ): string {
   const stylePrompt = LANGUAGE_STYLE_PROMPTS[languageStyle];
+
+  const userCustomPrompt = extra?.customSystemPrompt?.trim();
+
   let prompt = `
 You are Kheleel (خليلي), an Arabic AI assistant for all Arabic-speaking countries (Iraq, Egypt, Gulf, Levant, Maghreb, etc.).
 
@@ -59,6 +57,10 @@ ${extra?.empathyMode ? "\n- Empathy Mode: Be trauma-informed. Respond with sensi
 ${extra?.useSearch ? "\n- When citing facts, prefer recent/verified sources. Say 'حسب ما قرأت' or 'من المصادر' when uncertain." : ""}
 ${extra?.ramadanMode ? "\n- Ramadan Mode: Be aware of fasting context. Use greetings like 'رمضان كريم', acknowledge if user may be tired, avoid food-focused suggestions during daytime." : ""}
 `;
+
+  if (userCustomPrompt && userCustomPrompt !== DEFAULT_SYSTEM_PROMPT) {
+    prompt += `\n\nAdditional user instructions:\n${userCustomPrompt}\n`;
+  }
 
   if (characterId) {
     const selected = DEFAULT_CHARACTERS.find((c) => c.id === characterId);
@@ -94,6 +96,7 @@ export interface InvokeOptions {
   useSearch?: boolean;
   empathyMode?: boolean;
   ramadanMode?: boolean;
+  customSystemPrompt?: string;
 }
 
 export async function invokeDeepSeek(
@@ -108,9 +111,9 @@ export async function invokeDeepSeek(
     useSearch,
     empathyMode,
     ramadanMode,
+    customSystemPrompt,
   } = options;
 
-  // Extract user preferences for cross-character shared memory
   if (lastUserMessage && /(أحب|مفضل|أنا أحب|طعامي|أكلي)/.test(lastUserMessage)) {
     const trimmed = lastUserMessage.slice(0, 120).trim();
     if (trimmed.length > 5) addToSharedKnowledge(trimmed);
@@ -132,7 +135,7 @@ export async function invokeDeepSeek(
     characterId,
     ragContext,
     memoryContext,
-    { useSearch, empathyMode, ramadanMode }
+    { useSearch, empathyMode, ramadanMode, customSystemPrompt }
   );
 
   const formattedMessages: OpenAI.ChatCompletionMessageParam[] = [
@@ -144,8 +147,8 @@ export async function invokeDeepSeek(
   ];
 
   try {
-    const response = await client.chat.completions.create({
-      model: MODEL_ID,
+    const response = await siliconFlowClient.chat.completions.create({
+      model: SILICONFLOW_MODEL,
       messages: formattedMessages,
       max_tokens: 1024,
       temperature: 0.7,

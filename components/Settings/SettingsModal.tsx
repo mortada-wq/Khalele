@@ -5,6 +5,7 @@ import { MaterialSymbol } from "react-material-symbols";
 import type { LanguageStyle } from "@/lib/characters";
 import { DEFAULT_ACCENT, getStoredAccent, savePalette, resetPalette } from "@/lib/theme-color";
 import { ARABIC_VOICES, type VoiceOption } from "@/lib/voices";
+import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 
 export interface KheleelSettings {
   // عام
@@ -17,6 +18,8 @@ export interface KheleelSettings {
   autoResponse: boolean;
   // اللغة والأسلوب
   languageStyle: LanguageStyle;
+  // التعليمات الأساسية
+  systemPrompt: string;
   // التخصيص
   tone: "formal" | "friendly" | "casual";
   enthusiasm: "low" | "medium" | "high";
@@ -39,6 +42,7 @@ const DEFAULT_SETTINGS: KheleelSettings = {
   voiceId: "ar-XA-Wavenet-A",
   autoResponse: false,
   languageStyle: "easy_arabic",
+  systemPrompt: DEFAULT_SYSTEM_PROMPT,
   tone: "friendly",
   enthusiasm: "medium",
   nickname: "",
@@ -54,6 +58,7 @@ const SECTIONS = [
   { id: "apps", label: "ربط حساباتك", icon: "extension" as const },
   { id: "voice", label: "الصوت", icon: "mic" as const },
   { id: "language", label: "اللغة والأسلوب", icon: "translate" as const },
+  { id: "system_prompt", label: "التعليمات الأساسية", icon: "psychology" as const },
   { id: "personalization", label: "التخصيص", icon: "tune" as const },
   { id: "notifications", label: "الإشعارات", icon: "notifications" as const },
   { id: "data", label: "البيانات", icon: "storage" as const },
@@ -529,6 +534,66 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
                   </div>
                   <p className="text-sm" style={{ color: "#6b6b6b", lineHeight: 1.6 }}>
                     خليل يفهم كل اللهجات العربية — تكلم كما تحب. يختار الرد بالفصحى الرسمية أو بالعربية السهلة حسب إعدادك.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* التعليمات الأساسية — System Prompt */}
+            {activeSection === "system_prompt" && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold" style={{ color: "var(--color-accent)" }}>
+                  التعليمات الأساسية
+                </h3>
+                <p className="text-sm" style={{ color: "#6b6b6b", lineHeight: 1.7 }}>
+                  هذه التعليمات تُرسَل مع كل رسالة لتوجيه سلوك خليل. يمكنك تعديلها لتناسب احتياجاتك.
+                </p>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    System Prompt / التعليمات الأساسية
+                  </label>
+                  <textarea
+                    value={settings.systemPrompt}
+                    onChange={(e) => update("systemPrompt", e.target.value)}
+                    rows={6}
+                    dir="rtl"
+                    className="w-full px-4 py-3 rounded-xl border text-sm resize-y leading-relaxed font-ui"
+                    style={{
+                      borderColor: settings.systemPrompt !== DEFAULT_SYSTEM_PROMPT ? "var(--color-accent)" : "#e0e0e0",
+                      background: settings.systemPrompt !== DEFAULT_SYSTEM_PROMPT ? "var(--color-accent-tint-06)" : "#fafafa",
+                      minHeight: "120px",
+                    }}
+                    placeholder={DEFAULT_SYSTEM_PROMPT}
+                  />
+                  {settings.systemPrompt !== DEFAULT_SYSTEM_PROMPT && (
+                    <p className="text-xs mt-1.5" style={{ color: "var(--color-accent)" }}>
+                      تعليمات مخصصة مفعّلة
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => update("systemPrompt", DEFAULT_SYSTEM_PROMPT)}
+                    disabled={settings.systemPrompt === DEFAULT_SYSTEM_PROMPT}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
+                    style={{
+                      background: "#f0f0f0",
+                      color: "#5a5a5a",
+                      opacity: settings.systemPrompt === DEFAULT_SYSTEM_PROMPT ? 0.5 : 1,
+                      cursor: settings.systemPrompt === DEFAULT_SYSTEM_PROMPT ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    إعادة للافتراضي
+                  </button>
+                </div>
+                <div
+                  className="p-4 rounded-xl"
+                  style={{ background: "#fafafa", border: "1px solid #e5e5e5" }}
+                >
+                  <p className="text-xs font-medium mb-2" style={{ color: "#5a5a5a" }}>الافتراضي:</p>
+                  <p className="text-sm" style={{ color: "#8c8c8c", lineHeight: 1.7 }}>
+                    {DEFAULT_SYSTEM_PROMPT}
                   </p>
                 </div>
               </div>
