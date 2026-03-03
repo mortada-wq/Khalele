@@ -468,3 +468,41 @@ textarea:focus {
 .sidebar-nav-item.is-active .nav-icon {
   color: var(--color-accent-hover) !important;
 }
+
+/* ── Sidebar dividers (thin, barely visible) ── */
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  opacity: 0.3;
+  margin: 4px 12px;
+}
+
+/* ── Sidebar section headers ── */
+.sidebar-section-header {
+  transition: color 0.15s ease;
+}
+.sidebar-section-header:hover {
+  color: var(--color-accent) !important;
+}
+.sidebar-section-header:hover .sidebar-section-icon {
+  color: var(--color-accent) !important;
+}
+.sidebar-section-header.is-active {
+  color: var(--color-accent) !important;
+}
+.sidebar-section-header.is-active .sidebar-section-icon {
+  color: var(--color-accent) !important;
+}
+
+/* ── Sidebar collapsed icon colors (theme-aware) ── */
+.sidebar-section-icon {
+  transition: color 0.2s ease;
+}
+
+/* ── Expandable list dots ── */
+.expandable-dots {
+  cursor: pointer;
+}
+.expandable-dots:hover {
+  color: var(--color-accent) !important;
+}

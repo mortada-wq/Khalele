@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { invokeBedrock } from "@/lib/aws/bedrock";
+import { invokeDeepSeek } from "@/lib/llm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,22 +20,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const awsKey = process.env.AWS_ACCESS_KEY_ID ?? "";
-    const awsSecret = process.env.AWS_SECRET_ACCESS_KEY ?? "";
-    const isPlaceholder = (v: string) => !v || v.startsWith("PASTE_") || v === "your-key-here";
-    if (isPlaceholder(awsKey) || isPlaceholder(awsSecret)) {
-      console.error("CHAT API: AWS credentials missing or still set to placeholder values");
+    const apiKey = process.env.SILICONFLOW_API_KEY ?? "";
+    if (!apiKey || apiKey.startsWith("PASTE_") || apiKey === "your-key-here") {
+      console.error("CHAT API: SiliconFlow API key missing or placeholder");
       return NextResponse.json(
-        { error: "AWS credentials not configured. Update .env.local with real AWS keys, then restart the dev server." },
+        { error: "SiliconFlow API key not configured. Update .env.local with your SILICONFLOW_API_KEY, then restart the dev server." },
         { status: 500 }
       );
     }
 
-    console.log(`[Chat API] Sending ${messages.length} messages to Bedrock (model: ${process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-haiku-20240307-v1:0"}, style: ${languageStyle})`);
+    const model = process.env.SILICONFLOW_MODEL || "deepseek-ai/DeepSeek-V3.2";
+    console.log(`[Chat API] Sending ${messages.length} messages to DeepSeek (model: ${model}, style: ${languageStyle})`);
 
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()?.content;
 
-    const response = await invokeBedrock(messages, {
+    const response = await invokeDeepSeek(messages, {
       languageStyle,
       lastUserMessage,
       recentMessages: messages,
@@ -56,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json(
       {
-        error: `Bedrock error: ${errName}`,
+        error: `DeepSeek error: ${errName}`,
         details: errMsg,
       },
       { status: 500 }

@@ -21,6 +21,7 @@
     "lucide-react": "^0.460.0",
     "next": "14.2.18",
     "next-auth": "^4.24.13",
+    "openai": "^6.25.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-material-symbols": "^4.4.0",
