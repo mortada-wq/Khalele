@@ -75,9 +75,24 @@ export const authOptions: NextAuthOptions = {
     error: "/signin", // Redirect errors to signin page instead of showing error page
   },
   callbacks: {
-    async session({ session }) {
-      if (session.user?.email) {
-        const adminStatus = await isAdmin(session.user.email);
+    async jwt({ token, user }) {
+      // Persist user data to token after signin
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Send token data to session
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        
+        // Add role
+        const adminStatus = await isAdmin(token.email as string);
         (session.user as { role?: string }).role = adminStatus ? "admin" : "user";
       }
       return session;

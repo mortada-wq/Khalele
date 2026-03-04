@@ -639,3 +639,45 @@ textarea:focus {
 [data-theme="dark"] .message-actions-bar .action-separator {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ── Hidden Scrollbar for Chat (ChatGPT/Gemini style) ── */
+.chat-scroll-container {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* ── Floating Input Bar Enhancement ── */
+.home-pill-bar {
+  background: linear-gradient(135deg, #d9d9d9 0%, #dedede 100%);
+  border: 1px solid #f2f2f2;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.home-pill-bar:focus-within {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .home-pill-bar {
+  background: linear-gradient(135deg, #2a2a2a 0%, #252525 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .home-pill-bar:focus-within {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+}

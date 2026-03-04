@@ -38,8 +38,8 @@ export function MessageList({
   }, [messages, isLoading]);
 
   return (
-    <div ref={scrollRef} className="sidebar-scroll flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-4">
+    <div ref={scrollRef} className="chat-scroll-container flex-1 overflow-y-auto">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6" style={{ minHeight: "50vh" }}>
             <p className="font-ui text-center text-sm md:text-base" style={{ color: "var(--text-tertiary)" }}>

@@ -1,7 +1,5 @@
 "use client";
 
-import { Share2, FileText } from "lucide-react";
-
 function UserAvatarIcon({ role }: { role?: "admin" | "user" }) {
   const isAdmin = role === "admin";
   return (
@@ -30,55 +28,20 @@ export interface TopBarProps {
   sidebarExpanded: boolean;
   onToggleSidebar?: () => void;
   onAvatarClick: () => void;
-  onShare?: () => void;
-  onReport?: () => void;
   userRole?: "admin" | "user";
-  /** Show Share and Report (only when there's an active chat with messages) */
-  showChatActions?: boolean;
 }
 
 export function TopBar({
   sidebarExpanded,
   onToggleSidebar,
   onAvatarClick,
-  onShare,
-  onReport,
   userRole,
-  showChatActions = false,
 }: TopBarProps) {
   return (
     <div
-      className="top-bar shrink-0 flex items-center justify-between px-4 md:px-6"
+      className="top-bar shrink-0 flex items-center justify-end px-4 md:px-6"
       style={{ height: 52, background: "transparent" }}
     >
-      {/* Left side (RTL: visual right) — Chat actions only */}
-      <div className="flex items-center gap-4">
-        {showChatActions && (
-          <>
-            <button
-              type="button"
-              onClick={onShare}
-              className="top-bar-action"
-              aria-label="مشاركة"
-              title="مشاركة"
-            >
-              <Share2 size={20} strokeWidth={2} />
-              <span className="top-bar-action-label">مشاركة</span>
-            </button>
-            <button
-              type="button"
-              onClick={onReport}
-              className="top-bar-action"
-              aria-label="تقرير الكلام"
-              title="تقرير الكلام"
-            >
-              <FileText size={20} strokeWidth={2} />
-              <span className="top-bar-action-label">تقرير الكلام</span>
-            </button>
-          </>
-        )}
-      </div>
-
       {/* Right side (RTL: visual left) — Profile + Mobile Menu */}
       <div className="flex items-center gap-2">
         {/* Mobile menu button - only show on mobile when sidebar is collapsed */}

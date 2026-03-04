@@ -7,7 +7,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserProfile } from "./UserProfile";
 import type { Conversation } from "@/lib/chat";
 
-const SIDEBAR_W_EXPANDED = 300;
+const SIDEBAR_W_EXPANDED_PCT = "25%";
+const SIDEBAR_W_EXPANDED_MAX = 300;
+const SIDEBAR_W_EXPANDED_MIN = 200;
 const SIDEBAR_W_COLLAPSED = 72;
 
 const iconSize = 20;
@@ -468,7 +470,7 @@ export function Sidebar({
       <aside
         className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
-          width: expanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
+          width: expanded ? `clamp(${SIDEBAR_W_EXPANDED_MIN}px, ${SIDEBAR_W_EXPANDED_PCT}, ${SIDEBAR_W_EXPANDED_MAX}px)` : SIDEBAR_W_COLLAPSED,
           height: "100vh",
           background: expanded ? "#121212" : "transparent",
           transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
