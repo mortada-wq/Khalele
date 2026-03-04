@@ -7,8 +7,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserProfile } from "./UserProfile";
 import type { Conversation } from "@/lib/chat";
 
-const SIDEBAR_W_EXPANDED = 240;
-const SIDEBAR_W_COLLAPSED = 64;
+const SIDEBAR_W_EXPANDED = 300;
+const SIDEBAR_W_COLLAPSED = 72;
 
 const iconSize = 20;
 const iconProps = {
@@ -447,18 +447,16 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* User Profile and Theme toggle - PINNED TO BOTTOM */}
-      <div className="shrink-0 mt-auto border-t" style={{ borderColor: "var(--border-subtle)" }}>
-        {/* User Profile */}
-        <div className="px-3 py-2">
+      {/* User Profile and Theme toggle - PINNED TO BOTTOM - FLOATING */}
+      <div className="shrink-0 mt-auto" style={{ paddingTop: "40px" }}>
+        {/* User Profile - No borders, floating */}
+        <div style={{ marginBottom: "24px" }}>
           <UserProfile expanded={expanded} />
         </div>
         
         {/* Theme toggle */}
-        <div className="px-3 py-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-          <div className="flex items-center justify-end">
-            <ThemeToggle />
-          </div>
+        <div className="flex items-center justify-end">
+          <ThemeToggle />
         </div>
       </div>
     </div>
@@ -472,13 +470,14 @@ export function Sidebar({
         style={{
           width: expanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
           height: "100vh",
-          background: expanded ? "var(--bg-secondary)" : "transparent",
+          background: expanded ? "#121212" : "transparent",
           transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10,
+          padding: expanded ? "32px" : "16px",
         }}
       >
         {/* Bird at absolute top - INSIDE SIDEBAR */}
-        <div className="shrink-0 flex items-center" style={{ paddingLeft: expanded ? 12 : 16, height: 52 }}>
+        <div className="shrink-0 flex items-center" style={{ height: 52, marginBottom: expanded ? "24px" : "16px" }}>
           {onToggleSidebar && (
             <button
               type="button"
@@ -498,13 +497,26 @@ export function Sidebar({
 
         {/* ابدأ Button directly under bird - INSIDE SIDEBAR */}
         {onCreateDiwan && (
-          <div className="shrink-0 px-3 pb-2">
+          <div className="shrink-0" style={{ marginBottom: expanded ? "40px" : "24px" }}>
             {expanded ? (
               <button
                 type="button"
                 onClick={() => onCreateDiwan()}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                style={{ color: "var(--color-accent)" }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all"
+                style={{ 
+                  color: "#C68E17",
+                  fontFamily: "var(--font-ui)",
+                  fontSize: "14px",
+                  fontWeight: 300,
+                  backgroundColor: "rgba(198, 142, 23, 0.08)",
+                  border: "1px solid rgba(198, 142, 23, 0.2)"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.12)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.08)";
+                }}
                 title="ديوان جديد"
               >
                 <IconPlus />
@@ -514,8 +526,17 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => onCreateDiwan()}
-                className="w-full flex items-center justify-center p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                style={{ color: "var(--color-accent)" }}
+                className="w-full flex items-center justify-center p-3 rounded-lg transition-all"
+                style={{ 
+                  color: "#C68E17",
+                  backgroundColor: "rgba(198, 142, 23, 0.08)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.12)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.08)";
+                }}
                 title="ابدأ"
               >
                 <IconPlus />
@@ -569,16 +590,14 @@ export function Sidebar({
             {/* Spacer to push profile to bottom */}
             <div className="flex-1" />
 
-            {/* User Profile - collapsed state */}
-            <div className="shrink-0 border-t w-full" style={{ borderColor: "var(--border-subtle)" }}>
-              <div className="px-2 py-2">
-                <UserProfile expanded={false} />
-              </div>
+            {/* User Profile - collapsed state - FLOATING */}
+            <div className="shrink-0 w-full" style={{ marginTop: "24px" }}>
+              <UserProfile expanded={false} />
             </div>
 
             {/* Theme toggle - collapsed state */}
-            <div className="shrink-0 border-t w-full" style={{ borderColor: "var(--border-subtle)" }}>
-              <div className="px-2 py-2 flex justify-center">
+            <div className="shrink-0 w-full" style={{ marginTop: "16px" }}>
+              <div className="flex justify-center">
                 <ThemeToggle />
               </div>
             </div>

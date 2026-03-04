@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import { ProfileIcon } from "../Icons/ProfileIcon";
 
 export function UserProfile({ expanded }: { expanded: boolean }) {
   const { data: session, status } = useSession();
@@ -15,7 +16,6 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
     return null;
   }
 
-  const userInitial = session.user.name?.charAt(0).toUpperCase() || session.user.email?.charAt(0).toUpperCase() || "U";
   const userName = session.user.name || session.user.email || "User";
   const userEmail = session.user.email;
 
@@ -24,28 +24,19 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
       <button
         type="button"
         onClick={() => setShowMenu(!showMenu)}
-        className="w-full flex items-center justify-center p-2 transition-colors"
+        className="w-full flex items-center justify-center transition-opacity"
         style={{ 
-          color: "var(--text-primary)",
-          backgroundColor: showMenu ? "rgba(0, 0, 0, 0.05)" : "transparent",
+          opacity: showMenu ? 1 : 0.7,
         }}
-        title={userName}
         onMouseEnter={(e) => {
-          if (!showMenu) e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+          e.currentTarget.style.opacity = "1";
         }}
         onMouseLeave={(e) => {
-          if (!showMenu) e.currentTarget.style.backgroundColor = "transparent";
+          if (!showMenu) e.currentTarget.style.opacity = "0.7";
         }}
+        title={userName}
       >
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm"
-          style={{
-            background: "var(--color-accent)",
-            color: "#FFFFFF",
-          }}
-        >
-          {userInitial}
-        </div>
+        <ProfileIcon size={32} className="text-white" />
       </button>
     );
   }
@@ -55,36 +46,25 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
       <button
         type="button"
         onClick={() => setShowMenu(!showMenu)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 transition-all rounded-lg"
+        className="w-full flex items-center gap-3 transition-opacity"
         style={{ 
-          backgroundColor: showMenu ? "rgba(0, 0, 0, 0.08)" : "transparent",
+          opacity: showMenu ? 1 : 0.7,
         }}
         onMouseEnter={(e) => {
-          if (!showMenu) {
-            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-          }
+          e.currentTarget.style.opacity = "1";
         }}
         onMouseLeave={(e) => {
-          if (!showMenu) {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }
+          if (!showMenu) e.currentTarget.style.opacity = "0.7";
         }}
       >
-        <div
-          className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm shrink-0"
-          style={{
-            background: "var(--color-accent)",
-            color: "#FFFFFF",
-          }}
-        >
-          {userInitial}
-        </div>
+        <ProfileIcon size={40} className="text-white shrink-0" style={{ border: "1px solid #C68E17", borderRadius: "50%", padding: "2px" }} />
         <div className="flex-1 text-right overflow-hidden">
           <div 
             className="font-medium text-sm truncate" 
             style={{ 
-              color: "var(--text-primary)",
-              opacity: 1,
+              color: "rgba(255, 255, 255, 1)",
+              fontFamily: "var(--font-ui)",
+              fontWeight: 400,
             }}
           >
             {userName}
@@ -93,8 +73,9 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
             <div 
               className="text-xs truncate" 
               style={{ 
-                color: "var(--text-secondary)",
-                opacity: 1,
+                color: "rgba(255, 255, 255, 0.4)",
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                fontSize: "11px",
               }}
             >
               {userEmail}
@@ -113,8 +94,7 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
           style={{
             transform: showMenu ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 0.2s",
-            color: "var(--text-primary)",
-            opacity: 0.6,
+            color: "rgba(255, 255, 255, 0.4)",
           }}
         >
           <polyline points="6 9 12 15 18 9" />
@@ -128,11 +108,11 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
             onClick={() => setShowMenu(false)}
           />
           <div
-            className="absolute bottom-full left-3 right-3 mb-2 rounded-lg shadow-lg overflow-hidden z-20"
+            className="absolute bottom-full left-0 right-0 mb-2 rounded-lg overflow-hidden z-20"
             style={{
-              background: "var(--bg-primary)",
-              border: "1px solid rgba(0, 0, 0, 0.1)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              background: "#1a1a1a",
+              border: "1px solid rgba(255, 255, 255, 0.05)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
             }}
           >
             <button
@@ -141,16 +121,20 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
                 setShowMenu(false);
                 signOut({ callbackUrl: "/signin" });
               }}
-              className="w-full px-4 py-2.5 text-sm text-right transition-colors"
+              className="w-full px-4 py-3 text-sm text-right transition-all"
               style={{ 
-                color: "var(--text-primary)",
+                color: "rgba(255, 255, 255, 0.7)",
+                fontFamily: "var(--font-ui)",
+                fontWeight: 300,
                 backgroundColor: "transparent",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+                e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
               }}
             >
               تسجيل الخروج
