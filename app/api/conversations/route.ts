@@ -8,10 +8,9 @@ import {
 export const dynamic = "force-dynamic";
 
 const USER_ID_HEADER = "x-user-id";
-const DEFAULT_USER_ID = "anon_anonymous";
 
 function getUserId(req: NextRequest): string {
-  return req.headers.get(USER_ID_HEADER) || DEFAULT_USER_ID;
+  return req.headers.get(USER_ID_HEADER) || "";
 }
 
 export async function GET(req: NextRequest) {

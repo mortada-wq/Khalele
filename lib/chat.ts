@@ -17,14 +17,12 @@ export type DateGroup = "today" | "yesterday" | "last7" | "older";
 
 export const USER_ID_KEY = "khalele_user_id";
 
+// REMOVED: Guest/Anonymous user logic
+// Users must be authenticated to use the app
 export function getOrCreateUserId(): string {
-  if (typeof window === "undefined") return "anon_anonymous";
-  let id = localStorage.getItem(USER_ID_KEY);
-  if (!id) {
-    id = `anon_${crypto.randomUUID()}`;
-    localStorage.setItem(USER_ID_KEY, id);
-  }
-  return id;
+  if (typeof window === "undefined") return "";
+  const id = localStorage.getItem(USER_ID_KEY);
+  return id || "";
 }
 
 export function groupConversationsByDate(conversations: Conversation[]): Record<DateGroup, Conversation[]> {

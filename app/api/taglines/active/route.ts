@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentTagline, getTaglineConfig } from "@/lib/taglines";
+import { getCurrentTagline } from "@/lib/taglines";
 
 /**
  * Returns the current tagline to display on the home page.

@@ -30,7 +30,6 @@ export interface TopBarProps {
   sidebarExpanded: boolean;
   onToggleSidebar?: () => void;
   onAvatarClick: () => void;
-  onNewChat?: () => void;
   onShare?: () => void;
   onReport?: () => void;
   userRole?: "admin" | "user";
@@ -38,19 +37,10 @@ export interface TopBarProps {
   showChatActions?: boolean;
 }
 
-function IconStart() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
 export function TopBar({
   sidebarExpanded,
+  onToggleSidebar,
   onAvatarClick,
-  onNewChat,
   onShare,
   onReport,
   userRole,
@@ -61,20 +51,8 @@ export function TopBar({
       className="top-bar shrink-0 flex items-center justify-between px-4 md:px-6"
       style={{ height: 52, background: "transparent" }}
     >
-      {/* Left side (RTL: visual right) — Start button always visible when sidebar expanded */}
+      {/* Left side (RTL: visual right) — Chat actions only */}
       <div className="flex items-center gap-4">
-        {sidebarExpanded && onNewChat && (
-          <button
-            type="button"
-            onClick={onNewChat}
-            className="top-bar-action"
-            aria-label="ابدأ"
-            title="ابدأ"
-          >
-            <IconStart />
-            <span className="top-bar-action-label">ابدأ</span>
-          </button>
-        )}
         {showChatActions && (
           <>
             <button
@@ -101,8 +79,25 @@ export function TopBar({
         )}
       </div>
 
-      {/* Right side (RTL: visual left) — Profile only */}
+      {/* Right side (RTL: visual left) — Profile + Mobile Menu */}
       <div className="flex items-center gap-2">
+        {/* Mobile menu button - only show on mobile when sidebar is collapsed */}
+        {onToggleSidebar && !sidebarExpanded && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="md:hidden top-bar-action"
+            aria-label="فتح القائمة"
+            title="فتح القائمة"
+          >
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        )}
+        
         <button
           type="button"
           onClick={onAvatarClick}

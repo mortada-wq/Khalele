@@ -86,8 +86,10 @@ function buildBehaviorSnapshot(conversations: Conversation[]) {
 function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userRole = session?.user?.role;
+  
+  // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL RETURNS
   const [input, setInput] = useState("");
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const id = crypto.randomUUID();
@@ -128,7 +130,7 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
   const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; code: string; avatar?: string }[]>([]);
@@ -149,12 +151,23 @@ function ChatPageContent() {
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
   const nicknameSuggestRequestedRef = useRef(false);
 
-  const apiHeaders = () => ({
-    "Content-Type": "application/json",
-    "x-user-id": incognitoMode
-      ? (incognitoIdRef.current || (incognitoIdRef.current = `incognito_${crypto.randomUUID()}`))
-      : userIdRef.current || getOrCreateUserId(),
-  });
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin?callbackUrl=/chat");
+    }
+  }, [status, router]);
+
+  const apiHeaders = () => {
+    // Use authenticated user's email as identifier
+    const userId = session?.user?.email || "";
+    return {
+      "Content-Type": "application/json",
+      "x-user-id": incognitoMode
+        ? (incognitoIdRef.current || (incognitoIdRef.current = `incognito_${crypto.randomUUID()}`))
+        : userId,
+    };
+  };
 
   const handleAvatarClick = () => {
     if (!session) {
@@ -433,9 +446,10 @@ function ChatPageContent() {
     }
   }, [incognitoMode]);
 
-  // Fetch conversations from API on mount (skip when incognito — chat without user identity)
+  // Fetch conversations from API on mount (skip when incognito)
   useEffect(() => {
-    userIdRef.current = getOrCreateUserId();
+    if (!session?.user?.email) return;
+    userIdRef.current = session.user.email;
     if (incognitoMode) return;
     let cancelled = false;
     (async () => {
@@ -690,35 +704,6 @@ function ChatPageContent() {
     }
   };
 
-  const startNewChat = async () => {
-    const id = crypto.randomUUID();
-    const newConv: Conversation = {
-      id,
-      title: "محادثة جديدة",
-      messages: [],
-      characterId: character.id,
-      factCheckMode,
-      updatedAt: new Date().toISOString(),
-    };
-    setConversations((prev) => [newConv, ...prev]);
-    setCurrentConversationId(id);
-    try {
-      await fetch("/api/conversations", {
-        method: "POST",
-        headers: apiHeaders(),
-          body: JSON.stringify({
-            conversationId: id,
-            title: newConv.title,
-            messages: [],
-            characterId: newConv.characterId,
-            factCheckMode,
-          }),
-        });
-    } catch {
-      // Fallback: in-memory only
-    }
-  };
-
   const handleShare = () => {
     if (typeof navigator?.share !== "undefined" && currentConversation) {
       const text = currentConversation.messages
@@ -784,43 +769,46 @@ function ChatPageContent() {
     }
   };
 
-  return (
-    <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      <TopBar
-        sidebarExpanded={sidebarExpanded}
-        onAvatarClick={handleAvatarClick}
-        onNewChat={startNewChat}
-        onShare={handleShare}
-        onReport={handleReport}
-        userRole={userRole}
-        showChatActions={!showHero}
-      />
+  // Show loading or redirect states
+  if (status === "loading") {
+    return (
+      <div className="h-screen flex items-center justify-center" style={{ background: "var(--bg-tertiary)" }}>
+        <span style={{ color: "var(--text-tertiary)" }}>جاري التحميل...</span>
+      </div>
+    );
+  }
 
-      <div className="flex-1 flex min-h-0 overflow-hidden">
-        <Sidebar
-          expanded={sidebarExpanded}
-          onClose={() => setSidebarExpanded(false)}
-          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
-          conversations={conversations}
-          currentConversationId={currentConversationId}
-          contacts={contacts}
-          projects={notebooks}
-          studies={studies}
-          onSelectConversation={setCurrentConversationId}
-          onCreateDiwan={startNewDiwan}
-          onSelectContact={(contactId) => {
-            // TODO: Implement contact selection - open dialog to start diwan with contact
-            console.log("Selected contact:", contactId);
-          }}
-          onSelectProject={(nid) => router.push(`/notebooks/${nid}`)}
-          onCreateProject={async () => {
-            try {
-              const res = await fetch("/api/notebooks", {
-                method: "POST",
-                headers: apiHeaders(),
-                body: JSON.stringify({ title: "دفتر جديد" }),
-              });
-              const data = (await res.json()) as { notebook?: { id: string } };
+  if (!session) {
+    return null;
+  }
+
+  return (
+    <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
+      {/* Sidebar - Full height, includes everything */}
+      <Sidebar
+        expanded={sidebarExpanded}
+        onClose={() => setSidebarExpanded(false)}
+        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        contacts={contacts}
+        projects={notebooks}
+        studies={studies}
+        onSelectConversation={setCurrentConversationId}
+        onCreateDiwan={startNewDiwan}
+        onSelectContact={(contactId) => {
+          // TODO: Implement contact selection - open dialog to start diwan with contact
+          console.log("Selected contact:", contactId);
+        }}
+        onSelectProject={(nid) => router.push(`/notebooks/${nid}`)}
+        onCreateProject={async () => {
+          try {
+            const res = await fetch("/api/notebooks", {
+              method: "POST",
+              headers: apiHeaders(),
+              body: JSON.stringify({ title: "دفتر جديد" }),
+            });
+            const data = (await res.json()) as { notebook?: { id: string } };
               if (data?.notebook?.id) router.push(`/notebooks/${data.notebook.id}`);
             } catch { /* ignore */ }
           }}
@@ -868,6 +856,18 @@ function ChatPageContent() {
             console.log("Search cases:", query);
           }}
           notificationCount={notificationCount}
+        />
+
+      {/* Main content area - Full height with TopBar inside */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <TopBar
+          sidebarExpanded={sidebarExpanded}
+          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
+          onAvatarClick={handleAvatarClick}
+          onShare={handleShare}
+          onReport={handleReport}
+          userRole={userRole}
+          showChatActions={!showHero}
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">

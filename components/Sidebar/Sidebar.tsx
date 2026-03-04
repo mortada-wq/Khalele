@@ -171,8 +171,8 @@ export function Sidebar({
 
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full">
-      {/* Sections */}
-      <div className="flex-1 overflow-y-auto sidebar-scroll">
+      {/* Sections - scrollable content */}
+      <div className="flex-1 overflow-y-auto sidebar-scroll" style={{ minHeight: 0 }}>
         {/* ديوان Section */}
         <div className="mb-1">
           <button
@@ -447,11 +447,8 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Spacer to push bottom content down */}
-      <div className="flex-1" />
-
-      {/* User Profile and Theme toggle at bottom */}
-      <div className="shrink-0 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+      {/* User Profile and Theme toggle - PINNED TO BOTTOM */}
+      <div className="shrink-0 mt-auto border-t" style={{ borderColor: "var(--border-subtle)" }}>
         {/* User Profile */}
         <div className="px-3 py-2">
           <UserProfile expanded={expanded} />
@@ -469,17 +466,18 @@ export function Sidebar({
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar - FULL HEIGHT */}
       <aside
         className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
           width: expanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
+          height: "100vh",
           background: expanded ? "var(--bg-secondary)" : "transparent",
           transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 10,
         }}
       >
-        {/* Bird at absolute top - NO padding, NO gap, height matches TopBar */}
+        {/* Bird at absolute top - INSIDE SIDEBAR */}
         <div className="shrink-0 flex items-center" style={{ paddingLeft: expanded ? 12 : 16, height: 52 }}>
           {onToggleSidebar && (
             <button
@@ -498,19 +496,31 @@ export function Sidebar({
           )}
         </div>
 
-        {/* + Button directly under bird */}
-        {expanded && onCreateDiwan && (
+        {/* ابدأ Button directly under bird - INSIDE SIDEBAR */}
+        {onCreateDiwan && (
           <div className="shrink-0 px-3 pb-2">
-            <button
-              type="button"
-              onClick={() => onCreateDiwan()}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              style={{ color: "var(--color-accent)" }}
-              title="ديوان جديد"
-            >
-              <IconPlus />
-              <span>ديوان جديد</span>
-            </button>
+            {expanded ? (
+              <button
+                type="button"
+                onClick={() => onCreateDiwan()}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: "var(--color-accent)" }}
+                title="ديوان جديد"
+              >
+                <IconPlus />
+                <span>ابدأ</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onCreateDiwan()}
+                className="w-full flex items-center justify-center p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: "var(--color-accent)" }}
+                title="ابدأ"
+              >
+                <IconPlus />
+              </button>
+            )}
           </div>
         )}
 
@@ -518,19 +528,11 @@ export function Sidebar({
           sidebarContent(false)
         ) : (
           <div className="flex-1 flex flex-col items-center gap-1 pt-2">
-            <button
-              type="button"
-              onClick={() => onCreateDiwan?.()}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5"
-              title="ديوان جديد"
-              style={{ color: "var(--color-accent)" }}
-            >
-              <IconPlus />
-            </button>
+            {/* Collapsed state - icon-only buttons */}
             <button
               type="button"
               onClick={() => toggleSection("diwan")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5"
+              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               title="ديوان"
               style={{ color: activeSection === "diwan" ? "var(--color-accent)" : "var(--text-tertiary)" }}
             >
@@ -539,7 +541,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={() => toggleSection("directory")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5"
+              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               title="دليل"
               style={{ color: activeSection === "directory" ? "var(--color-accent)" : "var(--text-tertiary)" }}
             >
@@ -548,7 +550,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={() => toggleSection("projects")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5"
+              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               title="دفاتر"
               style={{ color: activeSection === "projects" ? "var(--color-accent)" : "var(--text-tertiary)" }}
             >
@@ -557,35 +559,34 @@ export function Sidebar({
             <button
               type="button"
               onClick={() => toggleSection("studies")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5"
+              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               title="قضايا"
               style={{ color: activeSection === "studies" ? "var(--color-accent)" : "var(--text-tertiary)" }}
             >
               <IconStudies />
             </button>
+
+            {/* Spacer to push profile to bottom */}
+            <div className="flex-1" />
+
+            {/* User Profile - collapsed state */}
+            <div className="shrink-0 border-t w-full" style={{ borderColor: "var(--border-subtle)" }}>
+              <div className="px-2 py-2">
+                <UserProfile expanded={false} />
+              </div>
+            </div>
+
+            {/* Theme toggle - collapsed state */}
+            <div className="shrink-0 border-t w-full" style={{ borderColor: "var(--border-subtle)" }}>
+              <div className="px-2 py-2 flex justify-center">
+                <ThemeToggle />
+              </div>
+            </div>
           </div>
         )}
       </aside>
 
-      {/* Mobile: bird button */}
-      {onToggleSidebar && !expanded && (
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          className="md:hidden fixed top-4 z-50 flex items-center justify-center p-3 rounded-xl bg-transparent"
-          style={{ right: 12 }}
-          aria-label="فتح القائمة"
-        >
-          <BirdToggle expanded={false} size={48} />
-          {notificationCount > 0 && (
-            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white rounded-full text-[10px] font-bold">
-              {notificationCount > 9 ? "9+" : notificationCount}
-            </span>
-          )}
-        </button>
-      )}
-
-      {/* Mobile drawer */}
+      {/* Mobile drawer - FULL HEIGHT */}
       <AnimatePresence>
         {expanded && (
           <>
@@ -598,14 +599,18 @@ export function Sidebar({
               style={{ background: "rgba(0,0,0,0.3)" }}
             />
             <motion.aside
-              initial={{ width: 0 }}
-              animate={{ width: "min(320px,85vw)" }}
-              exit={{ width: 0 }}
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              className="md:hidden fixed inset-0 z-40 flex flex-col overflow-hidden"
-              style={{ background: "var(--bg-secondary)" }}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="md:hidden fixed top-0 right-0 bottom-0 z-40 flex flex-col overflow-hidden"
+              style={{ 
+                width: "min(320px, 85vw)",
+                background: "var(--bg-secondary)",
+              }}
             >
-              <div className="shrink-0 flex items-center ps-2 border-b" style={{ height: 52, borderColor: "var(--border-subtle)" }}>
+              {/* Bird at top of mobile drawer */}
+              <div className="shrink-0 flex items-center ps-3 border-b" style={{ height: 52, borderColor: "var(--border-subtle)" }}>
                 {onToggleSidebar && (
                   <button
                     type="button"
@@ -621,6 +626,25 @@ export function Sidebar({
                   </button>
                 )}
               </div>
+
+              {/* ابدأ button in mobile */}
+              {onCreateDiwan && (
+                <div className="shrink-0 px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onCreateDiwan();
+                      onClose?.();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    style={{ color: "var(--color-accent)" }}
+                  >
+                    <IconPlus />
+                    <span>ابدأ</span>
+                  </button>
+                </div>
+              )}
+
               {sidebarContent(true)}
             </motion.aside>
           </>
