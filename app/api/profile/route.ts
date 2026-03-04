@@ -3,15 +3,14 @@ import { getUserProfile, putUserProfile, type UserProfile } from "@/lib/aws/dyna
 import { MAX_NICKNAME_LENGTH, NICKNAME_DELAY_HOURS, hoursUntilNicknameReady } from "@/lib/nickname";
 
 const USER_ID_HEADER = "x-user-id";
-const DEFAULT_USER_ID = "anon_anonymous";
 
 function getUserId(req: NextRequest): string {
-  return req.headers.get(USER_ID_HEADER) || DEFAULT_USER_ID;
+  return req.headers.get(USER_ID_HEADER) || "";
 }
 
 function normalizeProfile(profile: UserProfile | null, userId: string): UserProfile {
   const now = new Date().toISOString();
-  if (!profile) {
+  if (!profile || !userId) {
     return {
       userId,
       preferences: {},

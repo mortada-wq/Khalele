@@ -57,7 +57,7 @@ export function HomeHero() {
     };
     void load();
     return () => { canceled = true; };
-  }, []);
+  }, []); // Load once on mount, no rotation on client side
 
   const handleSend = () => {
     const trimmed = input.trim();

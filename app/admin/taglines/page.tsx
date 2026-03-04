@@ -14,7 +14,6 @@ import {
   RotateCw,
   ToggleLeft,
   ToggleRight,
-  Clock,
 } from "lucide-react";
 
 interface Tagline {
@@ -157,10 +156,6 @@ export default function AdminTaglinesPage() {
     saveConfig({ rotationEnabled: next });
   };
 
-  const setIntervalMinutes = (v: number) => {
-    if (v >= 1 && v <= 120) saveConfig({ rotationIntervalMinutes: v });
-  };
-
   const setActiveTagline = (id: string) => {
     saveConfig({ activeTaglineId: id, rotationEnabled: false });
   };
@@ -218,6 +213,9 @@ export default function AdminTaglinesPage() {
           <RotateCw size={22} />
           تبديل الشعار تلقائياً
         </h2>
+        <p className="text-[#8c8c8c] text-sm mb-4">
+          عند التفعيل، يتم التبديل بين آخر 5 شعارات مضافة (أو جميع الشعارات إذا كانت أقل من 5). التبديل يحدث كل ساعة.
+        </p>
         <div className="flex flex-wrap items-center gap-6">
           <button
             onClick={toggleRotation}
@@ -228,24 +226,8 @@ export default function AdminTaglinesPage() {
             ) : (
               <ToggleLeft size={32} className="text-[#8c8c8c]" />
             )}
-            <span>{config.rotationEnabled ? "مفعّل" : "معطّل"}</span>
+            <span>{config.rotationEnabled ? "مفعّل (كل ساعة)" : "معطّل"}</span>
           </button>
-
-          {config.rotationEnabled && (
-            <div className="flex items-center gap-2">
-              <Clock size={18} className="text-[#8c8c8c]" />
-              <span className="text-[#231f20] text-sm">كل</span>
-              <input
-                type="number"
-                min={1}
-                max={120}
-                value={config.rotationIntervalMinutes}
-                onChange={(e) => setIntervalMinutes(Number(e.target.value))}
-                className="w-16 px-2 py-1 rounded-lg bg-[#fafafa] border border-[#e5e5e5] text-center"
-              />
-              <span className="text-[#231f20] text-sm">دقيقة</span>
-            </div>
-          )}
 
           {!config.rotationEnabled && sorted.length > 0 && (
             <div className="flex items-center gap-2">
@@ -356,7 +338,7 @@ export default function AdminTaglinesPage() {
       </section>
 
       <p className="text-[#8c8c8c] text-sm">
-        الشعار يظهر في الصفحة الرئيسية. عند التبديل التلقائي، يتغير كل {config.rotationIntervalMinutes} دقيقة.
+        الشعار يظهر في الصفحة الرئيسية. عند التبديل التلقائي، يتم التبديل بين آخر 5 شعارات كل ساعة.
       </p>
     </main>
   );

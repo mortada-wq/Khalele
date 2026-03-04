@@ -45,7 +45,7 @@ const DEFAULT_TAGLINES: Tagline[] = [
 const DEFAULT_CONFIG: TaglineConfig = {
   taglines: [...DEFAULT_TAGLINES],
   rotationEnabled: false,
-  rotationIntervalMinutes: 5,
+  rotationIntervalMinutes: 60, // 1 hour default
   activeTaglineId: "1",
 };
 
@@ -242,7 +242,7 @@ export async function reorderTaglines(orderedIds: string[]): Promise<void> {
 
 /**
  * Returns the tagline to display based on config.
- * When rotation: picks by (timestamp / interval) % count.
+ * When rotation: uses last 5 active taglines (or all if fewer than 5), rotates hourly.
  * When fixed: returns activeTaglineId.
  */
 export async function getCurrentTagline(): Promise<string> {
@@ -251,9 +251,16 @@ export async function getCurrentTagline(): Promise<string> {
   if (active.length === 0) return "خليلي — ذكاء اصطناعي عربي";
 
   if (config.rotationEnabled && active.length > 1) {
-    const intervalMs = config.rotationIntervalMinutes * 60 * 1000;
-    const idx = Math.floor(Date.now() / intervalMs) % active.length;
-    return active[idx].text;
+    // Use last 5 taglines (most recently added) or all if fewer than 5
+    const sortedByDate = [...active].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const rotationPool = sortedByDate.slice(0, Math.min(5, sortedByDate.length));
+    
+    // Rotate every hour (60 minutes)
+    const intervalMs = 60 * 60 * 1000; // 1 hour in milliseconds
+    const idx = Math.floor(Date.now() / intervalMs) % rotationPool.length;
+    return rotationPool[idx].text;
   }
 
   const fixed = config.taglines.find((t) => t.id === config.activeTaglineId);
