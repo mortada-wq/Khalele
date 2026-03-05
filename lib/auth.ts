@@ -52,21 +52,26 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await getAuthUserByEmail(credentials.email);
-        if (!user) {
+        try {
+          const user = await getAuthUserByEmail(credentials.email);
+          if (!user) {
+            return null;
+          }
+
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          if (!isValid) {
+            return null;
+          }
+
+          return {
+            id: user.email,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error("Auth error during sign-in:", error);
           return null;
         }
-
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-        if (!isValid) {
-          return null;
-        }
-
-        return {
-          id: user.email,
-          email: user.email,
-          name: user.name,
-        };
       },
     }),
   ],

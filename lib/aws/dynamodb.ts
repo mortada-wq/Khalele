@@ -66,10 +66,16 @@ export interface UserProfile {
 
 function isMissingTableError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
+  const name = error instanceof Error ? error.name : "";
   return (
     msg.includes("ResourceNotFoundException") ||
     msg.includes("Cannot do operations on a non-existent table") ||
-    msg.includes("Requested resource not found")
+    msg.includes("Requested resource not found") ||
+    name === "CredentialsProviderError" ||
+    msg.includes("Could not load credentials") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("ENOTFOUND") ||
+    msg.includes("getaddrinfo")
   );
 }
 
