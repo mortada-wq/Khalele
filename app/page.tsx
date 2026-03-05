@@ -1,5 +1,12 @@
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  redirect("/chat");
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect("/chat");
+  } else {
+    redirect("/signin");
+  }
 }
