@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { BirdToggle } from "@/components/BirdToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserProfile } from "./UserProfile";
@@ -110,7 +110,6 @@ export interface Study {
 }
 
 export interface SidebarProps {
-  expanded: boolean;
   onClose?: () => void;
   conversations: Conversation[];
   currentConversationId: string | null;
@@ -129,14 +128,12 @@ export interface SidebarProps {
   onRenameStudy?: (id: string, title: string) => void;
   onSearchDirectory?: (query: string) => void;
   onSearchCases?: (query: string) => void;
-  onToggleSidebar?: () => void;
   notificationCount?: number;
 }
 
 type ActiveSection = "diwan" | "directory" | "projects" | "studies" | null;
 
 export function Sidebar({
-  expanded,
   onClose,
   conversations,
   currentConversationId,
@@ -150,13 +147,8 @@ export function Sidebar({
   onCreateProject,
   onOpenDefater,
   onSelectStudy,
-  // onRenameConversation,
-  // onRenameProject,
-  // onRenameStudy,
   onSearchDirectory,
   onSearchCases,
-  onToggleSidebar,
-  notificationCount = 0,
 }: SidebarProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>(null);
   const [showAllDiwans, setShowAllDiwans] = useState(false);
@@ -250,10 +242,7 @@ export function Sidebar({
                           className={`sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${
                             currentConversationId === conv.id ? "bg-black/5 dark:bg-white/5" : ""
                           }`}
-                          style={{ 
-                            color: "var(--text-primary)",
-                            animationDelay: `${0.05 + idx * 0.03}s`
-                          }}
+                          style={{ color: "var(--text-primary)" }}
                         >
                           <IconGroup />
                           <span className="flex-1 text-right truncate">{conv.title || "ديوان جديد"}</span>
@@ -308,10 +297,7 @@ export function Sidebar({
                     if (isMobile) onClose?.();
                   }}
                   className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ 
-                    color: "var(--text-primary)",
-                    animationDelay: `${0.05 + idx * 0.03}s`
-                  }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -381,10 +367,7 @@ export function Sidebar({
                     if (isMobile) onClose?.();
                   }}
                   className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ 
-                    color: "var(--text-primary)",
-                    animationDelay: `${0.08 + idx * 0.03}s`
-                  }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <IconProjects />
                   <span className="flex-1 text-right truncate">{project.name}</span>
@@ -435,10 +418,7 @@ export function Sidebar({
                     if (isMobile) onClose?.();
                   }}
                   className="sidebar-item w-full flex items-center gap-2 px-3 py-2 rounded-lg font-ui text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                  style={{ 
-                    color: "var(--text-primary)",
-                    animationDelay: `${0.05 + idx * 0.03}s`
-                  }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <IconStudies />
                   <span className="flex-1 text-right truncate">{study.title}</span>
@@ -466,210 +446,57 @@ export function Sidebar({
 
   return (
     <>
-      {/* Desktop sidebar - FULL HEIGHT */}
+      {/* Desktop sidebar - FULL HEIGHT, always expanded */}
       <aside
         className="hidden md:flex relative shrink-0 flex-col overflow-hidden"
         style={{
-          width: expanded ? `clamp(${SIDEBAR_W_EXPANDED_MIN}px, ${SIDEBAR_W_EXPANDED_PCT}, ${SIDEBAR_W_EXPANDED_MAX}px)` : SIDEBAR_W_COLLAPSED,
+          width: `clamp(${SIDEBAR_W_EXPANDED_MIN}px, ${SIDEBAR_W_EXPANDED_PCT}, ${SIDEBAR_W_EXPANDED_MAX}px)`,
           height: "100vh",
-          background: expanded ? "#121212" : "transparent",
-          transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          background: "#121212",
           zIndex: 10,
-          padding: expanded ? "32px" : "16px",
+          padding: "32px",
         }}
       >
-        {/* Bird at absolute top - INSIDE SIDEBAR */}
-        <div className="shrink-0 flex items-center" style={{ height: 52, marginBottom: expanded ? "24px" : "16px" }}>
-          {onToggleSidebar && (
-            <button
-              type="button"
-              onClick={onToggleSidebar}
-              className="relative flex items-center justify-center transition-colors"
-              aria-label={expanded ? "طي القائمة" : "فتح القائمة"}
-            >
-              <BirdToggle expanded={expanded} size={48} />
-              {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white rounded-full text-[10px] font-bold">
-                  {notificationCount > 9 ? "9+" : notificationCount}
-                </span>
-              )}
-            </button>
-          )}
+        {/* Bird logo - static, no toggle */}
+        <div className="shrink-0 flex items-center" style={{ height: 52, marginBottom: "24px" }}>
+          <BirdToggle expanded={true} size={48} />
         </div>
 
-        {/* ابدأ Button directly under bird - INSIDE SIDEBAR */}
+        {/* ابدأ Button */}
         {onCreateDiwan && (
-          <div className="shrink-0" style={{ marginBottom: expanded ? "40px" : "24px" }}>
-            {expanded ? (
-              <button
-                type="button"
-                onClick={() => onCreateDiwan()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all"
-                style={{ 
-                  color: "#C68E17",
-                  fontFamily: "var(--font-ui)",
-                  fontSize: "14px",
-                  fontWeight: 300,
-                  backgroundColor: "rgba(198, 142, 23, 0.08)",
-                  border: "1px solid rgba(198, 142, 23, 0.2)"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.08)";
-                }}
-                title="ديوان جديد"
-              >
-                <IconPlus />
-                <span>ابدأ</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onCreateDiwan()}
-                className="w-full flex items-center justify-center p-3 rounded-lg transition-all"
-                style={{ 
-                  color: "#C68E17",
-                  backgroundColor: "rgba(198, 142, 23, 0.08)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.08)";
-                }}
-                title="ابدأ"
-              >
-                <IconPlus />
-              </button>
-            )}
+          <div className="shrink-0" style={{ marginBottom: "40px" }}>
+            <button
+              type="button"
+              onClick={() => onCreateDiwan()}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all"
+              style={{
+                color: "#C68E17",
+                fontFamily: "var(--font-ui)",
+                fontSize: "14px",
+                fontWeight: 300,
+                backgroundColor: "rgba(198, 142, 23, 0.08)",
+                border: "1px solid rgba(198, 142, 23, 0.2)"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.12)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.08)";
+              }}
+              title="ديوان جديد"
+            >
+              <IconPlus />
+              <span>ابدأ</span>
+            </button>
           </div>
         )}
 
-        {expanded ? (
-          sidebarContent(false)
-        ) : (
-          <div className="flex-1 flex flex-col items-center gap-1 pt-2">
-            {/* Collapsed state - icon-only buttons */}
-            <button
-              type="button"
-              onClick={() => toggleSection("diwan")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              title="ديوان"
-              style={{ color: activeSection === "diwan" ? "var(--color-accent)" : "var(--text-tertiary)" }}
-            >
-              <IconGroup />
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleSection("directory")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              title="دليل"
-              style={{ color: activeSection === "directory" ? "var(--color-accent)" : "var(--text-tertiary)" }}
-            >
-              <IconDirectory />
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleSection("projects")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              title="دفاتر"
-              style={{ color: activeSection === "projects" ? "var(--color-accent)" : "var(--text-tertiary)" }}
-            >
-              <IconProjects />
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleSection("studies")}
-              className="p-2.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              title="قضايا"
-              style={{ color: activeSection === "studies" ? "var(--color-accent)" : "var(--text-tertiary)" }}
-            >
-              <IconStudies />
-            </button>
-
-            {/* Spacer to push profile to bottom */}
-            <div className="flex-1" />
-
-            {/* User Profile - collapsed state - FLOATING */}
-            <div className="shrink-0 w-full" style={{ marginTop: "24px" }}>
-              <UserProfile expanded={false} />
-            </div>
-
-            {/* Theme toggle - collapsed state */}
-            <div className="shrink-0 w-full" style={{ marginTop: "16px" }}>
-              <div className="flex justify-center">
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-        )}
+        {sidebarContent(false)}
       </aside>
 
-      {/* Mobile drawer - FULL HEIGHT */}
+      {/* Mobile drawer - slide in from right */}
       <AnimatePresence>
-        {expanded && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-              className="md:hidden fixed inset-0 z-30"
-              style={{ background: "rgba(0,0,0,0.3)" }}
-            />
-            <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="md:hidden fixed top-0 right-0 bottom-0 z-40 flex flex-col overflow-hidden"
-              style={{ 
-                width: "min(320px, 85vw)",
-                background: "var(--bg-secondary)",
-              }}
-            >
-              {/* Bird at top of mobile drawer */}
-              <div className="shrink-0 flex items-center ps-3 border-b" style={{ height: 52, borderColor: "var(--border-subtle)" }}>
-                {onToggleSidebar && (
-                  <button
-                    type="button"
-                    onClick={onToggleSidebar}
-                    className="relative flex items-center justify-center p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-                  >
-                    <BirdToggle expanded={true} size={43} />
-                    {notificationCount > 0 && (
-                      <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white rounded-full text-[10px] font-bold">
-                        {notificationCount > 9 ? "9+" : notificationCount}
-                      </span>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* ابدأ button in mobile */}
-              {onCreateDiwan && (
-                <div className="shrink-0 px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onCreateDiwan();
-                      onClose?.();
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-ui text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                    style={{ color: "var(--color-accent)" }}
-                  >
-                    <IconPlus />
-                    <span>ابدأ</span>
-                  </button>
-                </div>
-              )}
-
-              {sidebarContent(true)}
-            </motion.aside>
-          </>
-        )}
+        {/* Mobile: no toggle button, sidebar hidden by default */}
       </AnimatePresence>
     </>
   );

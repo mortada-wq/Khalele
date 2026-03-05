@@ -130,8 +130,7 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
+const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
   const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; code: string; avatar?: string }[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -784,11 +783,8 @@ function ChatPageContent() {
 
   return (
     <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      {/* Sidebar - Full height, includes everything */}
+      {/* Sidebar - Full height, always expanded */}
       <Sidebar
-        expanded={sidebarExpanded}
-        onClose={() => setSidebarExpanded(false)}
-        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
         conversations={conversations}
         currentConversationId={currentConversationId}
         contacts={contacts}
@@ -861,13 +857,8 @@ function ChatPageContent() {
       {/* Main content area - Full height with TopBar inside */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <TopBar
-          sidebarExpanded={sidebarExpanded}
-          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
           onAvatarClick={handleAvatarClick}
-          onShare={handleShare}
-          onReport={handleReport}
           userRole={userRole}
-          showChatActions={!showHero}
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
