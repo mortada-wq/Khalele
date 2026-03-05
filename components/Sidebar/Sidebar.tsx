@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { BirdToggle } from "@/components/BirdToggle";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserProfile } from "./UserProfile";
 import type { Conversation } from "@/lib/chat";
 
@@ -429,17 +428,9 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* User Profile and Theme toggle - PINNED TO BOTTOM - FLOATING */}
+      {/* User Profile - PINNED TO BOTTOM - FLOATING */}
       <div className="shrink-0 mt-auto" style={{ paddingTop: "40px" }}>
-        {/* User Profile - No borders, floating */}
-        <div style={{ marginBottom: "24px" }}>
-          <UserProfile expanded={expanded} />
-        </div>
-        
-        {/* Theme toggle */}
-        <div className="flex items-center justify-end">
-          <ThemeToggle />
-        </div>
+        <UserProfile expanded={expanded} />
       </div>
     </div>
   );
