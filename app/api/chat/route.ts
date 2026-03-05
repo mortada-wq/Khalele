@@ -46,6 +46,14 @@ export async function POST(req: NextRequest) {
       customSystemPrompt: typeof customSystemPrompt === "string" ? customSystemPrompt : undefined,
     });
 
+    if (!response || response.trim().length === 0) {
+      console.error("[Chat API] Received empty content from LLM — refusing to return fake response");
+      return NextResponse.json(
+        { error: "The AI model returned an empty response. Please try again." },
+        { status: 502 }
+      );
+    }
+
     console.log(`[Chat API] Got response (${response.length} chars)`);
     return NextResponse.json({ content: response });
   } catch (error) {

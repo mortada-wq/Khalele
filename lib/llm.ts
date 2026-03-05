@@ -173,10 +173,11 @@ export async function invokeDeepSeek(
 
     const text = response.choices?.[0]?.message?.content ?? "";
     if (!text) {
-      console.warn(
-        "[DeepSeek] Empty response:",
+      console.error(
+        "[DeepSeek] Empty response from API:",
         JSON.stringify(response).slice(0, 500)
       );
+      throw new Error("LLM returned an empty response — no content from the model.");
     }
     return text;
   } catch (err) {
