@@ -130,10 +130,6 @@ function ChatPageContent() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [notebooks, setNotebooks] = useState<{ id: string; name: string; preview?: string; createdAt?: string }[]>([]);
-  const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
-  const [contacts, setContacts] = useState<{ id: string; name: string; code: string; avatar?: string }[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
@@ -362,54 +358,6 @@ function ChatPageContent() {
     return () => { canceled = true; };
   }, []);
 
-  useEffect(() => {
-    let canceled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/notebooks?limit=50", {
-          headers: apiHeaders(),
-        });
-        if (!res.ok || canceled) return;
-        const data = (await res.json()) as { notebooks?: { id: string; title: string; content: string; updatedAt: string }[] };
-        const list = data.notebooks ?? [];
-        if (!canceled) {
-          setNotebooks(
-            list.map((n) => ({
-              id: n.id,
-              name: n.title,
-              preview: n.content.split("\n")[0]?.trim().slice(0, 40) || undefined,
-              createdAt: n.updatedAt,
-            }))
-          );
-        }
-      } catch { /* ignore */ }
-    })();
-    return () => { canceled = true; };
-  }, [incognitoMode]);
-
-  useEffect(() => {
-    if (incognitoMode) return;
-    let canceled = false;
-    fetch("/api/studies?limit=50", { headers: apiHeaders() })
-      .then((r) => r.json())
-      .then((d: { studies?: { id: string; title: string; createdAt: string }[] }) => {
-        if (!canceled && d.studies) setStudies(d.studies);
-      })
-      .catch(() => {});
-    return () => { canceled = true; };
-  }, [incognitoMode]);
-
-  // Fetch contacts (mock data for now - will be replaced with API)
-  useEffect(() => {
-    if (incognitoMode) return;
-    // TODO: Replace with actual API call to /api/contacts
-    const mockContacts = [
-      { id: "1", name: "أحمد محمد", code: "&mg1" },
-      { id: "2", name: "فاطمة علي", code: "&mg2" },
-      { id: "3", name: "محمود حسن", code: "&mg3" },
-    ];
-    setContacts(mockContacts);
-  }, [incognitoMode]);
 
   // Fetch notifications count (mock data for now - will be replaced with API)
   useEffect(() => {
@@ -784,90 +732,17 @@ function ChatPageContent() {
 
   return (
     <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      {/* Sidebar - Full height, includes everything */}
+      {/* Sidebar - Full height, always expanded */}
       <Sidebar
-        expanded={sidebarExpanded}
-        onClose={() => setSidebarExpanded(false)}
-        onToggleSidebar={() => setSidebarExpanded((p) => !p)}
-        conversations={conversations}
-        currentConversationId={currentConversationId}
-        contacts={contacts}
-        projects={notebooks}
-        studies={studies}
-        onSelectConversation={setCurrentConversationId}
         onCreateDiwan={startNewDiwan}
-        onSelectContact={(contactId) => {
-          // TODO: Implement contact selection - open dialog to start diwan with contact
-          console.log("Selected contact:", contactId);
-        }}
-        onSelectProject={(nid) => router.push(`/notebooks/${nid}`)}
-        onCreateProject={async () => {
-          try {
-            const res = await fetch("/api/notebooks", {
-              method: "POST",
-              headers: apiHeaders(),
-              body: JSON.stringify({ title: "دفتر جديد" }),
-            });
-            const data = (await res.json()) as { notebook?: { id: string } };
-              if (data?.notebook?.id) router.push(`/notebooks/${data.notebook.id}`);
-            } catch { /* ignore */ }
-          }}
-          onOpenDefater={() => router.push("/defater")}
-          onRenameConversation={(id, title) => {
-            setConversations((prev) =>
-              prev.map((c) =>
-                c.id === id ? { ...c, title, updatedAt: new Date().toISOString() } : c
-              )
-            );
-            const conv = conversations.find((c) => c.id === id);
-            if (conv) {
-              void persistConversation({ ...conv, title });
-            }
-          }}
-          onRenameProject={async (id, name) => {
-            try {
-              await fetch(`/api/notebooks/${id}`, {
-                method: "PUT",
-                headers: apiHeaders(),
-                body: JSON.stringify({ title: name }),
-              });
-              setNotebooks((prev) =>
-                prev.map((n) => (n.id === id ? { ...n, name } : n))
-              );
-            } catch { /* ignore */ }
-          }}
-          onSelectStudy={() => {}}
-          onRenameStudy={async (sid, title) => {
-            try {
-              const res = await fetch(`/api/studies/${sid}`, {
-                method: "PUT",
-                headers: apiHeaders(),
-                body: JSON.stringify({ title }),
-              });
-              if (res.ok) setStudies((prev) => prev.map((s) => (s.id === sid ? { ...s, title } : s)));
-            } catch { /* ignore */ }
-          }}
-          onSearchDirectory={(query) => {
-            // TODO: Implement directory search
-            console.log("Search directory:", query);
-          }}
-          onSearchCases={(query) => {
-            // TODO: Implement cases search
-            console.log("Search cases:", query);
-          }}
-          notificationCount={notificationCount}
-        />
+        notificationCount={notificationCount}
+      />
 
       {/* Main content area - Full height with TopBar inside */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <TopBar
-          sidebarExpanded={sidebarExpanded}
-          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
           onAvatarClick={handleAvatarClick}
-          onShare={handleShare}
-          onReport={handleReport}
           userRole={userRole}
-          showChatActions={!showHero}
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">

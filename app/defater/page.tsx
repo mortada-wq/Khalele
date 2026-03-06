@@ -7,7 +7,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { getOrCreateUserId } from "@/lib/chat";
-import type { Project, Study } from "@/components/Sidebar";
 
 const STORAGE_KEY = "khalele_defater_content";
 const MAX_SIZE_BYTES = 20 * 1024 * 1024;
@@ -15,8 +14,8 @@ const MAX_SIZE_BYTES = 20 * 1024 * 1024;
 export default function DefaterPage() {
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [notebooks, setNotebooks] = useState<Project[]>([]);
-  const [studies, setStudies] = useState<Study[]>([]);
+  const [notebooks, setNotebooks] = useState<{ id: string; name: string }[]>([]);
+  const [studies, setStudies] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const insertTextRef = useRef<((text: string) => void) | null>(null);
@@ -230,7 +229,6 @@ export default function DefaterPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
       <TopBar
-        sidebarExpanded={sidebarExpanded}
         onAvatarClick={() => router.push("/chat")}
         onShare={handleShare}
         onReport={() => {}}
@@ -239,19 +237,7 @@ export default function DefaterPage() {
 
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <Sidebar
-          expanded={sidebarExpanded}
-          onClose={() => setSidebarExpanded(false)}
-          onToggleSidebar={() => setSidebarExpanded((p) => !p)}
-          conversations={[]}
-          currentConversationId={null}
-          contacts={[]}
-          projects={notebooks}
-          studies={studies}
-          onSelectConversation={() => {}}
-          onSelectProject={handleSelectNotebook}
-          onCreateProject={handleCreateNotebook}
-          onSelectStudy={() => router.push("/chat")}
-          onOpenDefater={handleOpenDefater}
+          onCreateDiwan={() => router.push("/chat")}
         />
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
