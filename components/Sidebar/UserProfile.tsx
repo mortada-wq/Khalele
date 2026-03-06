@@ -57,7 +57,9 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
           if (!showMenu) e.currentTarget.style.opacity = "0.7";
         }}
       >
-        <ProfileIcon size={40} className="text-white shrink-0" style={{ border: "1px solid #C68E17", borderRadius: "50%", padding: "2px" }} />
+        <span className="shrink-0" style={{ border: "1px solid #C68E17", borderRadius: "50%", padding: "2px", display: "inline-flex" }}>
+          <ProfileIcon size={40} className="text-white" />
+        </span>
         <div className="flex-1 text-right overflow-hidden">
           <div 
             className="font-medium text-sm truncate" 
