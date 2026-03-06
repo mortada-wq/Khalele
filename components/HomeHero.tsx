@@ -75,13 +75,13 @@ export function HomeHero() {
   };
 
   return (
-    <div className="h-[100dvh] flex overflow-hidden" dir="rtl" style={{ background: "#ebebec" }}>
+    <div className="h-[100dvh] flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-secondary)" }}>
       {/* ── Desktop sidebar ── */}
       <aside
         className="hidden md:flex relative shrink-0 flex-col"
         style={{
           width: sidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED,
-          background: sidebarExpanded ? "#ffffff" : "#ebebec",
+          background: sidebarExpanded ? "var(--bg-primary)" : "var(--bg-secondary)",
           borderTopLeftRadius: sidebarExpanded ? 20 : 0,
           transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
@@ -105,7 +105,7 @@ export function HomeHero() {
               type="button"
               onClick={() => router.push("/chat")}
               className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-              style={{ color: "#000000" }}
+              style={{ color: "var(--text-primary)" }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -119,7 +119,7 @@ export function HomeHero() {
         <div
           className="shrink-0 flex items-center pb-4 pt-2"
           style={sidebarExpanded
-            ? { borderTop: "1px solid #efefef", paddingInline: 12 }
+            ? { borderTop: "1px solid var(--border-subtle)", paddingInline: 12 }
             : { justifyContent: "center", width: SIDEBAR_W_COLLAPSED }
           }
         >
@@ -163,9 +163,9 @@ export function HomeHero() {
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[min(280px,80vw)] flex flex-col"
-              style={{ background: "#ffffff", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
+              style={{ background: "var(--bg-primary)", boxShadow: "-4px 0 24px rgba(0,0,0,0.12)" }}
             >
-              <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[#e5e5e5]">
+              <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
                   className="p-2 -m-2 rounded-lg hover:bg-black/5"
@@ -173,7 +173,7 @@ export function HomeHero() {
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
-                <span className="font-ui font-semibold" style={{ color: "#000000" }}>القائمة</span>
+                <span className="font-ui font-semibold" style={{ color: "var(--text-primary)" }}>القائمة</span>
                 <div className="w-10" />
               </div>
               <div className="flex-1 overflow-y-auto px-3 py-4">
@@ -181,7 +181,7 @@ export function HomeHero() {
                   type="button"
                   onClick={() => { setMobileSidebarOpen(false); router.push("/chat"); }}
                   className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-ui text-sm transition-colors hover:bg-black/5"
-                  style={{ color: "#000000" }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -189,7 +189,7 @@ export function HomeHero() {
                   <span>ابدأ محادثة</span>
                 </button>
               </div>
-              <div className="shrink-0 p-4 border-t border-[#e5e5e5]">
+              <div className="shrink-0 p-4 border-t" style={{ borderColor: "var(--border-subtle)" }}>
                 <button
                   onClick={() => { setMobileSidebarOpen(false); router.push("/chat"); }}
                   className="w-full flex items-center justify-center gap-2 p-2 rounded-lg hover:bg-black/5"
@@ -212,7 +212,7 @@ export function HomeHero() {
           {/* Tagline */}
           <p
             className="font-ui text-sm md:text-base text-center leading-relaxed mb-10"
-            style={{ color: "#6b6b6b" }}
+            style={{ color: "var(--text-secondary)" }}
           >
             {tagline}
           </p>
