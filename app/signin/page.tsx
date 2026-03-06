@@ -21,7 +21,6 @@ function SignInContent() {
   const [inviterName, setInviterName] = useState("");
   const [inviteChecked, setInviteChecked] = useState(!rawInviteToken);
 
-  // Validate invite token from URL
   useEffect(() => {
     if (!rawInviteToken) return;
     fetch(`/api/invites/${rawInviteToken}`)
@@ -34,7 +33,7 @@ function SignInContent() {
           setIsSignUp(true);
         }
       })
-      .catch(() => {/* ignore — fall back to normal signup */})
+      .catch(() => {})
       .finally(() => setInviteChecked(true));
   }, [rawInviteToken]);
 
@@ -51,12 +50,7 @@ function SignInContent() {
       });
 
       if (res.ok) {
-        const result = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
-
+        const result = await signIn("credentials", { email, password, redirect: false });
         if (result?.ok) {
           router.push(callbackUrl);
         } else {
@@ -67,12 +61,7 @@ function SignInContent() {
         setError(data.error || "حدث خطأ في إنشاء الحساب");
       }
     } else {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const result = await signIn("credentials", { email, password, redirect: false });
       if (result?.ok) {
         router.push(callbackUrl);
       } else {
@@ -85,131 +74,367 @@ function SignInContent() {
 
   if (!inviteChecked) {
     return (
-      <div className="h-screen flex items-center justify-center" style={{ background: "#ebebec" }}>
-        <span style={{ color: "#8c8c8c" }}>جاري التحميل...</span>
+      <div className="h-screen flex items-center justify-center" style={{ background: "#0c0c0e" }}>
+        <div style={{ width: 24, height: 24, border: "2px solid #C68E17", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex items-center justify-center" dir="rtl" style={{ background: "#ebebec" }}>
-      <div className="w-full max-w-sm mx-4">
-        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6">
-          <div style={{ width: "min(50vw, 200px)" }}>
-            <img src="/logo/logo_black.svg" alt="خليل" className="w-full h-auto" />
+    <div className="h-screen flex" style={{ background: "#0c0c0e" }}>
+
+      {/* ── Left branding panel ── */}
+      <div
+        className="hidden lg:flex flex-col justify-between"
+        style={{
+          width: "44%",
+          background: "#0f0f11",
+          borderRight: "1px solid rgba(255,255,255,0.05)",
+          padding: "48px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Gold glow top-right */}
+        <div style={{
+          position: "absolute",
+          top: -120,
+          right: -120,
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(198,142,23,0.18) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        {/* Gold glow bottom-left */}
+        <div style={{
+          position: "absolute",
+          bottom: -80,
+          left: -80,
+          width: 280,
+          height: 280,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(198,142,23,0.10) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Dot grid */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          pointerEvents: "none",
+        }} />
+
+        {/* Logo */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <img src="/logo/logo_white.png" alt="خليل" style={{ height: 36, objectFit: "contain" }}
+            onError={(e) => {
+              const t = e.currentTarget;
+              t.style.display = "none";
+              const fallback = document.createElement("span");
+              fallback.textContent = "خليل";
+              fallback.style.cssText = "font-size:28px;font-weight:700;color:#fff;font-family:var(--font-ui)";
+              t.parentNode?.appendChild(fallback);
+            }}
+          />
+        </div>
+
+        {/* Main copy */}
+        <div style={{ position: "relative", zIndex: 1 }} dir="rtl">
+          <div
+            style={{
+              display: "inline-block",
+              background: "rgba(198,142,23,0.12)",
+              border: "1px solid rgba(198,142,23,0.3)",
+              borderRadius: 100,
+              padding: "5px 14px",
+              marginBottom: 24,
+            }}
+          >
+            <span style={{ color: "#C68E17", fontSize: 12, fontFamily: "var(--font-ui)" }}>
+              ذكاء اصطناعي بلهجتك
+            </span>
+          </div>
+
+          <h1 style={{
+            color: "#ffffff",
+            fontSize: "clamp(28px, 3vw, 40px)",
+            fontWeight: 700,
+            fontFamily: "var(--font-ui)",
+            lineHeight: 1.4,
+            marginBottom: 16,
+          }}>
+            تحدّث مع خليل<br />
+            <span style={{ color: "#C68E17" }}>بلهجتك أنت</span>
+          </h1>
+
+          <p style={{
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 15,
+            fontFamily: "var(--font-ui)",
+            lineHeight: 1.9,
+            maxWidth: 340,
+          }}>
+            مساعد ذكي يفهم العربية بكل لهجاتها — العراقية، المصرية، الشامية والمزيد.
+          </p>
+        </div>
+
+        {/* Bottom quote */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ width: 32, height: 1, background: "rgba(198,142,23,0.5)", marginBottom: 16 }} />
+          <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, fontFamily: "var(--font-ui)" }} dir="rtl">
+            تجربة محادثة عربية حقيقية
+          </p>
+        </div>
+      </div>
+
+      {/* ── Right form panel ── */}
+      <div
+        className="flex-1 flex items-center justify-center"
+        style={{ padding: "32px 24px" }}
+        dir="rtl"
+      >
+        <div style={{ width: "100%", maxWidth: 380 }}>
+
+          {/* Mobile-only logo */}
+          <div className="flex lg:hidden justify-center mb-8">
+            <img src="/logo/logo_white.png" alt="خليل" style={{ height: 32, objectFit: "contain" }}
+              onError={(e) => {
+                const t = e.currentTarget;
+                t.style.display = "none";
+              }}
+            />
           </div>
 
           {/* Invite banner */}
           {inviterName && (
             <div
-              className="w-full rounded-xl px-4 py-3 text-center"
               style={{
-                background: "#fff8e6",
-                border: "1px solid #f0d98a",
-                color: "#7a5c00",
+                background: "rgba(198,142,23,0.10)",
+                border: "1px solid rgba(198,142,23,0.25)",
+                borderRadius: 12,
+                padding: "12px 16px",
+                marginBottom: 24,
+                textAlign: "center",
               }}
             >
-              <p className="font-ui text-sm" style={{ lineHeight: 1.7 }}>
-                دعاك <strong>{inviterName}</strong> للانضمام إلى خليل
+              <p style={{ color: "#C68E17", fontSize: 13, fontFamily: "var(--font-ui)", lineHeight: 1.7, margin: 0 }}>
+                دعاك <strong style={{ color: "#d4a030" }}>{inviterName}</strong> للانضمام إلى خليل
               </p>
             </div>
           )}
 
-          <p className="font-ui text-sm text-center" style={{ color: "#6b6b6b", lineHeight: 1.8 }}>
-            {isSignUp ? "إنشاء حساب جديد" : "سجّل الدخول للمتابعة"}
-          </p>
+          {/* Header */}
+          <div style={{ marginBottom: 32 }}>
+            <h2 style={{
+              color: "#ffffff",
+              fontSize: 22,
+              fontWeight: 600,
+              fontFamily: "var(--font-ui)",
+              margin: "0 0 6px",
+            }}>
+              {isSignUp ? "إنشاء حساب" : "مرحباً بك"}
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 14, fontFamily: "var(--font-ui)", margin: 0 }}>
+              {isSignUp ? "أدخل بياناتك للبدء" : "سجّل الدخول للمتابعة"}
+            </p>
+          </div>
 
-          <div className="w-full flex flex-col gap-3">
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {isSignUp && (
-              <input
-                type="text"
-                placeholder="الاسم"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full px-4 py-3 rounded-lg font-ui text-sm"
-                style={{
-                  background: "#ffffff",
-                  border: "1px solid #e0e0e0",
-                  color: "#1f1f1f",
-                }}
-              />
+              <div>
+                <label style={{ display: "block", color: "rgba(255,255,255,0.5)", fontSize: 12, fontFamily: "var(--font-ui)", marginBottom: 6 }}>
+                  الاسم
+                </label>
+                <input
+                  type="text"
+                  placeholder="اسمك الكامل"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: 10,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    color: "#ffffff",
+                    fontSize: 14,
+                    fontFamily: "var(--font-ui)",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 0.2s",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(198,142,23,0.5)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+                />
+              </div>
             )}
 
-            <input
-              type="email"
-              placeholder="البريد الإلكتروني"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-lg font-ui text-sm"
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e0e0e0",
-                color: "#1f1f1f",
-              }}
-            />
+            <div>
+              <label style={{ display: "block", color: "rgba(255,255,255,0.5)", fontSize: 12, fontFamily: "var(--font-ui)", marginBottom: 6 }}>
+                البريد الإلكتروني
+              </label>
+              <input
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                dir="ltr"
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  color: "#ffffff",
+                  fontSize: 14,
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(198,142,23,0.5)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="كلمة المرور"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-3 rounded-lg font-ui text-sm"
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e0e0e0",
-                color: "#1f1f1f",
-              }}
-            />
+            <div>
+              <label style={{ display: "block", color: "rgba(255,255,255,0.5)", fontSize: 12, fontFamily: "var(--font-ui)", marginBottom: 6 }}>
+                كلمة المرور
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                dir="ltr"
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  color: "#ffffff",
+                  fontSize: 14,
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(198,142,23,0.5)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+              />
+            </div>
 
             {error && (
-              <p className="font-ui text-xs text-center" style={{ color: "#d32f2f" }}>
-                {error}
-              </p>
+              <div style={{
+                background: "rgba(220,53,53,0.1)",
+                border: "1px solid rgba(220,53,53,0.25)",
+                borderRadius: 8,
+                padding: "10px 14px",
+              }}>
+                <p style={{ color: "#f87171", fontSize: 13, fontFamily: "var(--font-ui)", margin: 0 }}>
+                  {error}
+                </p>
+              </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3.5 rounded-full font-ui text-sm font-medium transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50"
               style={{
-                background: "#1f1f1f",
+                width: "100%",
+                padding: "13px",
+                borderRadius: 10,
+                background: loading ? "rgba(198,142,23,0.5)" : "linear-gradient(135deg, #C68E17 0%, #a87212 100%)",
                 color: "#ffffff",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)",
+                fontSize: 14,
+                fontWeight: 600,
+                fontFamily: "var(--font-ui)",
+                border: "none",
+                cursor: loading ? "not-allowed" : "pointer",
+                marginTop: 4,
+                transition: "opacity 0.2s, transform 0.1s",
+                boxShadow: loading ? "none" : "0 4px 16px rgba(198,142,23,0.3)",
               }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.opacity = "0.9"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+              onMouseDown={(e) => { if (!loading) e.currentTarget.style.transform = "scale(0.99)"; }}
+              onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
             >
-              {loading ? "جاري التحميل..." : isSignUp ? "إنشاء حساب" : "تسجيل الدخول"}
+              {loading
+                ? "جاري التحميل..."
+                : isSignUp ? "إنشاء الحساب" : "تسجيل الدخول"}
             </button>
+          </form>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, fontFamily: "var(--font-ui)" }}>أو</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
           </div>
 
+          {/* Toggle */}
           <button
             type="button"
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setError("");
+            onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: 10,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.09)",
+              color: "rgba(255,255,255,0.6)",
+              fontSize: 13,
+              fontFamily: "var(--font-ui)",
+              cursor: "pointer",
+              transition: "border-color 0.2s, color 0.2s",
             }}
-            className="font-ui text-xs"
-            style={{ color: "#6b6b6b" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+              e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
+              e.currentTarget.style.color = "rgba(255,255,255,0.6)";
+            }}
           >
             {isSignUp ? "لديك حساب؟ سجّل الدخول" : "ليس لديك حساب؟ أنشئ حسابًا"}
           </button>
 
-          <p className="font-ui text-xs text-center" style={{ color: "#999", lineHeight: 1.7 }}>
-            بتسجيل الدخول، توافق على{" "}
+          {/* Privacy */}
+          <p style={{
+            color: "rgba(255,255,255,0.2)",
+            fontSize: 11,
+            fontFamily: "var(--font-ui)",
+            textAlign: "center",
+            lineHeight: 1.8,
+            marginTop: 24,
+          }}>
+            بالمتابعة توافق على{" "}
             <a
               href="/tahseen-khaleel#privacy-terms"
               target="_blank"
-              className="underline hover:opacity-70"
-              style={{ color: "var(--color-accent)" }}
+              style={{ color: "rgba(198,142,23,0.7)", textDecoration: "underline" }}
             >
               شروط الاستخدام وسياسة الخصوصية
             </a>
           </p>
-        </form>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        input::placeholder { color: rgba(255,255,255,0.2); }
+      `}</style>
     </div>
   );
 }
@@ -218,8 +443,8 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-screen flex items-center justify-center" style={{ background: "#ebebec" }}>
-          <span style={{ color: "#8c8c8c" }}>جاري التحميل...</span>
+        <div className="h-screen flex items-center justify-center" style={{ background: "#0c0c0e" }}>
+          <div style={{ width: 24, height: 24, border: "2px solid #C68E17", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
         </div>
       }
     >
