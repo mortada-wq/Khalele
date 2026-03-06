@@ -2,9 +2,14 @@ import { createAuthUser } from "../lib/aws/dynamodb";
 import bcrypt from "bcryptjs";
 
 async function createAdmin() {
-  const email = "mortadagzar@gmail.com";
-  const password = "Moma1982#g";
-  const name = "Mortada Gzar";
+  const email = process.env.ADMIN_EMAIL || "";
+  const password = process.env.ADMIN_PASSWORD || "";
+  const name = process.env.ADMIN_NAME || "Admin";
+
+  if (!email || !password) {
+    console.error("❌ Set ADMIN_EMAIL and ADMIN_PASSWORD env vars before running");
+    process.exit(1);
+  }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
