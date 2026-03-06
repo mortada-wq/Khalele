@@ -26,6 +26,7 @@ const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-
 const TABLE_NOTEBOOKS = process.env.DYNAMODB_NOTEBOOKS_TABLE || "khalele-notebooks";
 const TABLE_STUDIES = process.env.DYNAMODB_STUDIES_TABLE || "khalele-studies";
 const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "khalele-settings";
+const TABLE_INVITES = process.env.DYNAMODB_INVITES_TABLE || "khalele-invites";
 const inMemoryProfiles = new Map<string, UserProfile>();
 const inMemoryAuthUsers = new Map<string, AuthUser>();
 
@@ -721,6 +722,127 @@ export async function listStudiesByUser(userId: string, limit = 50): Promise<Stu
         .filter((s) => s.userId === userId)
         .sort((a, b) => (b.updatedAt > a.updatedAt ? 1 : -1))
         .slice(0, limit);
+    }
+    throw err;
+  }
+}
+
+// ─── Invites (الدعوات) ────────────────────────────────────────────────────
+
+export interface InviteRecord {
+  token: string;
+  inviterEmail: string;
+  inviterName: string;
+  inviteeEmail: string;
+  status: "pending" | "accepted";
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+}
+
+const inMemoryInvites = new Map<string, InviteRecord>();
+
+let _invitesTableEnsured = false;
+
+async function ensureInvitesTable(): Promise<void> {
+  if (_invitesTableEnsured) return;
+  try {
+    await client.send(new DescribeTableCommand({ TableName: TABLE_INVITES }));
+    _invitesTableEnsured = true;
+  } catch (err) {
+    if (!isMissingTableError(err)) return;
+    try {
+      await client.send(new CreateTableCommand({
+        TableName: TABLE_INVITES,
+        AttributeDefinitions: [{ AttributeName: "token", AttributeType: "S" }],
+        KeySchema: [{ AttributeName: "token", KeyType: "HASH" }],
+        BillingMode: "PAY_PER_REQUEST",
+      }));
+      for (let i = 0; i < 15; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        try {
+          const desc = await client.send(new DescribeTableCommand({ TableName: TABLE_INVITES }));
+          if (desc.Table?.TableStatus === "ACTIVE") break;
+        } catch { /* still creating */ }
+      }
+      _invitesTableEnsured = true;
+    } catch (createErr) {
+      console.error("Failed to auto-create invites table:", createErr);
+    }
+  }
+}
+
+export async function createInvite(data: Omit<InviteRecord, "createdAt" | "expiresAt" | "status">): Promise<InviteRecord> {
+  const now = new Date();
+  const invite: InviteRecord = {
+    ...data,
+    status: "pending",
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  };
+  try {
+    await ensureInvitesTable();
+    await docClient.send(new PutCommand({ TableName: TABLE_INVITES, Item: invite }));
+  } catch (err) {
+    if (isMissingTableError(err) || isCredentialError(err)) {
+      inMemoryInvites.set(invite.token, invite);
+      return invite;
+    }
+    throw err;
+  }
+  return invite;
+}
+
+export async function getInviteByToken(token: string): Promise<InviteRecord | null> {
+  try {
+    await ensureInvitesTable();
+    const result = await docClient.send(new GetCommand({ TableName: TABLE_INVITES, Key: { token } }));
+    return (result.Item as InviteRecord) ?? inMemoryInvites.get(token) ?? null;
+  } catch (err) {
+    if (isMissingTableError(err) || isCredentialError(err)) {
+      return inMemoryInvites.get(token) ?? null;
+    }
+    throw err;
+  }
+}
+
+export async function markInviteAccepted(token: string): Promise<void> {
+  const invite = await getInviteByToken(token);
+  if (!invite) return;
+  const updated: InviteRecord = { ...invite, status: "accepted", acceptedAt: new Date().toISOString() };
+  try {
+    await docClient.send(new PutCommand({ TableName: TABLE_INVITES, Item: updated }));
+  } catch (err) {
+    if (isMissingTableError(err) || isCredentialError(err)) {
+      inMemoryInvites.set(token, updated);
+      return;
+    }
+    throw err;
+  }
+  inMemoryInvites.set(token, updated);
+}
+
+export async function getPendingInviteByInviteeEmail(email: string): Promise<InviteRecord | null> {
+  const normalizedEmail = email.toLowerCase().trim();
+  try {
+    await ensureInvitesTable();
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: TABLE_INVITES,
+        FilterExpression: "inviteeEmail = :e AND #s = :s",
+        ExpressionAttributeNames: { "#s": "status" },
+        ExpressionAttributeValues: { ":e": normalizedEmail, ":s": "pending" },
+        Limit: 1,
+      })
+    );
+    const items = (result.Items as InviteRecord[]) ?? [];
+    return items[0] ?? null;
+  } catch (err) {
+    if (isMissingTableError(err) || isCredentialError(err)) {
+      for (const invite of inMemoryInvites.values()) {
+        if (invite.inviteeEmail === normalizedEmail && invite.status === "pending") return invite;
+      }
+      return null;
     }
     throw err;
   }

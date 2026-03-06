@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createAuthUser } from "@/lib/aws/dynamodb";
+import { createAuthUser, getInviteByToken, markInviteAccepted } from "@/lib/aws/dynamodb";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, inviteToken } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -21,15 +21,33 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const normalizedEmail = email.toLowerCase().trim();
 
     try {
       await createAuthUser({
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
         name: name || email,
         passwordHash: hashedPassword,
         authProvider: "credentials",
         createdAt: new Date().toISOString(),
       });
+
+      // Consume the invite token if provided and valid
+      if (inviteToken) {
+        try {
+          const invite = await getInviteByToken(inviteToken);
+          if (
+            invite &&
+            invite.status === "pending" &&
+            new Date(invite.expiresAt) > new Date() &&
+            invite.inviteeEmail === normalizedEmail
+          ) {
+            await markInviteAccepted(inviteToken);
+          }
+        } catch {
+          // Silently ignore — don't block signup on invite errors
+        }
+      }
 
       return NextResponse.json({ success: true });
     } catch (error) {
