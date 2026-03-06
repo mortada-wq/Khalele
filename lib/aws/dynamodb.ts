@@ -1,5 +1,7 @@
 import {
   DynamoDBClient,
+  CreateTableCommand,
+  DescribeTableCommand,
 } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 
@@ -71,12 +73,55 @@ function isMissingTableError(error: unknown): boolean {
     msg.includes("ResourceNotFoundException") ||
     msg.includes("Cannot do operations on a non-existent table") ||
     msg.includes("Requested resource not found") ||
+    name === "ResourceNotFoundException"
+  );
+}
+
+function isCredentialError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  const name = error instanceof Error ? error.name : "";
+  return (
     name === "CredentialsProviderError" ||
+    name === "UnrecognizedClientException" ||
     msg.includes("Could not load credentials") ||
+    msg.includes("UnrecognizedClientException") ||
+    msg.includes("InvalidClientTokenId") ||
+    msg.includes("InvalidSignatureException") ||
     msg.includes("ECONNREFUSED") ||
     msg.includes("ENOTFOUND") ||
     msg.includes("getaddrinfo")
   );
+}
+
+let _usersTableEnsured = false;
+
+async function ensureUsersTable(): Promise<void> {
+  if (_usersTableEnsured) return;
+  try {
+    await client.send(new DescribeTableCommand({ TableName: TABLE_USERS }));
+    _usersTableEnsured = true;
+  } catch (err) {
+    if (!isMissingTableError(err)) return; // credential error or other — skip
+    try {
+      await client.send(new CreateTableCommand({
+        TableName: TABLE_USERS,
+        AttributeDefinitions: [{ AttributeName: "userId", AttributeType: "S" }],
+        KeySchema: [{ AttributeName: "userId", KeyType: "HASH" }],
+        BillingMode: "PAY_PER_REQUEST",
+      }));
+      // Wait up to 15s for table to become active
+      for (let i = 0; i < 15; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        try {
+          const desc = await client.send(new DescribeTableCommand({ TableName: TABLE_USERS }));
+          if (desc.Table?.TableStatus === "ACTIVE") break;
+        } catch { /* still creating */ }
+      }
+      _usersTableEnsured = true;
+    } catch (createErr) {
+      console.error("Failed to auto-create users table:", createErr);
+    }
+  }
 }
 
 export type GoldVerdict = "perfect" | "needs_tweak" | "wrong_level";
@@ -374,6 +419,7 @@ export async function updateTrainingSessionStatus(
 export async function getAuthUserByEmail(email: string): Promise<AuthUser | null> {
   const normalizedEmail = email.toLowerCase().trim();
   try {
+    await ensureUsersTable();
     const result = await docClient.send(
       new GetCommand({
         TableName: TABLE_USERS,
@@ -383,7 +429,7 @@ export async function getAuthUserByEmail(email: string): Promise<AuthUser | null
     if (result.Item) return result.Item as AuthUser;
     return inMemoryAuthUsers.get(normalizedEmail) ?? null;
   } catch (error) {
-    if (isMissingTableError(error)) {
+    if (isMissingTableError(error) || isCredentialError(error)) {
       return inMemoryAuthUsers.get(normalizedEmail) ?? null;
     }
     throw error;
@@ -394,6 +440,7 @@ export async function createAuthUser(user: AuthUser): Promise<void> {
   const normalizedEmail = user.email.toLowerCase().trim();
   const item = { ...user, userId: `auth#${normalizedEmail}`, email: normalizedEmail };
   try {
+    await ensureUsersTable();
     await docClient.send(
       new PutCommand({
         TableName: TABLE_USERS,
@@ -406,7 +453,7 @@ export async function createAuthUser(user: AuthUser): Promise<void> {
     if (msg.includes("ConditionalCheckFailedException")) {
       throw new Error("EMAIL_EXISTS");
     }
-    if (isMissingTableError(error)) {
+    if (isMissingTableError(error) || isCredentialError(error)) {
       if (inMemoryAuthUsers.has(normalizedEmail)) {
         throw new Error("EMAIL_EXISTS");
       }
@@ -431,7 +478,7 @@ export async function updateAuthUser(email: string, updates: Partial<AuthUser>):
       })
     );
   } catch (error) {
-    if (isMissingTableError(error)) {
+    if (isMissingTableError(error) || isCredentialError(error)) {
       inMemoryAuthUsers.set(normalizedEmail, updated);
       return;
     }
