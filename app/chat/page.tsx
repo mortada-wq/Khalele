@@ -918,7 +918,6 @@ function ChatPageContent() {
       {/* Main content area - Full height with TopBar inside */}
       <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
         <TopBar
-          onAvatarClick={handleAvatarClick}
           userRole={userRole}
         />
 

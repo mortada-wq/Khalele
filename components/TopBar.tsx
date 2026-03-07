@@ -1,31 +1,48 @@
 "use client";
 
-function UserAvatarIcon({ role }: { role?: "admin" | "user" }) {
-  const isAdmin = role === "admin";
-  return (
+import { useEffect, useState } from "react";
+
+function ThemeToggleIcon({ isDark }: { isDark: boolean }) {
+  return isDark ? (
+    // Sun icon
     <svg
-      viewBox="0 0 33.5 39.75"
-      width="28"
-      height="33"
-      className={isAdmin ? "admin-avatar-glow" : ""}
-      style={{
-        opacity: isAdmin ? 1 : 0.85,
-        color: isAdmin ? "#D4A017" : "var(--color-accent-avatar-collapsed)",
-      }}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      <circle fill="currentColor" cx="16.75" cy="17.55" r="5.83" />
-      <path
-        stroke="currentColor"
-        strokeWidth=".5"
-        fill="none"
-        d="M28.59,9.99c-2.88-3.56-6.76-6.48-10.76-9.49-.64-.48-1.52-.48-2.16,0C7.69,6.52.15,12.2.15,23.26c-.14,4.32,1.46,8.52,4.46,11.64.23.23.45.45.7.66,2.81,2.37,6.31,3.77,9.98,3.97.98.02,1.95.04,2.93.06h0c3.67-.22,7.17-1.61,9.98-3.99,3.38-2.97,5.16-7.24,5.16-12.33,0-5.55-1.88-9.74-4.77-13.3ZM27.41,31.2c-.29.38-.61.74-.95,1.07-1.78-5.35-7.56-8.25-12.91-6.47-2.87.95-5.17,3.13-6.28,5.95-.52-.48-.99-1.01-1.39-1.58-1.89-3.07-2.55-6.74-1.84-10.28,1.18-6.28,5.76-10.43,12.72-15.7,8.13,6.18,13.02,10.81,13.02,19.04.11,2.85-.72,5.65-2.36,7.97Z"
-      />
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ) : (
+    // Moon icon
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
   );
 }
 
 export interface TopBarProps {
-  onAvatarClick: () => void;
   userRole?: "admin" | "user";
   showChatActions?: boolean;
   onShare?: () => void;
@@ -33,26 +50,41 @@ export interface TopBarProps {
 }
 
 export function TopBar({
-  onAvatarClick,
   userRole,
 }: TopBarProps) {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    // Check current theme
+    const theme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("kheleel_theme") || "dark";
+    setIsDark(theme === "dark");
+  }, []);
+
+  const handleThemeToggle = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setIsDark(!isDark);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("kheleel_theme", newTheme);
+  };
+
   return (
     <div
       className="top-bar shrink-0 flex items-center justify-end px-4 md:px-6"
-      style={{ height: 52, background: "transparent" }}
+      style={{ height: 52, background: "transparent", gap: "12px" }}
     >
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onAvatarClick}
-          className="top-bar-action shrink-0"
-          aria-label="الحساب والإعدادات"
-          title="الحساب والإعدادات"
-        >
-          <UserAvatarIcon role={userRole} />
-          <span className="top-bar-action-label sr-only">الحساب</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleThemeToggle}
+        className="theme-toggle-btn shrink-0"
+        aria-label={isDark ? "تبديل للوضع الفاتح" : "تبديل للوضع الداكن"}
+        title={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
+        style={{
+          color: "var(--text-tertiary)",
+          transition: "color 0.2s ease",
+        }}
+      >
+        <ThemeToggleIcon isDark={isDark} />
+      </button>
     </div>
   );
 }

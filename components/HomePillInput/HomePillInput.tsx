@@ -70,7 +70,7 @@ export function HomePillInput({
 
   return (
     <div className="w-full max-w-3xl">
-      {/* Main pill bar */}
+      {/* Main pill bar with all controls inside */}
       <div
         className="home-pill-bar relative flex items-center transition-all duration-200"
         style={{
@@ -111,44 +111,53 @@ export function HomePillInput({
           }}
         />
 
-        {/* Left (RTL last child): Send (paper plane) */}
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={disabled || !value.trim()}
-          className="shrink-0 flex items-center justify-center self-center hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          style={{ color: "var(--color-accent)", width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
-          aria-label="إرسال"
-        >
-          <SendIcon size={ICON_SIZE} />
-        </button>
+        {/* Left side (RTL): Mic + Attachment buttons before Send */}
+        <div className="flex items-center gap-0 shrink-0">
+          {/* Attachment button */}
+          <button
+            type="button"
+            onClick={handleAttach}
+            disabled={disabled}
+            className="flex items-center justify-center text-[#4a4a4a] hover:text-[var(--color-accent)] transition-colors disabled:opacity-50"
+            style={{ width: 36, height: PILL_HEIGHT }}
+            aria-label="إرفاق ملف"
+            title="إرفاق ملف"
+          >
+            <AttachmentIcon size={18} />
+          </button>
+
+          {/* Mic button */}
+          {onMicTranscript ? (
+            <MicButton onTranscript={onMicTranscript} disabled={disabled} variant="minimal" />
+          ) : (
+            <div className="flex items-center justify-center text-[#4a4a4a] opacity-50 cursor-not-allowed" style={{ width: 36, height: PILL_HEIGHT }}>
+              <MicIcon size={18} />
+            </div>
+          )}
+
+          {/* Send button - rightmost (LTR left, RTL last) */}
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={disabled || !value.trim()}
+            className="shrink-0 flex items-center justify-center self-center hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            style={{ color: "var(--color-accent)", width: PILL_PADDING_X + ICON_SIZE, height: PILL_HEIGHT }}
+            aria-label="إرسال"
+          >
+            <SendIcon size={ICON_SIZE} />
+          </button>
+        </div>
       </div>
 
-      {/* Second row: Mic + Attachment — below pill, dark gray outline, ~18–24px gap */}
-      <div
-        className="flex items-center gap-6"
-        style={{
-          marginTop: ROW_MARGIN_TOP,
-          marginInlineStart: PILL_PADDING_X,
-        }}
-      >
-        {onMicTranscript ? (
-          <MicButton onTranscript={onMicTranscript} disabled={disabled} variant="minimal" />
-        ) : (
-          <div className="p-2 text-[var(--text-subtle)] opacity-50 cursor-not-allowed" aria-hidden>
-            <MicIcon size={ROW_ICON_SIZE} />
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={handleAttach}
-          disabled={disabled}
-          className="p-2 rounded-lg text-[var(--text-subtle)] hover:text-[var(--foreground)] transition-colors disabled:opacity-50"
-          aria-label="إرفاق ملف"
+      {/* Bottom row: Only incognito mode toggle (if applicable) */}
+      {onIncognitoChange && (
+        <div
+          className="flex items-center"
+          style={{
+            marginTop: ROW_MARGIN_TOP,
+            marginInlineStart: PILL_PADDING_X,
+          }}
         >
-          <AttachmentIcon size={ROW_ICON_SIZE} />
-        </button>
-        {onIncognitoChange && (
           <button
             type="button"
             onClick={() => onIncognitoChange(!incognitoMode)}
@@ -161,8 +170,8 @@ export function HomePillInput({
           >
             <IncognitoIcon size={ROW_ICON_SIZE} />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}

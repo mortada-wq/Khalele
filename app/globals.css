@@ -566,12 +566,13 @@ textarea:focus {
 .top-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
+  justify-content: flex-end;
+  padding: 8px 20px;
   height: 52px;
   background: transparent;
   position: relative;
   z-index: 5;
+  gap: 12px;
 }
 
 .top-bar-action {
