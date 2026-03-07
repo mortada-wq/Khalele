@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { BirdToggle } from "@/components/BirdToggle";
 import { UserProfile } from "./UserProfile";
 
 const SIDEBAR_W = 220;
@@ -40,43 +39,24 @@ function IconGroup() {
 export interface SidebarProps {
   onCreateDiwan?: () => void;
   onCreateGroup?: () => void;
-  notificationCount?: number;
 }
 
 export function Sidebar({
   onCreateDiwan,
   onCreateGroup,
-  notificationCount = 0,
 }: SidebarProps) {
   return (
     <aside
-      className="hidden md:flex shrink-0 flex-col"
+      className="flex shrink-0 flex-col"
       style={{
         width: SIDEBAR_W,
         height: "100vh",
         background: "#121212",
-        padding: "32px 24px",
+        padding: "96px 24px 32px",
         zIndex: 10,
       }}
     >
-      {/* 1. Bird logo + notification dot */}
-      <div className="shrink-0 relative" style={{ marginBottom: 32 }}>
-        <BirdToggle expanded={true} size={48} />
-        {notificationCount > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: 2,
-              right: 2,
-              width: 8,
-              height: 8,
-              background: "#ff4444",
-              borderRadius: "50%",
-              border: "2px solid #121212",
-            }}
-          />
-        )}
-      </div>
+      {/* Bird space — bird lives as a fixed button outside, we leave top padding */}
 
       {/* 2. ابدأ محادثة — Start a chat */}
       <button

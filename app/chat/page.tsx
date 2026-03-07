@@ -8,6 +8,7 @@ import { HomePillInput } from "@/components/HomePillInput";
 import { KheleelLogo } from "@/components/KheleelLogo";
 import { MessageList } from "@/components/Chat/MessageList";
 import { Sidebar } from "@/components/Sidebar";
+import { BirdToggle } from "@/components/BirdToggle";
 import { TopBar } from "@/components/TopBar";
 
 import { SettingsModal } from "@/components/Settings";
@@ -131,6 +132,7 @@ function ChatPageContent() {
   const [, setUserToolIds] = useState<string[]>([]);
   const [incognitoMode, setIncognitoMode] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [profileData, setProfileData] = useState<ChatUserProfile | null>(null);
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus | null>(null);
   const [, setNicknameTone] = useState("");
@@ -731,15 +733,40 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      {/* Sidebar - Full height, always expanded */}
-      <Sidebar
-        onCreateDiwan={startNewDiwan}
-        notificationCount={notificationCount}
-      />
+    <div className="h-screen overflow-hidden relative" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
+      {/* Fixed bird toggle — always visible, same position open or closed */}
+      <div className="bird-fixed-btn" style={{ position: "fixed", top: 32, right: 24, zIndex: 40 }}>
+        <div style={{ position: "relative", display: "inline-flex" }}>
+          <BirdToggle
+            expanded={sidebarExpanded}
+            size={48}
+            onClick={() => setSidebarExpanded((v) => !v)}
+          />
+          {notificationCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: 2,
+                right: 2,
+                width: 8,
+                height: 8,
+                background: "#ff4444",
+                borderRadius: "50%",
+                border: "2px solid var(--bg-tertiary)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar overlay — slides in/out from the right */}
+      <div className={`sidebar-drawer${sidebarExpanded ? "" : " is-closed"}`}>
+        <Sidebar onCreateDiwan={startNewDiwan} />
+      </div>
 
       {/* Main content area - Full height with TopBar inside */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
         <TopBar
           onAvatarClick={handleAvatarClick}
           userRole={userRole}
