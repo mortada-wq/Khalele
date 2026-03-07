@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UserProfile } from "./UserProfile";
+import { SunIcon } from "../Icons/SunIcon";
+import { MoonIcon } from "../Icons/MoonIcon";
 
 const SIDEBAR_W = 220;
 
@@ -45,6 +48,21 @@ export function Sidebar({
   onCreateDiwan,
   onCreateGroup,
 }: SidebarProps) {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    // Check current theme
+    const theme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("kheleel_theme") || "dark";
+    setIsDark(theme === "dark");
+  }, []);
+
+  const handleThemeToggle = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setIsDark(!isDark);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("kheleel_theme", newTheme);
+  };
+
   return (
     <aside
       className="flex shrink-0 flex-col"
@@ -170,7 +188,39 @@ export function Sidebar({
         <UserProfile expanded={true} />
       </div>
 
-      {/* 6. تحسين خليل — doc page at very bottom */}
+      {/* 6. Theme Toggle — Sun/Moon at bottom */}
+      <button
+        type="button"
+        onClick={handleThemeToggle}
+        className="shrink-0 w-full flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all"
+        style={{
+          color: "rgba(255,255,255,0.65)",
+          fontFamily: "var(--font-ui)",
+          fontSize: "14px",
+          fontWeight: 400,
+          backgroundColor: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          marginBottom: 12,
+          cursor: "pointer",
+          justifyContent: "center",
+          gap: "8px",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+          e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
+          e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+        }}
+        title={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
+        aria-label={isDark ? "تبديل للوضع الفاتح" : "تبديل للوضع الداكن"}
+      >
+        {isDark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+        <span>{isDark ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+      </button>
+
+      {/* 7. تحسين خليل — doc page at very bottom */}
       <Link
         href="/tahseen-khaleel"
         className="shrink-0 flex items-center justify-center gap-2 py-2 rounded-lg transition-opacity"
