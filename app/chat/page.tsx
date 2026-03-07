@@ -747,7 +747,7 @@ function ChatPageContent() {
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
         <motion.div
-          className="flex-1 flex flex-col min-w-0"
+          className="flex-1 flex flex-col min-w-0 min-h-0"
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
           transition={{ duration: 0.2 }}
         >
