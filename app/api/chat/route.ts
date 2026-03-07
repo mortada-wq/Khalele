@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { invokeDeepSeek } from "@/lib/llm";
+import { invokeBedrock } from "@/lib/aws/bedrock";
+import type { ChatMessage } from "@/lib/aws/bedrock";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,17 +24,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.SILICONFLOW_API_KEY ?? "";
-    if (!apiKey || apiKey.startsWith("PASTE_") || apiKey === "your-key-here") {
-      console.error("CHAT API: SiliconFlow API key missing or placeholder");
-      return NextResponse.json(
-        { error: "SiliconFlow API key not configured. Update .env.local with your SILICONFLOW_API_KEY, then restart the dev server." },
-        { status: 500 }
-      );
-    }
-
-    const model = process.env.SILICONFLOW_MODEL || "deepseek-ai/DeepSeek-V3.2";
-    console.log(`[Chat API] Sending ${messages.length} messages to DeepSeek (model: ${model}, style: ${languageStyle})`);
+    // Check AWS Bedrock configuration
+    const region = process.env.BEDROCK_REGION || process.env.AWS_REGION || "us-east-1";
+    console.log(`[Chat API] Using AWS Bedrock in region: ${region}`);
 
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()?.content;
 
@@ -48,31 +41,34 @@ export async function POST(req: NextRequest) {
       ? `IMPORTANT: This is a guest/trial user. Keep your response under ${guestWordLimit} words. Be helpful but concise.`
       : undefined;
 
-    const response = await invokeDeepSeek(messages, {
+    // Convert messages to ChatMessage format for Bedrock
+    const bedrockMessages: ChatMessage[] = messages.map((m: any) => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: m.content || "",
+    }));
+
+    const response = await invokeBedrock(bedrockMessages, {
       languageStyle,
-      lastUserMessage,
-      recentMessages: messages,
       characterId: typeof characterId === "string" ? characterId : undefined,
+      lastUserMessage,
+      recentMessages: bedrockMessages,
       useSearch: isGuest ? false : useSearch,
       empathyMode: isGuest ? false : empathyMode,
       ramadanMode,
-      customSystemPrompt: guestSystemNote
-        ? `${guestSystemNote}${customSystemPrompt ? `\n\n${customSystemPrompt}` : ""}`
-        : typeof customSystemPrompt === "string" ? customSystemPrompt : undefined,
     });
 
-    console.log(`[Chat API] Got response (${response.length} chars)`);
+    console.log(`[Chat API] Got Bedrock response (${response.length} chars)`);
     return NextResponse.json({ content: response });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const errName = error instanceof Error ? error.name : "Unknown";
-    console.error(`[Chat API] ERROR (${errName}):`, errMsg);
+    console.error(`[Chat API] Bedrock ERROR (${errName}):`, errMsg);
     if (error instanceof Error && error.stack) {
       console.error("[Chat API] Stack:", error.stack);
     }
     return NextResponse.json(
       {
-        error: `DeepSeek error: ${errName}`,
+        error: `AWS Bedrock error: ${errName}`,
         details: errMsg,
       },
       { status: 500 }
