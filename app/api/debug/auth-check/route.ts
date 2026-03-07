@@ -24,7 +24,7 @@ export async function GET() {
       : {}),
   });
 
-  const table = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
+  const table = process.env.DYNAMODB_USERS_TABLE || "kheleel-users";
   try {
     const desc = await client.send(new DescribeTableCommand({ TableName: table }));
     results.dynamodb = {

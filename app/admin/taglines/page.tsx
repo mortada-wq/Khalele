@@ -173,7 +173,7 @@ export default function AdminTaglinesPage() {
       <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
         <header className="flex items-center justify-between mb-12">
           <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-            خليلي — بنك الشعارات
+            خليل — بنك الشعارات
           </Link>
           <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
             العودة
@@ -190,7 +190,7 @@ export default function AdminTaglinesPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-12">
         <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-          خليلي — بنك الشعارات
+          خليل — بنك الشعارات
         </Link>
         <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
           العودة

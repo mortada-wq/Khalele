@@ -101,7 +101,7 @@ interface SettingsModalProps {
 }
 
 const FEEDBACK_CATEGORIES = [
-  { id: "develop", label: "تطوير خليلي" },
+  { id: "develop", label: "تطوير خليل" },
   { id: "ui", label: "ملاحظة عن واجهة التطبيق" },
   { id: "behavior", label: "ملاحظة عن سلوك أو إجابة خليل" },
   { id: "suggestion", label: "اقتراح" },
@@ -697,15 +697,15 @@ export function SettingsModal({ open, onClose, initialSettings, initialSection, 
 
                 {/* رسالة لإدارة التطبيق */}
                 <div className="pt-4 border-t" style={{ borderColor: "#e5e5e5" }}>
-                  <p className="text-sm font-medium mb-2">أرسل رسالة لإدارة التطبيق لتطوير وتحسين خليلي</p>
+                  <p className="text-sm font-medium mb-2">أرسل رسالة لإدارة التطبيق لتطوير وتحسين خليل</p>
                   <p className="text-xs mb-3" style={{ color: "#6b6b6b" }}>
                     البريد: <a href="mailto:hello@kheleel.com" className="hover:underline" style={{ color: "var(--color-accent)" }}>hello@kheleel.com</a>
                   </p>
                   {feedbackSent ? (
                     <div className="p-4 rounded-xl" style={{ background: "var(--color-accent-tint-08)", border: "1px solid var(--color-accent-tint-25)" }}>
-                      <p className="text-sm font-medium mb-2" style={{ color: "var(--color-accent)" }}>شكراً لمشاركتك في تحسين خليلي!</p>
+                      <p className="text-sm font-medium mb-2" style={{ color: "var(--color-accent)" }}>شكراً لمشاركتك في تحسين خليل!</p>
                       <p className="text-sm mb-3" style={{ color: "#5a5a5a", lineHeight: 1.6 }}>
-                        خليلي منتج عام وغير ربحي، صُنع لمن لا يقدر على تحمل التكاليف. مساهمتك تساعدنا على جعله أفضل للجميع.
+                        خليل منتج عام وغير ربحي، صُنع لمن لا يقدر على تحمل التكاليف. مساهمتك تساعدنا على جعله أفضل للجميع.
                       </p>
                       <button
                         type="button"

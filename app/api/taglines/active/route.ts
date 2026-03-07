@@ -12,7 +12,7 @@ export async function GET() {
   } catch (error) {
     console.error("Active tagline fetch error:", error);
     return NextResponse.json({
-      tagline: "خليلي — ذكاء اصطناعي عربي",
+      tagline: "خليل — ذكاء اصطناعي عربي",
     });
   }
 }

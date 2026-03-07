@@ -88,7 +88,7 @@ export default function VolunteerPage() {
           <Check className="w-16 h-16 mx-auto mb-4" style={{ color: "var(--color-accent)" }} />
           <h1 className="text-2xl font-bold mb-2">شكراً لمشاركتك!</h1>
           <p className="text-[#6b6b6b] mb-6">
-            تم استلام تصحيحك. فريقنا سيراجعه لتحسين خليلي.
+            تم استلام تصحيحك. فريقنا سيراجعه لتحسين خليل.
           </p>
           <Link
             href="/volunteer"
@@ -113,7 +113,7 @@ export default function VolunteerPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#fafafa", color: "#231f20" }}>
       <header className="flex items-center justify-between mb-8 max-w-2xl mx-auto">
         <Link href="/" className="font-bold text-xl" style={{ color: "var(--color-accent)" }}>
-          خليلي — صقل التصحيحات
+          خليل — صقل التصحيحات
         </Link>
         <Link href="/" className="text-sm" style={{ color: "#6b6b6b" }}>
           العودة
@@ -221,7 +221,7 @@ export default function VolunteerPage() {
         {aiResponse && (
           <section className="p-6 rounded-2xl border" style={{ borderColor: "#e5e5e5", background: "#fff" }}>
             <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--color-accent)" }}>
-              إجابة خليلي
+              إجابة خليل
             </h2>
             <div
               className="p-4 rounded-xl mb-4"

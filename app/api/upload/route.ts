@@ -6,7 +6,7 @@ import { requireAdminResponse } from "@/lib/admin-auth";
     region: process.env.AWS_REGION || "us-east-1",
   });
 
-  const BUCKET = process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+  const BUCKET = process.env.S3_TRAINING_BUCKET || "kheleel-training-data";
 
 export async function POST(req: NextRequest) {
   const authError = await requireAdminResponse();

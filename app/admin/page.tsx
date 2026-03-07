@@ -79,7 +79,7 @@ export default function AdminPage() {
       >
         <div className="flex items-center gap-3">
           <div style={{ width: 100 }}>
-            <img src="/logo/logo_black.svg" alt="خليلي" className="w-full h-auto" />
+            <img src="/logo/logo_black.svg" alt="خليل" className="w-full h-auto" />
           </div>
           <span
             className="font-ui text-xs font-bold px-2 py-0.5 rounded-full"

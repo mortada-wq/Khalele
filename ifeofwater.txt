@@ -2,7 +2,7 @@
 
 ## Business Description
 
-**Kheleel (خليلي)** is a culturally-intelligent Arabic AI platform that addresses the critical gap in authentic Arabic language AI services. While major AI platforms like ChatGPT and Claude excel in English, they fail to capture the nuances, dialects, and cultural context essential for meaningful Arabic communication.
+**Kheleel (خليل)** is a culturally-intelligent Arabic AI platform that addresses the critical gap in authentic Arabic language AI services. While major AI platforms like ChatGPT and Claude excel in English, they fail to capture the nuances, dialects, and cultural context essential for meaningful Arabic communication.
 
 ### Problem Statement
 - **400 million Arabic speakers** lack access to AI that understands their dialects and cultural context

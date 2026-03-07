@@ -77,7 +77,7 @@ export default function AdminFactCheckPage() {
       <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
         <header className="flex items-center justify-between mb-12">
           <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-            خليلي — فحص الحقائق
+            خليل — فحص الحقائق
           </Link>
           <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
             العودة
@@ -92,7 +92,7 @@ export default function AdminFactCheckPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-10">
         <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-          خليلي — فحص الحقائق
+          خليل — فحص الحقائق
         </Link>
         <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
           العودة

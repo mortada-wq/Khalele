@@ -28,12 +28,12 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(RESEND_API_KEY);
 
     const subject = category
-      ? `[خليلي] ${category}: ${message.slice(0, 50)}${message.length > 50 ? "…" : ""}`
-      : `[خليلي] رسالة من المستخدم`;
+      ? `[خليل] ${category}: ${message.slice(0, 50)}${message.length > 50 ? "…" : ""}`
+      : `[خليل] رسالة من المستخدم`;
 
     const html = `
       <div dir="rtl" style="font-family: sans-serif; padding: 20px;">
-        <h2>رسالة جديدة لتحسين خليلي</h2>
+        <h2>رسالة جديدة لتحسين خليل</h2>
         ${category ? `<p><strong>التصنيف:</strong> ${category}</p>` : ""}
         <p><strong>الرسالة:</strong></p>
         <p style="background: #f5f5f5; padding: 12px; border-radius: 8px;">${message.replace(/\n/g, "<br>")}</p>

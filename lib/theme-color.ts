@@ -4,7 +4,7 @@
  */
 
 export const DEFAULT_ACCENT = "#C68E17";
-const STORAGE_KEY = "khalele_accent_color";
+const STORAGE_KEY = "kheleel_accent_color";
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);

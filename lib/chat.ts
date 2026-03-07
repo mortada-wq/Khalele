@@ -15,7 +15,7 @@ export interface Conversation {
 
 export type DateGroup = "today" | "yesterday" | "last7" | "older";
 
-export const USER_ID_KEY = "khalele_user_id";
+export const USER_ID_KEY = "kheleel_user_id";
 
 // REMOVED: Guest/Anonymous user logic
 // Users must be authenticated to use the app

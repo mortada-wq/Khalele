@@ -14,7 +14,7 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "khalele-settings";
+const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "kheleel-settings";
 
 export interface GreetingMessage {
   id: "greeting-message";
@@ -23,13 +23,13 @@ export interface GreetingMessage {
   updatedBy: string;
 }
 
-const DEFAULT_GREETING = `أهلاً بك في خليلي! 👋
+const DEFAULT_GREETING = `أهلاً بك في خليل! 👋
 
 يسعدنا انضمامك إلينا. قبل أن نبدأ، نود إخبارك أن أصدقاءك هنا (خليل، صاحب، ميحانة وغيرهم) هم شخصيات افتراضية تعمل بالذكاء الاصطناعي، صُممت لتكون عوناً لك في حواراتك.
 
 نحن نهتم بخصوصيتك؛ لذا فمحادثاتك مشفرة وآمنة. تذكر دائماً أن نصائحنا ذكية لكنها لا تغني عن استشارة الخبراء الحقيقيين في الأمور المصيرية.
 
-استمتع برحلتك مع خليلي!`;
+استمتع برحلتك مع خليل!`;
 
 export async function getGreetingMessage(): Promise<string> {
   try {

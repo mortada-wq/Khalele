@@ -5,7 +5,7 @@
 ## 1. App Overview
 
 ### Purpose
-**Kheleel** (خليلي) is an Arabic-first AI chat application. It targets Arab users across dialects, supports Fusha or Easy Arabic responses, and provides voice input/output for natural Arabic conversation.
+**Kheleel** (خليل) is an Arabic-first AI chat application. It targets Arab users across dialects, supports Fusha or Easy Arabic responses, and provides voice input/output for natural Arabic conversation.
 
 ### Tech Stack
 | Layer | Technology |

@@ -5,7 +5,7 @@ export interface KheleelLogoProps {
   alt?: string;
 }
 
-export function KheleelLogo({ className = "", alt = "خليلي" }: KheleelLogoProps) {
+export function KheleelLogo({ className = "", alt = "خليل" }: KheleelLogoProps) {
   return (
     <img
       src="/logo/logo_white.png"

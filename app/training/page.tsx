@@ -12,7 +12,7 @@ const DEFAULT_PROMPTS = [
   "وين تروح النهاردة",
 ];
 
-const USER_ID_KEY = "khalele_user_id";
+const USER_ID_KEY = "kheleel_user_id";
 
 function getOrCreateUserId(): string {
   if (typeof window === "undefined") return "anon_anonymous";
@@ -113,7 +113,7 @@ export default function TrainingPage() {
           <Check className="w-16 h-16 mx-auto mb-4" style={{ color: "var(--color-accent)" }} />
           <h1 className="text-2xl font-bold mb-2">شكراً لمشاركتك!</h1>
           <p className="text-[#6b6b6b] mb-6">
-            تم استلام تسجيلاتك. فريقنا سيراجعها قريباً لتحسين خليلي.
+            تم استلام تسجيلاتك. فريقنا سيراجعها قريباً لتحسين خليل.
           </p>
           <Link
             href="/"
@@ -131,7 +131,7 @@ export default function TrainingPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#fafafa", color: "#231f20" }}>
       <header className="flex items-center justify-between mb-8 max-w-2xl mx-auto">
         <Link href="/" className="font-bold text-xl" style={{ color: "var(--color-accent)" }}>
-          خليلي — المساهمة بالبيانات
+          خليل — المساهمة بالبيانات
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/volunteer" className="text-sm" style={{ color: "var(--color-accent)" }}>

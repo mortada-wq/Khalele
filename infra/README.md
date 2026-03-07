@@ -38,22 +38,22 @@
 ```
 
 ### 3. S3 Buckets
-- `khalele-training-data` — training data, transcriptions
+- `kheleel-training-data` — training data, transcriptions
 - Enable CORS if needed for uploads
 
 ### 4. DynamoDB Tables (optional for Phase 1)
-- `khalele-users` — PK: userId
-- `khalele-corrections` — PK: id, GSI: userId-createdAt-index. For few-shot gold examples, add optional attributes: `inputPrompt`, `languageStyle`, `verdict`. Approved corrections with these fields are injected into LLM prompts.
-- `khalele-conversations` — see below
+- `kheleel-users` — PK: userId
+- `kheleel-corrections` — PK: id, GSI: userId-createdAt-index. For few-shot gold examples, add optional attributes: `inputPrompt`, `languageStyle`, `verdict`. Approved corrections with these fields are injected into LLM prompts.
+- `kheleel-conversations` — see below
 
 App works without DynamoDB; corrections stored in-memory as fallback. Add `dynamodb:Scan` to IAM for gold example retrieval.
 
-#### khalele-conversations (chat archive)
+#### kheleel-conversations (chat archive)
 
 Full conversation persistence for the chat archive. Create manually or via IaC.
 
-**Table name:** `khalele-conversations`  
-**Environment variable:** `DYNAMODB_CONVERSATIONS_TABLE` (default: `khalele-conversations`)
+**Table name:** `kheleel-conversations`  
+**Environment variable:** `DYNAMODB_CONVERSATIONS_TABLE` (default: `kheleel-conversations`)
 
 **Key schema:**
 | Attribute       | Type   | Key   |
@@ -79,7 +79,7 @@ Full conversation persistence for the chat archive. Create manually or via IaC.
 **AWS CLI creation example:**
 ```bash
 aws dynamodb create-table \
-  --table-name khalele-conversations \
+  --table-name kheleel-conversations \
   --attribute-definitions \
     AttributeName=conversationId,AttributeType=S \
     AttributeName=userId,AttributeType=S \
@@ -100,12 +100,12 @@ aws dynamodb create-table \
 
 **IAM:** Add `dynamodb:PutItem` to the policy (already included in the minimal policy above).
 
-#### khalele-training-sessions (Phase 3: training data collection)
+#### kheleel-training-sessions (Phase 3: training data collection)
 
 Volunteer-contributed training sessions for dialect improvement.
 
-**Table name:** `khalele-training-sessions`  
-**Environment variable:** `DYNAMODB_TRAINING_TABLE` (default: `khalele-training-sessions`)
+**Table name:** `kheleel-training-sessions`  
+**Environment variable:** `DYNAMODB_TRAINING_TABLE` (default: `kheleel-training-sessions`)
 
 **Key schema:**
 | Attribute  | Type   | Key |
@@ -131,7 +131,7 @@ Volunteer-contributed training sessions for dialect improvement.
 **AWS CLI creation example:**
 ```bash
 aws dynamodb create-table \
-  --table-name khalele-training-sessions \
+  --table-name kheleel-training-sessions \
   --attribute-definitions AttributeName=sessionId,AttributeType=S \
   --key-schema AttributeName=sessionId,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST

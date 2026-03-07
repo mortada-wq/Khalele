@@ -38,15 +38,18 @@ function BirdOpen({ size = defaultSize }: { size?: number }) {
   );
 }
 
-export function BirdToggle({ expanded, size }: { expanded: boolean; size?: number }) {
+export function BirdToggle({ expanded, size, onClick }: { expanded: boolean; size?: number; onClick?: () => void }) {
   const s = size || defaultSize;
   return (
-    <span
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={expanded ? "إغلاق الشريط الجانبي" : "فتح الشريط الجانبي"}
       className={`toggle-wrapper${expanded ? " is-open" : ""}`}
-      style={{ width: s, height: s }}
+      style={{ width: s, height: s, background: "none", border: "none", padding: 0, cursor: "pointer" }}
     >
       <BirdOpen size={size} />
       <BirdClosed size={size} />
-    </span>
+    </button>
   );
 }

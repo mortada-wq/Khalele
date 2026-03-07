@@ -9,7 +9,7 @@ const client = new TranscribeClient({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
-const OUTPUT_BUCKET = process.env.S3_TRANSCRIPTION_BUCKET || process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+const OUTPUT_BUCKET = process.env.S3_TRANSCRIPTION_BUCKET || process.env.S3_TRAINING_BUCKET || "kheleel-training-data";
 
 export async function startTranscriptionJob(
   audioUri: string,

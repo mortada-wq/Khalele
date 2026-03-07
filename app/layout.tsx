@@ -35,8 +35,8 @@ const notoNastaliq = Noto_Nastaliq_Urdu({
 export const metadata: Metadata = {
   metadataBase: new URL("https://kheleel.com"),
   title: {
-    default: "Kheleel | خليلي — ذكاء اصطناعي عربي",
-    template: "%s | Kheleel خليلي",
+    default: "Kheleel | خليل — ذكاء اصطناعي عربي",
+    template: "%s | Kheleel خليل",
   },
   description:
     "ذكاء اصطناعي يتكلم عربي — يفهم كل اللهجات: عراقي، مصري، خليجي، شامي، مغربي. محادثة صوتية، أدوات، وخصوصية كاملة. مجاني.",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "ذكاء اصطناعي عربي",
     "Arabic AI",
     "chatbot عربي",
-    "خليلي",
+    "خليل",
     "Kheleel",
     "لهجات عربية",
     "محادثة ذكاء اصطناعي",
@@ -56,15 +56,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ar_SA",
     url: "https://kheleel.com",
-    siteName: "Kheleel | خليلي",
-    title: "Kheleel | خليلي — ذكاء اصطناعي يتكلم عربي",
+    siteName: "Kheleel | خليل",
+    title: "Kheleel | خليل — ذكاء اصطناعي يتكلم عربي",
     description:
       "يفهم كل اللهجات العربية. محادثة نصية وصوتية، أدوات ذكية، وخصوصية كاملة. مجاني.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kheleel — خليلي" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kheleel — خليل" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kheleel | خليلي — ذكاء اصطناعي يتكلم عربي",
+    title: "Kheleel | خليل — ذكاء اصطناعي يتكلم عربي",
     description:
       "يفهم كل اللهجات العربية. محادثة نصية وصوتية، أدوات ذكية، وخصوصية كاملة.",
     images: ["/opengraph-image"],
@@ -94,7 +94,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "Kheleel | خليلي",
+              name: "Kheleel | خليل",
               url: "https://kheleel.com",
               applicationCategory: "UtilitiesApplication",
               operatingSystem: "Web",
@@ -112,7 +112,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Kheleel",
-              alternateName: "خليلي",
+              alternateName: "خليل",
               url: "https://kheleel.com",
               logo: "https://kheleel.com/logo/logo_black.svg",
               description:
@@ -130,7 +130,7 @@ export default function RootLayout({
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
-            __html: `(function(){document.documentElement.setAttribute("data-theme","dark");var s=localStorage.getItem("khalele_accent_color");if(s){var h=s.replace(/^#/,""),r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16),d=function(a){return"#"+[r,g,b].map(function(c){return Math.max(0,Math.floor(c*(1-a))).toString(16).padStart(2,"0")}).join("")},root=document.documentElement;root.style.setProperty("--color-accent",s);root.style.setProperty("--color-accent-hover",d(0.15));root.style.setProperty("--color-accent-avatar-expanded",d(0.25));root.style.setProperty("--color-accent-avatar-collapsed",d(0.4));root.style.setProperty("--color-earth",d(0.45));root.style.setProperty("--color-accent-tint-12","rgba("+r+","+g+","+b+",0.12)");root.style.setProperty("--color-accent-tint-08","rgba("+r+","+g+","+b+",0.08)");root.style.setProperty("--color-accent-tint-20","rgba("+r+","+g+","+b+",0.2)");root.style.setProperty("--color-accent-tint-25","rgba("+r+","+g+","+b+",0.25)");root.style.setProperty("--color-accent-tint-10","rgba("+r+","+g+","+b+",0.1)");root.style.setProperty("--color-accent-tint-06","rgba("+r+","+g+","+b+",0.06)");root.style.setProperty("--color-accent-tint-40","rgba("+r+","+g+","+b+",0.4)");}})();`,
+            __html: `(function(){document.documentElement.setAttribute("data-theme","dark");var s=localStorage.getItem("kheleel_accent_color");if(s){var h=s.replace(/^#/,""),r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16),d=function(a){return"#"+[r,g,b].map(function(c){return Math.max(0,Math.floor(c*(1-a))).toString(16).padStart(2,"0")}).join("")},root=document.documentElement;root.style.setProperty("--color-accent",s);root.style.setProperty("--color-accent-hover",d(0.15));root.style.setProperty("--color-accent-avatar-expanded",d(0.25));root.style.setProperty("--color-accent-avatar-collapsed",d(0.4));root.style.setProperty("--color-earth",d(0.45));root.style.setProperty("--color-accent-tint-12","rgba("+r+","+g+","+b+",0.12)");root.style.setProperty("--color-accent-tint-08","rgba("+r+","+g+","+b+",0.08)");root.style.setProperty("--color-accent-tint-20","rgba("+r+","+g+","+b+",0.2)");root.style.setProperty("--color-accent-tint-25","rgba("+r+","+g+","+b+",0.25)");root.style.setProperty("--color-accent-tint-10","rgba("+r+","+g+","+b+",0.1)");root.style.setProperty("--color-accent-tint-06","rgba("+r+","+g+","+b+",0.06)");root.style.setProperty("--color-accent-tint-40","rgba("+r+","+g+","+b+",0.4)");}})();`,
           }}
         />
       </head>

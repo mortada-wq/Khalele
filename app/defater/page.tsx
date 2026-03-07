@@ -8,7 +8,7 @@ import { TopBar } from "@/components/TopBar";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { getOrCreateUserId } from "@/lib/chat";
 
-const STORAGE_KEY = "khalele_defater_content";
+const STORAGE_KEY = "kheleel_defater_content";
 const MAX_SIZE_BYTES = 20 * 1024 * 1024;
 
 export default function DefaterPage() {
@@ -138,7 +138,7 @@ export default function DefaterPage() {
         showToast("تم تحميل الملف");
       } else if (action === "chat") {
         if (typeof window !== "undefined") {
-          sessionStorage.setItem("khalele_import_from_notebook", content);
+          sessionStorage.setItem("kheleel_import_from_notebook", content);
         }
         router.push("/chat");
         showToast("جاري فتح المحادثة...");

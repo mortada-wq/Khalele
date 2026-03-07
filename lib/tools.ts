@@ -65,7 +65,7 @@ export const ADMIN_TOOLS: Tool[] = [
   },
 ];
 
-export const USER_TOOLS_KEY = "khalele_user_tools";
+export const USER_TOOLS_KEY = "kheleel_user_tools";
 
 export function getUserTools(): string[] {
   if (typeof window === "undefined") return [];

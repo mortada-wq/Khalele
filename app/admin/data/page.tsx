@@ -78,7 +78,7 @@ export default function AdminDataPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-12">
         <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-          خليلي — استخراج البيانات
+          خليل — استخراج البيانات
         </Link>
         <Link href="/admin" className="text-[#000000] hover:text-kheleel-gold">
           العودة
@@ -169,7 +169,7 @@ export default function AdminDataPage() {
           </div>
         )}
         <p className="mt-4 text-[#8c8c8c] text-sm">
-          التخزين: s3://khalele-training-data/
+          التخزين: s3://kheleel-training-data/
         </p>
       </section>
     </main>

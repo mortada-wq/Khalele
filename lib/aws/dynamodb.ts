@@ -19,14 +19,14 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_USERS = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
-const TABLE_CORRECTIONS = process.env.DYNAMODB_CORRECTIONS_TABLE || "khalele-corrections";
-const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "khalele-conversations";
-const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "khalele-training-sessions";
-const TABLE_NOTEBOOKS = process.env.DYNAMODB_NOTEBOOKS_TABLE || "khalele-notebooks";
-const TABLE_STUDIES = process.env.DYNAMODB_STUDIES_TABLE || "khalele-studies";
-const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "khalele-settings";
-const TABLE_INVITES = process.env.DYNAMODB_INVITES_TABLE || "khalele-invites";
+const TABLE_USERS = process.env.DYNAMODB_USERS_TABLE || "kheleel-users";
+const TABLE_CORRECTIONS = process.env.DYNAMODB_CORRECTIONS_TABLE || "kheleel-corrections";
+const TABLE_CONVERSATIONS = process.env.DYNAMODB_CONVERSATIONS_TABLE || "kheleel-conversations";
+const TABLE_TRAINING = process.env.DYNAMODB_TRAINING_TABLE || "kheleel-training-sessions";
+const TABLE_NOTEBOOKS = process.env.DYNAMODB_NOTEBOOKS_TABLE || "kheleel-notebooks";
+const TABLE_STUDIES = process.env.DYNAMODB_STUDIES_TABLE || "kheleel-studies";
+const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "kheleel-settings";
+const TABLE_INVITES = process.env.DYNAMODB_INVITES_TABLE || "kheleel-invites";
 const inMemoryProfiles = new Map<string, UserProfile>();
 const inMemoryAuthUsers = new Map<string, AuthUser>();
 

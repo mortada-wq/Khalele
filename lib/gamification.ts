@@ -16,7 +16,7 @@ export function getPointsForType(type: keyof typeof CONTRIBUTION_POINTS): number
   return CONTRIBUTION_POINTS[type] ?? 0;
 }
 
-const COUNTS_KEY = "khalele_contribution_counts";
+const COUNTS_KEY = "kheleel_contribution_counts";
 
 export function getContributionCounts(): Record<string, number> {
   if (typeof window === "undefined") return {};
@@ -39,7 +39,7 @@ export function checkAndUnlockBadges(
   incrementCount(type);
   const counts = getContributionCounts();
   const current = JSON.parse(
-    typeof window !== "undefined" ? localStorage.getItem("khalele_user_badges") ?? "[]" : "[]"
+    typeof window !== "undefined" ? localStorage.getItem("kheleel_user_badges") ?? "[]" : "[]"
   ) as string[];
 
   for (const badge of BADGES) {
@@ -54,8 +54,8 @@ export function checkAndUnlockBadges(
   }
 
   if (newBadges.length > 0 && typeof window !== "undefined") {
-    localStorage.setItem("khalele_user_badges", JSON.stringify(current));
-    window.dispatchEvent(new Event("khalele-points-update"));
+    localStorage.setItem("kheleel_user_badges", JSON.stringify(current));
+    window.dispatchEvent(new Event("kheleel-points-update"));
   }
   return newBadges;
 }
