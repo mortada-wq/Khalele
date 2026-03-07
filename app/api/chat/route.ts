@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
       empathyMode,
       ramadanMode,
       customSystemPrompt,
+      isGuest = false,
+      guestWordsRemaining,
     } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -35,15 +37,28 @@ export async function POST(req: NextRequest) {
 
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()?.content;
 
+    // Guest mode: limit response length to stay within 1000-word budget
+    const guestWordLimit = isGuest
+      ? typeof guestWordsRemaining === "number"
+        ? Math.max(50, Math.min(guestWordsRemaining, 350))
+        : 350
+      : undefined;
+
+    const guestSystemNote = guestWordLimit
+      ? `IMPORTANT: This is a guest/trial user. Keep your response under ${guestWordLimit} words. Be helpful but concise.`
+      : undefined;
+
     const response = await invokeDeepSeek(messages, {
       languageStyle,
       lastUserMessage,
       recentMessages: messages,
       characterId: typeof characterId === "string" ? characterId : undefined,
-      useSearch,
-      empathyMode,
+      useSearch: isGuest ? false : useSearch,
+      empathyMode: isGuest ? false : empathyMode,
       ramadanMode,
-      customSystemPrompt: typeof customSystemPrompt === "string" ? customSystemPrompt : undefined,
+      customSystemPrompt: guestSystemNote
+        ? `${guestSystemNote}${customSystemPrompt ? `\n\n${customSystemPrompt}` : ""}`
+        : typeof customSystemPrompt === "string" ? customSystemPrompt : undefined,
     });
 
     console.log(`[Chat API] Got response (${response.length} chars)`);

@@ -25,6 +25,8 @@ import { DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 
 const MAX_REASON_LENGTH = 180;
 const DEFAULT_TAGLINE = "ذكاء اصطناعي عربي — يفهم كل اللهجات ويرد بالعربية السهلة";
+const GUEST_MSG_LIMIT = 3;
+const GUEST_WORD_LIMIT = 1000;
 
 interface ProfileNicknameSuggestion {
   value: string;
@@ -54,6 +56,119 @@ interface NicknameStatus {
 interface ProfileApiResponse {
   profile: ChatUserProfile;
   nicknameStatus: NicknameStatus;
+}
+
+// ── Guest Auth Wall ─────────────────────────────────────────────────────────
+function GuestAuthWall({ hasAccount }: { hasAccount: boolean }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-end pb-10 px-4"
+      style={{ backdropFilter: "blur(6px)", background: "rgba(0,0,0,0.35)" }}
+    >
+      {/* Floating hint badges */}
+      <div className="absolute top-20 left-6 hidden md:block">
+        <span
+          className="font-ui text-xs px-3 py-1.5 rounded-full"
+          style={{
+            background: "var(--color-accent-tint-12)",
+            color: "var(--color-accent)",
+            border: "1px solid var(--color-accent-tint-25)",
+          }}
+        >
+          {hasAccount ? "← سجّل الدخول للاستمرار" : "← مجاني تماماً"}
+        </span>
+      </div>
+
+      {/* Main card */}
+      <div
+        className="w-full max-w-sm rounded-3xl p-7 text-center"
+        style={{
+          background: "var(--bg-primary)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.1)",
+        }}
+      >
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <img
+            src="/logo/logo_black.svg"
+            alt="خليل"
+            className="logo-theme h-8 w-auto"
+          />
+        </div>
+
+        <h2
+          className="font-ui text-xl font-semibold mb-2"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {hasAccount ? "أهلاً بعودتك" : "استمر مع خليل"}
+        </h2>
+
+        <p
+          className="font-ui text-sm mb-6 leading-relaxed"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {hasAccount
+            ? "سجّل دخولك لمتابعة المحادثة وحفظ تاريخك كاملاً"
+            : "أنشئ حساباً مجانياً في ثوانٍ — المحادثات، الذاكرة، كل شيء محفوظ"}
+        </p>
+
+        {/* Primary CTA */}
+        <a
+          href="/signin"
+          className="block w-full py-3.5 rounded-full font-ui text-sm font-medium mb-3 text-center transition-opacity hover:opacity-90"
+          style={{ background: "var(--text-primary)", color: "var(--bg-primary)" }}
+        >
+          {hasAccount ? "تسجيل الدخول" : "إنشاء حساب مجاني"}
+        </a>
+
+        {/* Secondary CTA */}
+        {!hasAccount ? (
+          <a
+            href="/signin"
+            className="block font-ui text-xs transition-opacity hover:opacity-70"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            لديك حساب؟ سجّل الدخول
+          </a>
+        ) : (
+          <a
+            href="/signin"
+            className="block font-ui text-xs transition-opacity hover:opacity-70"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            ليس لديك حساب؟ أنشئه الآن مجاناً
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Guest Progress Bar ────────────────────────────────────────────────────────
+function GuestProgressBar({ messagesUsed, hasAccount }: { messagesUsed: number; hasAccount: boolean }) {
+  const remaining = GUEST_MSG_LIMIT - messagesUsed;
+  return (
+    <div
+      className="shrink-0 flex items-center justify-between px-4 md:px-6 py-1.5"
+      style={{
+        background: "var(--color-accent-tint-08)",
+        borderBottom: "1px solid var(--color-accent-tint-12)",
+      }}
+    >
+      <span className="font-ui text-xs" style={{ color: "var(--text-tertiary)" }}>
+        {remaining > 0
+          ? `${remaining} ${remaining === 1 ? "رسالة" : "رسائل"} مجانية متبقية`
+          : "وصلت إلى حد الرسائل المجانية"}
+      </span>
+      <a
+        href="/signin"
+        className="font-ui text-xs font-medium transition-opacity hover:opacity-80"
+        style={{ color: "var(--color-accent)" }}
+      >
+        {hasAccount ? "تسجيل الدخول ←" : "إنشاء حساب مجاني ←"}
+      </a>
+    </div>
+  );
 }
 
 function buildBehaviorSnapshot(conversations: Conversation[]) {
@@ -144,17 +259,36 @@ function ChatPageContent() {
   const [deleteReason, setDeleteReason] = useState("");
   const [factCheckMode] = useState<FactCheckMode>("off");
   const [tagline, setTagline] = useState(DEFAULT_TAGLINE);
+
+  // Guest mode state
+  const isGuest = status === "unauthenticated";
+  const [guestMessageCount, setGuestMessageCount] = useState(0);
+  const [guestTotalAiWords, setGuestTotalAiWords] = useState(0);
+  const [guestLimitReached, setGuestLimitReached] = useState(false);
+  const [hasAccount, setHasAccount] = useState(false);
+
   const userIdRef = useRef<string>("");
   const incognitoIdRef = useRef<string>("");
   const dismissedBannersRef = useRef<Set<IntegrationSuggestion>>(new Set());
   const nicknameSuggestRequestedRef = useRef(false);
 
-  // Redirect to signin if not authenticated
+  // Guest mode setup — detect returning user and set conversationsLoaded so initial message works
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin?callbackUrl=/chat");
+    if (typeof window === "undefined") return;
+    setHasAccount(!!localStorage.getItem("kheleel_has_account"));
+  }, []);
+
+  // Mark account exists whenever authenticated (for future guest visits)
+  useEffect(() => {
+    if (session?.user?.email && typeof window !== "undefined") {
+      localStorage.setItem("kheleel_has_account", "1");
     }
-  }, [status, router]);
+  }, [session]);
+
+  // For guests, mark conversations as loaded immediately (no fetch needed)
+  useEffect(() => {
+    if (isGuest) setConversationsLoaded(true);
+  }, [isGuest]);
 
   const apiHeaders = () => {
     // Use authenticated user's email as identifier
@@ -184,7 +318,7 @@ function ChatPageContent() {
   // const userDisplayName = session?.user?.name?.trim() || "ضيف خليل";
 
   const loadProfile = async () => {
-    if (incognitoMode) return;
+    if (isGuest || incognitoMode) return;
     try {
       const res = await fetch("/api/profile", { headers: apiHeaders() });
       if (!res.ok) return;
@@ -500,7 +634,7 @@ function ChatPageContent() {
   }, [searchParams, conversationsLoaded]);
 
   const persistConversation = async (conv: Conversation) => {
-    if (incognitoMode) return;
+    if (isGuest || incognitoMode) return;
     try {
       await fetch(`/api/conversations/${conv.id}`, {
         method: "PUT",
@@ -525,6 +659,7 @@ function ChatPageContent() {
     setIsLoading(true);
     const allMessages = [...existingMessages, { role: "user" as const, content }];
     try {
+      const wordsRemaining = GUEST_WORD_LIMIT - guestTotalAiWords;
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -532,10 +667,12 @@ function ChatPageContent() {
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           languageStyle: character.languageStyle || languageStyle,
           characterId: character.id,
-          useSearch,
-          empathyMode,
+          useSearch: isGuest ? false : useSearch,
+          empathyMode: isGuest ? false : empathyMode,
           ramadanMode,
           customSystemPrompt: systemPrompt !== DEFAULT_SYSTEM_PROMPT ? systemPrompt : undefined,
+          isGuest,
+          guestWordsRemaining: isGuest ? wordsRemaining : undefined,
         }),
       });
 
@@ -552,6 +689,20 @@ function ChatPageContent() {
         if (conv) void persistConversation(conv);
         return updated;
       });
+
+      // Track guest usage and trigger auth wall when limit is reached
+      if (isGuest) {
+        const wordCount = aiContent.split(/\s+/).filter(Boolean).length;
+        setGuestTotalAiWords((prev) => prev + wordCount);
+        setGuestMessageCount((prev) => {
+          const next = prev + 1;
+          if (next >= GUEST_MSG_LIMIT || guestTotalAiWords + wordCount >= GUEST_WORD_LIMIT) {
+            setGuestLimitReached(true);
+          }
+          return next;
+        });
+      }
+
       return aiContent;
     } catch (error) {
       const errMsg: Message = {
@@ -702,24 +853,26 @@ function ChatPageContent() {
     };
     setConversations((prev) => [newConv, ...prev]);
     setCurrentConversationId(id);
-    try {
-      await fetch("/api/conversations", {
-        method: "POST",
-        headers: apiHeaders(),
-        body: JSON.stringify({
-          conversationId: id,
-          title: newConv.title,
-          messages: [],
-          characterId: newConv.characterId,
-          factCheckMode,
-        }),
-      });
-    } catch {
-      // Fallback: in-memory only
+    if (!isGuest) {
+      try {
+        await fetch("/api/conversations", {
+          method: "POST",
+          headers: apiHeaders(),
+          body: JSON.stringify({
+            conversationId: id,
+            title: newConv.title,
+            messages: [],
+            characterId: newConv.characterId,
+            factCheckMode,
+          }),
+        });
+      } catch {
+        // Fallback: in-memory only
+      }
     }
   };
 
-  // Show loading or redirect states
+  // Show loading state while session resolves
   if (status === "loading") {
     return (
       <div className="h-screen flex items-center justify-center" style={{ background: "var(--bg-tertiary)" }}>
@@ -727,10 +880,7 @@ function ChatPageContent() {
       </div>
     );
   }
-
-  if (!session) {
-    return null;
-  }
+  // Guests (unauthenticated) are allowed through — they get 3 free messages
 
   return (
     <div className="h-screen overflow-hidden relative" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
@@ -773,8 +923,13 @@ function ChatPageContent() {
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
+        {/* Guest progress bar — shown while under limit */}
+        {isGuest && !guestLimitReached && (
+          <GuestProgressBar messagesUsed={guestMessageCount} hasAccount={hasAccount} />
+        )}
+
         <motion.div
-          className="flex-1 flex flex-col min-w-0 min-h-0"
+          className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden"
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
           transition={{ duration: 0.2 }}
         >
@@ -807,18 +962,25 @@ function ChatPageContent() {
               value={input}
               onChange={setInput}
               onSend={handleSend}
-              onVoiceMode={() => setVoiceOverlayOpen(true)}
-              onMicTranscript={(text) => {
+              // Voice, mic, files and incognito disabled for guests (text-only mode)
+              onVoiceMode={isGuest ? undefined : () => setVoiceOverlayOpen(true)}
+              onMicTranscript={isGuest ? undefined : (text) => {
                 if (text.trim()) { setInput(""); void sendMessage(text); }
               }}
-              onFiles={(files) => {
+              onFiles={isGuest ? undefined : (files) => {
                 const names = Array.from(files).map((f) => f.name).join(", ");
                 setInput((prev) => (prev ? `${prev} ${names}` : names));
               }}
               incognitoMode={incognitoMode}
-              onIncognitoChange={setIncognitoMode}
-              placeholder={showHero ? "سلام عليكم.." : "اكتب رسالتك..."}
-              disabled={isLoading}
+              onIncognitoChange={isGuest ? undefined : setIncognitoMode}
+              placeholder={
+                guestLimitReached
+                  ? "سجّل دخولك للمتابعة..."
+                  : showHero
+                  ? "سلام عليكم.."
+                  : "اكتب رسالتك..."
+              }
+              disabled={isLoading || guestLimitReached}
             />
           </div>
         </div>
@@ -885,13 +1047,18 @@ function ChatPageContent() {
         }}
       />
 
-      <CallModeOverlay
-        open={voiceOverlayOpen}
-        onClose={() => setVoiceOverlayOpen(false)}
-        onSendAndGetResponse={sendMessage}
-        speechSpeed={speechSpeed}
-        voiceId={voiceId}
-      />
+      {!isGuest && (
+        <CallModeOverlay
+          open={voiceOverlayOpen}
+          onClose={() => setVoiceOverlayOpen(false)}
+          onSendAndGetResponse={sendMessage}
+          speechSpeed={speechSpeed}
+          voiceId={voiceId}
+        />
+      )}
+
+      {/* Guest auth wall — appears after 3 messages or 1000 words */}
+      {isGuest && guestLimitReached && <GuestAuthWall hasAccount={hasAccount} />}
     </div>
   );
 }
