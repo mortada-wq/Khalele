@@ -107,17 +107,17 @@ function ChatPageContent() {
   const [languageStyle, setLanguageStyle] = useState<LanguageStyle>("easy_arabic");
   const [speechSpeed, setSpeechSpeed] = useState(() => {
     if (typeof window === "undefined") return 1;
-    const v = localStorage.getItem("khalele_speech_speed");
+    const v = localStorage.getItem("kheleel_speech_speed");
     const n = v ? parseFloat(v) : 1;
     return Number.isFinite(n) && n >= 0.5 && n <= 2 ? n : 1;
   });
   const [voiceId, setVoiceId] = useState(() => {
     if (typeof window === "undefined") return "ar-XA-Wavenet-A";
-    return localStorage.getItem("khalele_voice_id") || "ar-XA-Wavenet-A";
+    return localStorage.getItem("kheleel_voice_id") || "ar-XA-Wavenet-A";
   });
   const [systemPrompt, setSystemPrompt] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_SYSTEM_PROMPT;
-    return localStorage.getItem("khalele_system_prompt") || DEFAULT_SYSTEM_PROMPT;
+    return localStorage.getItem("kheleel_system_prompt") || DEFAULT_SYSTEM_PROMPT;
   });
   const [useSearch] = useState(false);
   const [empathyMode] = useState(false);
@@ -369,9 +369,9 @@ function ChatPageContent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const v = sessionStorage.getItem("khalele_incognito");
+    const v = sessionStorage.getItem("kheleel_incognito");
     if (v === "1") {
-      sessionStorage.removeItem("khalele_incognito");
+      sessionStorage.removeItem("kheleel_incognito");
       setIncognitoMode(true);
     }
   }, []);
@@ -379,8 +379,8 @@ function ChatPageContent() {
   // Open Call Mode when coming from home page (wave icon)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (sessionStorage.getItem("khalele_open_call_mode") === "1") {
-      sessionStorage.removeItem("khalele_open_call_mode");
+    if (sessionStorage.getItem("kheleel_open_call_mode") === "1") {
+      sessionStorage.removeItem("kheleel_open_call_mode");
       setVoiceOverlayOpen(true);
     }
   }, []);
@@ -468,12 +468,12 @@ function ChatPageContent() {
   useEffect(() => {
     if (initialSentRef.current || !conversationsLoaded) return;
     const fromUrl = searchParams.get("m");
-    const fromStorage = typeof window !== "undefined" ? sessionStorage.getItem("khalele_initial_message") : null;
-    const fromNotebook = typeof window !== "undefined" ? sessionStorage.getItem("khalele_import_from_notebook") : null;
-    if (fromNotebook) sessionStorage.removeItem("khalele_import_from_notebook");
+    const fromStorage = typeof window !== "undefined" ? sessionStorage.getItem("kheleel_initial_message") : null;
+    const fromNotebook = typeof window !== "undefined" ? sessionStorage.getItem("kheleel_import_from_notebook") : null;
+    if (fromNotebook) sessionStorage.removeItem("kheleel_import_from_notebook");
     const initial = (fromUrl ? decodeURIComponent(fromUrl) : fromStorage ?? fromNotebook)?.trim();
     if (initial) {
-      if (fromStorage) sessionStorage.removeItem("khalele_initial_message");
+      if (fromStorage) sessionStorage.removeItem("kheleel_initial_message");
       if (fromUrl) router.replace("/chat");
       initialSentRef.current = true;
       // Add user message to current conversation immediately so it shows, then send
@@ -819,9 +819,9 @@ function ChatPageContent() {
           setVoiceId(s.voiceId);
           setSystemPrompt(s.systemPrompt);
           if (typeof window !== "undefined") {
-            localStorage.setItem("khalele_speech_speed", String(s.speechSpeed));
-            localStorage.setItem("khalele_voice_id", s.voiceId);
-            localStorage.setItem("khalele_system_prompt", s.systemPrompt);
+            localStorage.setItem("kheleel_speech_speed", String(s.speechSpeed));
+            localStorage.setItem("kheleel_voice_id", s.voiceId);
+            localStorage.setItem("kheleel_system_prompt", s.systemPrompt);
           }
           if (!incognitoMode) {
             const nextNickname = s.nickname.trim();

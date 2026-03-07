@@ -49,7 +49,7 @@ const DEFAULT_CONFIG: TaglineConfig = {
   activeTaglineId: "1",
 };
 
-const TABLE = process.env.DYNAMODB_TAGLINES_TABLE || "khalele-taglines";
+const TABLE = process.env.DYNAMODB_TAGLINES_TABLE || "kheleel-taglines";
 const CONFIG_ID = "tagline-config-v1";
 
 const client = new DynamoDBClient({

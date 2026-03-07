@@ -4,7 +4,7 @@ const client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
 });
 
-const BUCKET = process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+const BUCKET = process.env.S3_TRAINING_BUCKET || "kheleel-training-data";
 export const S3_BUCKET = BUCKET;
 
 export async function uploadTrainingData(key: string, content: string): Promise<string> {

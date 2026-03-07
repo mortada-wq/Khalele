@@ -14,7 +14,7 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "khalele-settings";
+const TABLE_SETTINGS = process.env.DYNAMODB_SETTINGS_TABLE || "kheleel-settings";
 
 export interface GreetingMessage {
   id: "greeting-message";

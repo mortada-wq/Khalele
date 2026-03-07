@@ -23,7 +23,7 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const ADMINS_TABLE = process.env.DYNAMODB_ADMINS_TABLE || "khalele-admins";
+const ADMINS_TABLE = process.env.DYNAMODB_ADMINS_TABLE || "kheleel-admins";
 
 async function isAdmin(email: string): Promise<boolean> {
   try {

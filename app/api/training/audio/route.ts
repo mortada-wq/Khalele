@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const match = uri.replace("s3://", "").split("/");
     const bucket = match[0];
     const key = match.slice(1).join("/");
-    const allowedBucket = process.env.S3_TRAINING_BUCKET || "khalele-training-data";
+    const allowedBucket = process.env.S3_TRAINING_BUCKET || "kheleel-training-data";
     if (!bucket || !key || bucket !== allowedBucket || !key.startsWith("training-sessions/")) {
       return NextResponse.json({ error: "Invalid or disallowed S3 URI" }, { status: 400 });
     }

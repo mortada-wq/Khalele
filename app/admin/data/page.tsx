@@ -169,7 +169,7 @@ export default function AdminDataPage() {
           </div>
         )}
         <p className="mt-4 text-[#8c8c8c] text-sm">
-          التخزين: s3://khalele-training-data/
+          التخزين: s3://kheleel-training-data/
         </p>
       </section>
     </main>

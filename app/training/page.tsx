@@ -12,7 +12,7 @@ const DEFAULT_PROMPTS = [
   "وين تروح النهاردة",
 ];
 
-const USER_ID_KEY = "khalele_user_id";
+const USER_ID_KEY = "kheleel_user_id";
 
 function getOrCreateUserId(): string {
   if (typeof window === "undefined") return "anon_anonymous";

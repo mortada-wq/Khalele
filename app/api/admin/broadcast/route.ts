@@ -17,7 +17,7 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.DYNAMODB_USERS_TABLE || "khalele-users";
+const TABLE_NAME = process.env.DYNAMODB_USERS_TABLE || "kheleel-users";
 
 // POST - Broadcast message to all users
 export async function POST(req: Request) {

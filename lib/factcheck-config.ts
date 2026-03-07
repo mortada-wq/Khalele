@@ -13,7 +13,7 @@ export interface FactCheckConfig {
   updatedAt: string;
 }
 
-const TABLE = process.env.DYNAMODB_FACTCHECK_TABLE || "khalele-factcheck-config";
+const TABLE = process.env.DYNAMODB_FACTCHECK_TABLE || "kheleel-factcheck-config";
 const CONFIG_ID = "factcheck-config-v1";
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });

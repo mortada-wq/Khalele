@@ -43,7 +43,7 @@ const DEFAULT_DOCS: KhaleelDocsConfig = {
   updatedAt: new Date().toISOString(),
 };
 
-const TABLE = process.env.DYNAMODB_DOCS_TABLE || "khalele-docs";
+const TABLE = process.env.DYNAMODB_DOCS_TABLE || "kheleel-docs";
 const CONFIG_ID = "tahseen-khaleel-v1";
 
 const client = new DynamoDBClient({
