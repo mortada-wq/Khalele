@@ -144,33 +144,6 @@ function GuestAuthWall({ hasAccount }: { hasAccount: boolean }) {
   );
 }
 
-// ── Guest Progress Bar ────────────────────────────────────────────────────────
-function GuestProgressBar({ messagesUsed, hasAccount }: { messagesUsed: number; hasAccount: boolean }) {
-  const remaining = GUEST_MSG_LIMIT - messagesUsed;
-  return (
-    <div
-      className="shrink-0 flex items-center justify-between px-4 md:px-6 py-1.5"
-      style={{
-        background: "var(--color-accent-tint-08)",
-        borderBottom: "1px solid var(--color-accent-tint-12)",
-      }}
-    >
-      <span className="font-ui text-xs" style={{ color: "var(--text-tertiary)" }}>
-        {remaining > 0
-          ? `${remaining} ${remaining === 1 ? "رسالة" : "رسائل"} مجانية متبقية`
-          : "وصلت إلى حد الرسائل المجانية"}
-      </span>
-      <a
-        href="/signin"
-        className="font-ui text-xs font-medium transition-opacity hover:opacity-80"
-        style={{ color: "var(--color-accent)" }}
-      >
-        {hasAccount ? "تسجيل الدخول ←" : "إنشاء حساب مجاني ←"}
-      </a>
-    </div>
-  );
-}
-
 function buildBehaviorSnapshot(conversations: Conversation[]) {
   let totalMessages = 0;
   let chars = 0;
@@ -922,11 +895,6 @@ function ChatPageContent() {
         />
 
       <main className="flex-1 flex flex-col min-w-0 relative min-h-0 overflow-hidden">
-        {/* Guest progress bar — shown while under limit */}
-        {isGuest && !guestLimitReached && (
-          <GuestProgressBar messagesUsed={guestMessageCount} hasAccount={hasAccount} />
-        )}
-
         <motion.div
           className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden"
           animate={{ opacity: voiceOverlayOpen ? 0.3 : 1 }}
