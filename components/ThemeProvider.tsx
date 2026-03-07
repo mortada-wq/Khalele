@@ -9,7 +9,9 @@ const ThemeContext = createContext<{ theme: "dark"; toggleTheme: () => void }>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
+    // Check localStorage for saved theme, default to "dark"
+    const savedTheme = localStorage.getItem("kheleel_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
   }, []);
 
   return (
