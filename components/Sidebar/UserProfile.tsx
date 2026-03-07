@@ -122,12 +122,10 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
     return null;
   }
 
-  if (!session?.user) {
-    return null;
-  }
-
-  const userName = session.user.name || session.user.email || "User";
-  const userEmail = session.user.email;
+  // Show guest profile when not logged in
+  const isGuest = !session?.user;
+  const userName = session?.user?.name || session?.user?.email || "ضيف";
+  const userEmail = session?.user?.email;
 
   if (!expanded) {
     return (
@@ -170,21 +168,21 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
             if (!showMenu) e.currentTarget.style.opacity = "0.7";
           }}
         >
-          <span className="shrink-0" style={{ border: "1px solid #C68E17", borderRadius: "50%", padding: "2px", display: "inline-flex" }}>
-            <ProfileIcon size={40} className="text-white" />
+          <span className="shrink-0" style={{ border: isGuest ? "1px solid rgba(255,255,255,0.3)" : "1px solid #C68E17", borderRadius: "50%", padding: "2px", display: "inline-flex" }}>
+            <ProfileIcon size={40} className={isGuest ? "text-gray-400" : "text-white"} />
           </span>
           <div className="flex-1 text-right overflow-hidden">
             <div
               className="font-medium text-sm truncate"
               style={{
-                color: "rgba(255, 255, 255, 1)",
+                color: isGuest ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 1)",
                 fontFamily: "var(--font-ui)",
                 fontWeight: 400,
               }}
             >
               {userName}
             </div>
-            {userEmail && (
+            {userEmail ? (
               <div
                 className="text-xs truncate"
                 style={{
@@ -194,6 +192,17 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
                 }}
               >
                 {userEmail}
+              </div>
+            ) : (
+              <div
+                className="text-xs"
+                style={{
+                  color: "rgba(255, 255, 255, 0.3)",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: "11px",
+                }}
+              >
+                الوضع المجاني
               </div>
             )}
           </div>
@@ -230,55 +239,111 @@ export function UserProfile({ expanded }: { expanded: boolean }) {
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
               }}
             >
-              <button
-                type="button"
-                onClick={() => {
-                  setShowMenu(false);
-                  setShowInvite(true);
-                }}
-                className="w-full px-4 py-3 text-sm text-right transition-all"
-                style={{
-                  color: "rgba(255, 255, 255, 0.7)",
-                  fontFamily: "var(--font-ui)",
-                  fontWeight: 300,
-                  backgroundColor: "transparent",
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                }}
-              >
-                دعوة صديق
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowMenu(false);
-                  signOut({ callbackUrl: "/signin" });
-                }}
-                className="w-full px-4 py-3 text-sm text-right transition-all"
-                style={{
-                  color: "rgba(255, 255, 255, 0.7)",
-                  fontFamily: "var(--font-ui)",
-                  fontWeight: 300,
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                }}
-              >
-                تسجيل الخروج
-              </button>
+              {isGuest ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      window.location.href = "/signin";
+                    }}
+                    className="w-full px-4 py-3 text-sm text-right transition-all"
+                    style={{
+                      color: "#C68E17",
+                      fontFamily: "var(--font-ui)",
+                      fontWeight: 300,
+                      backgroundColor: "transparent",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.1)";
+                      e.currentTarget.style.color = "#C68E17";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "#C68E17";
+                    }}
+                  >
+                    تسجيل الدخول
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      window.location.href = "/signup";
+                    }}
+                    className="w-full px-4 py-3 text-sm text-right transition-all"
+                    style={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      fontFamily: "var(--font-ui)",
+                      fontWeight: 300,
+                      backgroundColor: "transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+                    }}
+                  >
+                    إنشاء حساب
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      setShowInvite(true);
+                    }}
+                    className="w-full px-4 py-3 text-sm text-right transition-all"
+                    style={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      fontFamily: "var(--font-ui)",
+                      fontWeight: 300,
+                      backgroundColor: "transparent",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+                    }}
+                  >
+                    دعوة صديق
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      signOut({ callbackUrl: "/signin" });
+                    }}
+                    className="w-full px-4 py-3 text-sm text-right transition-all"
+                    style={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      fontFamily: "var(--font-ui)",
+                      fontWeight: 300,
+                      backgroundColor: "transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+                    }}
+                  >
+                    تسجيل الخروج
+                  </button>
+                </>
+              )}
             </div>
           </>
         )}
