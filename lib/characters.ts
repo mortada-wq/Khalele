@@ -13,7 +13,7 @@ export const DEFAULT_CHARACTERS: Character[] = [
   {
     id: "kheleel-base",
     name: "Kheleel",
-    nameAr: "خليلي",
+    nameAr: "خليل",
     region: "baghdad",
     languageStyle: "easy_arabic",
     description: "الذكاء الاصطناعي العربي الافتراضي — يفهم كل اللهجات، يرد بالفصحى أو العربية السهلة",

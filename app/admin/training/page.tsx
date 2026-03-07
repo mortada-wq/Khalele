@@ -121,7 +121,7 @@ export default function AdminTrainingPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-12">
         <Link href="/admin" className="text-kheleel-gold font-bold text-2xl">
-          خليلي — جلسات التدريب
+          خليل — جلسات التدريب
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/training" className="text-[#000000] hover:text-kheleel-gold text-sm">

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Kheleel | خليلي — ذكاء اصطناعي عربي",
-    short_name: "خليلي",
+    name: "Kheleel | خليل — ذكاء اصطناعي عربي",
+    short_name: "خليل",
     description: "ذكاء اصطناعي يتكلم عربي — يفهم كل اللهجات العربية",
     start_url: "/",
     display: "standalone",

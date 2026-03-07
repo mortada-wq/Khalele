@@ -28,7 +28,7 @@ export default function CharacterDesignerPage() {
     <main className="min-h-screen p-8" dir="rtl" style={{ background: "#ebebec" }}>
       <header className="flex items-center justify-between mb-12">
         <Link href="/admin/characters" className="text-kheleel-gold font-bold text-2xl">
-          خليلي — مصمم الشخصيات
+          خليل — مصمم الشخصيات
         </Link>
         <Link href="/admin/characters" className="text-[#000000] hover:text-kheleel-gold">
           العودة
