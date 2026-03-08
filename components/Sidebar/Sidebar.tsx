@@ -69,9 +69,10 @@ export function Sidebar({
       style={{
         width: SIDEBAR_W,
         height: "100vh",
-        background: "#121212",
+        background: isDark ? "#121212" : "#f5f5f5",
         padding: "96px 24px 32px",
         zIndex: 10,
+        transition: "background-color 0.3s ease",
       }}
     >
       {/* Bird space — bird lives as a fixed button outside, we leave top padding */}
@@ -90,6 +91,7 @@ export function Sidebar({
           border: "1px solid rgba(198, 142, 23, 0.2)",
           marginBottom: 10,
           cursor: "pointer",
+          opacity: isDark ? 1 : 0.9,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "rgba(198, 142, 23, 0.14)";
@@ -108,22 +110,32 @@ export function Sidebar({
         onClick={() => (onCreateGroup ?? onCreateDiwan)?.()}
         className="shrink-0 w-full flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all"
         style={{
-          color: "rgba(255,255,255,0.65)",
+          color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)",
           fontFamily: "var(--font-ui)",
           fontSize: "14px",
           fontWeight: 400,
-          backgroundColor: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.07)",
+          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+          border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(0,0,0,0.07)",
           marginBottom: 32,
           cursor: "pointer",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-          e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+          if (isDark) {
+            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+            e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+          } else {
+            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.08)";
+            e.currentTarget.style.color = "rgba(0,0,0,0.9)";
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
-          e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+          if (isDark) {
+            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+          } else {
+            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+            e.currentTarget.style.color = "rgba(0,0,0,0.65)";
+          }
         }}
       >
         <IconGroup />
@@ -136,7 +148,7 @@ export function Sidebar({
         style={{
           padding: "14px 16px",
           borderRadius: 10,
-          background: "linear-gradient(135deg, rgba(198,142,23,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+          background: isDark ? "linear-gradient(135deg, rgba(198,142,23,0.06) 0%, rgba(255,255,255,0.02) 100%)" : "linear-gradient(135deg, rgba(198,142,23,0.1) 0%, rgba(0,0,0,0.02) 100%)",
           border: "1px solid rgba(198,142,23,0.12)",
           position: "relative",
           overflow: "hidden",
@@ -171,7 +183,7 @@ export function Sidebar({
           style={{
             fontFamily: "var(--font-ui)",
             fontSize: "10px",
-            color: "rgba(255,255,255,0.2)",
+            color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.3)",
             textAlign: "right",
             marginTop: 4,
           }}
@@ -188,36 +200,42 @@ export function Sidebar({
         <UserProfile expanded={true} />
       </div>
 
-      {/* 6. Theme Toggle — Sun/Moon at bottom */}
+      {/* 6. Theme Toggle — Sun/Moon Icon Only */}
       <button
         type="button"
         onClick={handleThemeToggle}
-        className="shrink-0 w-full flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all"
+        className="shrink-0 flex items-center justify-center px-4 py-2.5 rounded-lg transition-all"
         style={{
-          color: "rgba(255,255,255,0.65)",
-          fontFamily: "var(--font-ui)",
-          fontSize: "14px",
-          fontWeight: 400,
-          backgroundColor: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.07)",
+          color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)",
+          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+          border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(0,0,0,0.07)",
           marginBottom: 12,
           cursor: "pointer",
-          justifyContent: "center",
-          gap: "8px",
+          width: 44,
+          height: 44,
+          transition: "all 0.3s ease",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-          e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+          if (isDark) {
+            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+            e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+          } else {
+            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.08)";
+            e.currentTarget.style.color = "rgba(0,0,0,0.9)";
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
-          e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+          if (isDark) {
+            e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+          } else {
+            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.04)";
+            e.currentTarget.style.color = "rgba(0,0,0,0.65)";
+          }
         }}
-        title={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
         aria-label={isDark ? "تبديل للوضع الفاتح" : "تبديل للوضع الداكن"}
       >
-        {isDark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
-        <span>{isDark ? "الوضع الفاتح" : "الوضع الداكن"}</span>
+        {isDark ? <SunIcon size={20} /> : <MoonIcon size={20} />}
       </button>
 
       {/* 7. تحسين خليل — doc page at very bottom */}
@@ -227,7 +245,7 @@ export function Sidebar({
         style={{
           fontFamily: "var(--font-ui)",
           fontSize: "12px",
-          color: "rgba(255,255,255,0.25)",
+          color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.4)",
           textDecoration: "none",
           opacity: 0.7,
         }}
@@ -237,7 +255,7 @@ export function Sidebar({
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7";
-          (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.25)";
+          (e.currentTarget as HTMLAnchorElement).style.color = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.4)";
         }}
       >
         تحسين خليل
