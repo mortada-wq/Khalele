@@ -88,7 +88,7 @@ export function Sidebar({
           fontSize: "14px",
           fontWeight: 400,
           backgroundColor: "rgba(198, 142, 23, 0.08)",
-          border: "1px solid rgba(198, 142, 23, 0.2)",
+          border: "none",
           marginBottom: 10,
           cursor: "pointer",
           opacity: isDark ? 1 : 0.9,
@@ -115,7 +115,7 @@ export function Sidebar({
           fontSize: "14px",
           fontWeight: 400,
           backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-          border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(0,0,0,0.07)",
+          border: "none",
           marginBottom: 32,
           cursor: "pointer",
         }}
@@ -149,7 +149,7 @@ export function Sidebar({
           padding: "14px 16px",
           borderRadius: 10,
           background: isDark ? "linear-gradient(135deg, rgba(198,142,23,0.06) 0%, rgba(255,255,255,0.02) 100%)" : "linear-gradient(135deg, rgba(198,142,23,0.1) 0%, rgba(0,0,0,0.02) 100%)",
-          border: "1px solid rgba(198,142,23,0.12)",
+          border: "none",
           position: "relative",
           overflow: "hidden",
         }}
@@ -208,7 +208,7 @@ export function Sidebar({
         style={{
           color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)",
           backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-          border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(0,0,0,0.07)",
+          border: "none",
           marginBottom: 12,
           cursor: "pointer",
           width: 44,

@@ -242,19 +242,41 @@ body {
   transform: scale(0.95);
 }
 
-/* ── Sidebar Drawer Overlay ─────────────────────────────────────────────────────── */
+/* ── Sidebar Drawer — Push layout (not overlay) ─────────────────────────────────── */
 .sidebar-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100vh;
   width: 220px;
-  z-index: 30;
-  transform: translateX(0);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100vh;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .sidebar-drawer.is-closed {
-  transform: translateX(100%);
+  width: 0;
+}
+
+/* On mobile (< 768px): sidebar overlays instead of pushing */
+@media (max-width: 767px) {
+  .sidebar-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 30;
+    width: 220px;
+    transform: translateX(0);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar-drawer.is-closed {
+    width: 220px;
+    transform: translateX(100%);
+  }
+}
+
+/* Main content area — smooth transition when sidebar pushes */
+.main-content-area {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Sidebar Section Animations — Minimalist professional fade ─────────────────── */

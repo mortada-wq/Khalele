@@ -856,8 +856,8 @@ function ChatPageContent() {
   // Guests (unauthenticated) are allowed through — they get 3 free messages
 
   return (
-    <div className="h-screen overflow-hidden relative" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
-      {/* Fixed bird toggle — always visible, same position open or closed */}
+    <div className="h-screen overflow-hidden flex" dir="rtl" style={{ background: "var(--bg-tertiary)" }}>
+      {/* Fixed bird toggle — always visible */}
       <div className="bird-fixed-btn" style={{ position: "fixed", top: 32, right: 24, zIndex: 40 }}>
         <div style={{ position: "relative", display: "inline-flex" }}>
           <BirdToggle
@@ -883,13 +883,13 @@ function ChatPageContent() {
         </div>
       </div>
 
-      {/* Sidebar overlay — slides in/out from the right */}
+      {/* Sidebar — pushes content on desktop, overlays on mobile */}
       <div className={`sidebar-drawer${sidebarExpanded ? "" : " is-closed"}`}>
         <Sidebar onCreateDiwan={startNewDiwan} />
       </div>
 
-      {/* Main content area - Full height with TopBar inside */}
-      <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
+      {/* Main content area — flexes to fill remaining space */}
+      <div className="main-content-area flex flex-col min-h-0 overflow-hidden">
         <TopBar
           userRole={userRole}
         />
